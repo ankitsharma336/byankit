@@ -25,7 +25,7 @@ function HomepageHeader() {
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
-            to="/docs/intro">
+            to="/learn/intro">
             Start Learning
           </Link>
 
@@ -45,12 +45,12 @@ export default function Home(): ReactNode {
 
   return (
     <Layout
-      title={siteConfig.title}
-      description={siteConfig.tagline}>
+      title={`${siteConfig.title}`}
+      description={`${siteConfig.tagline}`}>
       <HomepageHeader />
       <main>
         <HomepageFeatures />
       </main>
     </Layout>
   );
-}
+} 

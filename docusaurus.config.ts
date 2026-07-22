@@ -23,8 +23,8 @@ const config: Config = {
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'Ankitsharma336', // Usually your GitHub org/user name.
-  projectName: 'byAnkit ', // Usually your repo name.
+  organizationName: 'ankitsharma336', // Usually your GitHub org/user name.
+  projectName: 'byankit', // Usually your repo name.
   trailingSlash: false,
   
 
@@ -44,6 +44,8 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
+            routeBasePath: 'learn',
+
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
@@ -94,7 +96,7 @@ const config: Config = {
         {to: '/about', label: 'About', position: 'left'},
         {to: '/contact', label: 'Contact', position: 'left'},
         {
-          href: 'https://github.com/facebook/docusaurus',
+          href: 'https://github.com/ankitsharma336/byankit',
           label: 'GitHub',
           position: 'right',
         },
