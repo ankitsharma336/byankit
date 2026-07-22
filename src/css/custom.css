@@ -35,7 +35,7 @@ body {
 
 
 .hero--primary {
-    padding: 1.5rem 0;
+  padding: 5rem 0 8rem;
 
   background: linear-gradient(
     135deg,
@@ -50,4 +50,8 @@ body {
 
 .card {
   border-radius: 16px;
+}
+
+.features {
+  margin-top: -60px;
 }

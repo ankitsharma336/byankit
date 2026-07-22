@@ -24,7 +24,7 @@ const FeatureList: FeatureItem[] = [
     Svg: require('@site/static/img/research.svg').default,
     description: (
       <>
-        Explore my teaching resources, research publications, and academic projects.
+        Explore our teaching resources, research publications, and academic projects.
       </>
     ),
   },
@@ -33,7 +33,7 @@ const FeatureList: FeatureItem[] = [
     Svg: require('@site/static/img/ai.svg').default,
     description: (
       <>
-        Learn how AI is transforming engineering education and research.
+        Learn how AI is can help you engineer education and research.
       </>
     ),
   },
