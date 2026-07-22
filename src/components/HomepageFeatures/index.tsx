@@ -21,7 +21,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Teaching & Research',
-    Svg: require('@site/static/img/Research.svg').default,
+    Svg: require('@site/static/img/research.svg').default,
     description: (
       <>
         Explore my teaching resources, research publications, and academic projects.
