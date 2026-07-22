@@ -1,0 +1,53 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #166534;
+  --ifm-color-primary-dark: #14532d;
+  --ifm-color-primary-darker: #134e2b;
+  --ifm-color-primary-darkest: #0f3d22;
+  --ifm-color-primary-light: #15803d;
+  --ifm-color-primary-lighter: #16a34a;
+  --ifm-color-primary-lightest: #22c55e;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #25c2a0;
+  --ifm-color-primary-dark: #21af90;
+  --ifm-color-primary-darker: #1fa588;
+  --ifm-color-primary-darkest: #1a8870;
+  --ifm-color-primary-light: #29d5b0;
+  --ifm-color-primary-lighter: #32d8b4;
+  --ifm-color-primary-lightest: #4fddbf;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+body {
+  background-color: #fcfcfb;
+}
+
+
+.hero--primary {
+    padding: 1.5rem 0;
+
+  background: linear-gradient(
+    135deg,
+    #166534 0%,
+    #15803d 100%
+  );
+}
+
+.button {
+  border-radius: 12px;
+}
+
+.card {
+  border-radius: 16px;
+}

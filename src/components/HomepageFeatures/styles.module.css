@@ -1,0 +1,26 @@
+.features {
+  display: flex;
+  align-items: center;
+  padding: 3  rem 0;
+  width: 100%;
+}
+
+.featureCard {
+  background: var(--ifm-card-background-color, var(--ifm-background-surface-color));
+  border: 2px solid var(--ifm-color-emphasis-200);
+  border-radius: 21 px;
+  padding: 2rem;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  height: 100%;
+}
+
+.featureCard:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--ifm-global-shadow-lw);
+}
+
+.featureSvg {
+  width: 90px;
+  height: 90px;
+  margin-bottom: 1rem;
+}
