@@ -1,13 +1,17 @@
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
-
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
   title: 'By Ankit',
   tagline: 'Helping engineering students learn better through teaching, research, and AI.',
   favicon: 'img/favicon.ico',
+   clientModules: [
+    require.resolve('./src/client/security.ts'),
+   ],
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -44,13 +48,17 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-            routeBasePath: 'learn',
-
+          routeBasePath: 'learn',
+          
+          
+          remarkPlugins: [remarkMath],
+          rehypePlugins: [rehypeKatex],   
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
             'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
         },
+        
         blog: {
           showReadingTime: true,
           feedOptions: {
@@ -73,6 +81,15 @@ const config: Config = {
     ],
   ],
 
+  stylesheets: [
+    {
+      href: 'https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css',
+      type: 'text/css',
+      integrity:
+        'sha384-5TcZemv2l/9On385z///+d7MSYlvIEw9FuZTIdZ14vJLqWphw7e7ZPuOiCHJcFCP',
+      crossorigin: 'anonymous',
+    },
+  ],
   themeConfig: {
     // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
@@ -105,49 +122,71 @@ const config: Config = {
     footer: {
       style: 'dark',
       links: [
+         {
+      title: 'Learn',
+      items: [
         {
-          title: 'Docs',
-          items: [
-            {
-              label: 'Tutorial',
-              to: '/docs/intro',
-            },
-          ],
+          label: 'Transportation',
+          to: '/learn/transportation/intro',
         },
         {
-          title: 'Community',
-          items: [
-            {
-              label: 'Stack Overflow',
-              href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-            },
-            {
-              label: 'Discord',
-              href: 'https://discordapp.com/invite/docusaurus',
-            },
-            {
-              label: 'X',
-              href: 'https://x.com/docusaurus',
-            },
-          ],
+          label: 'Geotechnical',
+          to: '/learn/geotechnical/intro',
         },
         {
-          title: 'More',
-          items: [
-            {
-              label: 'Blog',
-              to: '/blog',
-            },
-            {
-              label: 'GitHub',
-              href: 'https://github.com/facebook/docusaurus',
-            },
-          ],
+          label: 'AI',
+          to: '/learn/Artificial_intelligence/intro',
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
     },
-    prism: {
+       
+    {
+      title: 'Professional',
+      items: [
+        {
+          label: 'About',
+          to: '/about',
+        },
+        {
+          label: 'Research',
+          to: '/learn/research/intro',
+        },
+        {
+          label: 'Contact',
+          to: '/contact',
+        },
+      ],
+    },
+
+    {
+      title: 'Connect',
+      items: [
+       
+        {
+          label: 'Email',
+          href: 'mailto:ankitsharma336@gmail.com',
+        },
+        {
+          label: 'Linkedin',
+          href: 'https://www.linkedin.com/in/ankitsharma336/',
+        },
+      ],
+    },  
+    {
+      title: 'By Ankit',
+      items: [
+        {
+          label: ' Empowering Civil Engineering education through teaching, research, and innovation.',
+          to : '/',
+        },
+      ],
+    },
+  ],
+  copyright: `© ${new Date().getFullYear()} Dr. Ankit Sharma • Made with ❤️`,
+    },
+
+
+  prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
     },

@@ -1,10 +1,14 @@
 /**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
+ * ==========================================================
+ * By Ankit - Global Theme
+ * Docusaurus Custom CSS
+ * ==========================================================
  */
 
-/* You can override the default Infima variables here. */
+/* ==========================================================
+   1. Theme Colors
+========================================================== */
+
 :root {
   --ifm-color-primary: #166534;
   --ifm-color-primary-dark: #14532d;
@@ -13,11 +17,16 @@
   --ifm-color-primary-light: #15803d;
   --ifm-color-primary-lighter: #16a34a;
   --ifm-color-primary-lightest: #22c55e;
+
+  /* Typography */
+  --ifm-font-color-base: #374151;
+  --ifm-font-color-secondary: #6b7280;
+  --ifm-heading-color: #1f2937;
+
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
   --ifm-color-primary: #25c2a0;
   --ifm-color-primary-dark: #21af90;
@@ -26,13 +35,52 @@
   --ifm-color-primary-light: #29d5b0;
   --ifm-color-primary-lighter: #32d8b4;
   --ifm-color-primary-lightest: #4fddbf;
+
+    /* Typography */
+  --ifm-font-color-base: #e5e7eb;
+  --ifm-font-color-secondary: #9ca3af;
+  --ifm-heading-color: #ffffff;
+
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
+
+/* ==========================================================
+   2. Global Styles
+========================================================== */
 
 body {
   background-color: #fcfcfb;
 }
 
+/* ==========================================================
+   3. Typography
+========================================================== */
+
+/* Justify paragraphs for comfortable reading */
+
+.theme-doc-markdown p,
+.markdown p {
+  text-align: justify;
+  hyphens: auto;
+}
+
+/* Better line spacing */
+
+.theme-doc-markdown {
+  line-height: 1.4;
+}
+
+/* ==========================================================
+   4. Buttons
+========================================================== */
+
+.button {
+  border-radius: 12px;
+}
+
+/* ==========================================================
+   5. Hero Section
+========================================================== */
 
 .hero--primary {
   padding: 5rem 0 8rem;
@@ -44,14 +92,214 @@ body {
   );
 }
 
-.button {
-  border-radius: 12px;
+/* ==========================================================
+   6. Homepage Features
+========================================================== */
+
+.features {
+  margin-top: -60px;
 }
 
 .card {
   border-radius: 16px;
 }
 
-.features {
-  margin-top: -60px;
+/* ==========================================================
+   7. Documentation Pages
+========================================================== */
+
+@media (min-width: 997px) {
+
+  [class*="docItemCol"] {
+    margin-left: -4.5rem;
+  }
+
+}
+
+/* ==========================================================
+   Typography Utilities
+========================================================== */
+
+
+.lead {
+  font-size: 1.8rem;
+  font-weight: 400;
+  line-height: 1.8;
+  
+  color: var(--ifm-color-primary-light);
+}
+
+.lead-bold {
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.8;
+}
+
+.large-text {
+  font-size: 1.5rem;
+}
+
+.small-text {
+  font-size: 0.9rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-primary {
+  color: var(--ifm-color-primary);
+}
+
+@media (min-width: 997px) {
+
+  /* Main documentation content */
+  .theme-doc-main {
+    padding-left: 2rem;
+    padding-right: 1rem;
+  }
+
+  /* Comfortable reading width */
+  .theme-doc-markdown {
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.8;
+  }
+
+}
+
+/* ==========================================================
+   8. Table of Contents (Outline)
+========================================================== */
+
+
+.table-of-contents__link {
+  font-size: 1rem;          /* Default: ~0.875rem */
+  line-height: 1.6;
+}
+
+.table-of-contents__link--active {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+@media (min-width: 997px) {
+
+  /* TOC container */
+
+  .theme-doc-toc-desktop {
+    margin-left: -.5rem;
+    position: sticky;
+    top: 90px;
+  }
+
+  /* Card */
+
+  .theme-doc-toc-desktop > div {
+    padding: 1rem;
+    border-radius: 16px;
+    border: 1px solid var(--ifm-color-emphasis-300);
+    background: var(--ifm-background-surface-color);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+  }
+
+  /* Width */
+
+  .table-of-contents {
+    width: 280px;
+  }
+
+  /* TOC links */
+
+  .table-of-contents__link {
+    display: block;
+    padding: 0.45rem 0.85rem;
+    margin: 0.15rem 0;
+    border-radius: 8px;
+
+    color: var(--ifm-font-color-base);
+
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      padding-left 0.2s ease;
+  }
+
+  /* Hover */
+
+  .table-of-contents__link:hover {
+    background: rgba(22,101,52,0.08);
+    color: var(--ifm-color-primary);
+    text-decoration: none;
+  }
+
+  /* Active section */
+
+  .table-of-contents__link--active {
+    position: relative;
+
+    background: rgba(22,101,52,0.12);
+    color: var(--ifm-color-primary);
+    font-weight: 700;
+
+    padding-left: 1.15rem;
+  }
+
+  /* Green indicator */
+
+  .table-of-contents__link--active::before {
+    content: "";
+    position: absolute;
+
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+
+    width: 4px;
+
+    background: var(--ifm-color-primary);
+    border-radius: 999px;
+  }
+
+}
+
+/* ==========================================================
+   9. Code Blocks
+========================================================== */
+
+.theme-code-block {
+  border-radius: 12px;
+}
+
+/* ==========================================================
+   10. Tables
+========================================================== */
+
+table {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* ==========================================================
+   11. Images
+========================================================== */
+
+img {
+  border-radius: 10px;
+}
+
+/* ==========================================================
+   12. Responsive
+========================================================== */
+
+@media (max-width: 996px) {
+
+  .theme-doc-markdown {
+    max-width: 100%;
+  }
+
+  .theme-doc-markdown p {
+    text-align: left;
+  }
+
 }
