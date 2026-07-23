@@ -127,11 +127,11 @@ const config: Config = {
       items: [
         {
           label: 'Transportation',
-          to: '/learn/transportation/intro',
+          to: '/learn/Civil_Engineering/Subject_notes/Transportation/intro',
         },
         {
           label: 'Geotechnical',
-          to: '/learn/geotechnical/intro',
+          to: '/learn/Civil_Engineering/Subject_notes/Geotechnical/intro',
         },
         {
           label: 'AI',
@@ -149,7 +149,7 @@ const config: Config = {
         },
         {
           label: 'Research',
-          to: '/learn/research/intro',
+          to: '/learn/Research/intro',
         },
         {
           label: 'Contact',
