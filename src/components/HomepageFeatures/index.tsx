@@ -30,7 +30,7 @@ const FeatureList: FeatureItem[] = [
         Explore our teaching resources, research publications, and academic projects.
       </>
     ),
-    link: '/research',
+    link: '/learn/Research/intro',
   },
   {
     title: 'Artificial Intelligence',
