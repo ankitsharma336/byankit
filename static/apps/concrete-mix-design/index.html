@@ -33,12 +33,123 @@
         }
     </script>
     <style>
+        .ref-tag {
+            display: none;
+            margin-left: 5px;
+            font-size: 9px;
+            line-height: 1.2;
+            color: #475569;
+            font-weight: 500;
+        }
+        body.references-on .ref-tag { display: inline; }
+        .print-title { text-align: center; margin-bottom: 5mm; }
+        .print-title h1 { font-size: 18px; margin: 0; font-weight: 800; }
+        .print-title p { font-size: 9px; margin: 2px 0; }
+        .print-meta { display: flex; justify-content: space-between; font-size: 8px; border-bottom: 1px solid #999; padding-bottom: 2mm; }
+
         @media print {
+            /* Normal engineering report print: readable size, natural multi-page flow */
+            @page { size: A4 portrait; margin: 12mm; }
+            html, body { width: auto; height: auto; }
+            body {
+                background: white !important;
+                color: #111827 !important;
+                display: block !important;
+                font-size: 10pt !important;
+                line-height: 1.35 !important;
+            }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            body { background: white; color: black; }
-            .card-box { border: 1px solid #ccc !important; box-shadow: none !important; }
+            #printSheet {
+                max-width: none !important;
+                width: auto !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            /* Print every tab sequentially instead of squeezing them into columns. */
+            .tab-panel,
+            .tab-panel.hidden { display: block !important; }
+            .grid.grid-cols-1.lg\:grid-cols-12 {
+                display: block !important;
+            }
+            .lg\:col-span-7,
+            .lg\:col-span-5 {
+                display: block !important;
+                width: auto !important;
+            }
+
+            .space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 8mm !important; }
+            .space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 6mm !important; }
+            .space-y-3 > :not([hidden]) ~ :not([hidden]) { margin-top: 4mm !important; }
+
+            .card-box {
+                border: 1px solid #b8b8b8 !important;
+                box-shadow: none !important;
+                border-radius: 2mm !important;
+                padding: 5mm !important;
+                margin-bottom: 5mm !important;
+                break-inside: avoid;
+            }
+
+            .print-title {
+                margin-bottom: 6mm !important;
+                break-after: avoid;
+            }
+            .print-title h1 { font-size: 18pt !important; }
+            .print-title p { font-size: 9pt !important; }
+            .print-meta { font-size: 8pt !important; }
+
+            h2 {
+                font-size: 11pt !important;
+                line-height: 1.25 !important;
+                margin-bottom: 4mm !important;
+            }
+            h3 { font-size: 10pt !important; }
+            label { font-size: 9pt !important; margin-bottom: 2px !important; }
+            input, select {
+                font-size: 9pt !important;
+                padding: 2mm !important;
+                min-height: 0 !important;
+                background: white !important;
+            }
+            .text-xs { font-size: 8.5pt !important; }
+            .text-\[11px\] { font-size: 8pt !important; }
+            .text-\[10px\] { font-size: 8pt !important; }
+            table { font-size: 8.5pt !important; }
+            th, td { padding: 2.2mm !important; }
+            .ref-tag {
+                display: inline !important;
+                font-size: 7.5pt !important;
+                color: #374151 !important;
+            }
+
+            /* Keep each major calculation section readable; allow it to continue to the next page. */
+            #panel-design,
+            #panel-field,
+            #panel-audit { break-before: auto; }
+            #panel-field { break-before: page; }
+            #panel-audit { break-before: page; }
+            #auditContainer {
+                columns: 1 !important;
+                font-size: 8pt !important;
+                line-height: 1.35 !important;
+            }
+            #auditContainer > div { break-inside: avoid; }
+            .sticky { position: static !important; }
+            canvas { max-height: 70mm !important; }
+            .tab-panel > div,
+            .lg\:col-span-5 > div { break-inside: avoid; }
+
+            /* Show print-friendly form values without browser UI styling. */
+            button { display: none !important; }
+            .overflow-x-auto { overflow: visible !important; }
+            .grid.grid-cols-1.sm\:grid-cols-2,
+            .grid.grid-cols-2.sm\:grid-cols-4 {
+                break-inside: avoid;
+            }
         }
+
         .print-only { display: none; }
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
@@ -72,6 +183,10 @@
                     <option value="M40_FLYASH">M40 Severe Exposure + 25% Fly Ash</option>
                     <option value="M50_HIGH">M50 High Strength + Silica Fume</option>
                 </select>
+                <label class="flex items-center gap-2 text-xs font-semibold text-white cursor-pointer select-none">
+                    <input id="referenceToggle" type="checkbox" onchange="toggleReferences(this.checked)" class="accent-emerald-500 w-3.5 h-3.5">
+                    <span>Show References</span>
+                </label>
                 <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                     Print Sheet
@@ -80,7 +195,12 @@
         </div>
     </header>
 
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6" id="printSheet">
+        <div class="print-only print-title">
+            <h1>Concrete Mix Design Calculation Sheet</h1>
+            <p>IS 10262:2019 / IS 456:2000 / IS 383:2016 — Preliminary Design & Trial Batch Record</p>
+            <div class="print-meta"><span>Generated: <span id="printDate"></span></span><span>References: <span id="printRefStatus">Off</span></span></div>
+        </div>
         
         <!-- Tab Navigation -->
         <div class="no-print border-b border-slate-200 mb-6 flex space-x-8 overflow-x-auto">
@@ -115,7 +235,7 @@
                         </h2>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Characteristic Grade (f<sub>ck</sub>)</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Characteristic Grade (f<sub>ck</sub>)</label><span class="ref-tag" data-ref-for="inpGrade">[IS 10262:2019, Cl. 4; IS 456:2000, Table 5]</span>
                                 <select id="inpGrade" onchange="runCalculation()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
                                     <option value="20">M20 (Standard)</option>
                                     <option value="25">M25 (Standard)</option>
@@ -130,7 +250,7 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Exposure Condition (IS 456 Table 5)</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Exposure Condition (IS 456 Table 5)</label><span class="ref-tag" data-ref-for="inpExposure">[IS 456:2000, Table 5]</span>
                                 <select id="inpExposure" onchange="runCalculation()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
                                     <option value="Mild">Mild</option>
                                     <option value="Moderate" selected>Moderate</option>
@@ -141,7 +261,7 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Concrete Type (IS 456 Table 5)</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Concrete Type (IS 456 Table 5)</label><span class="ref-tag" data-ref-for="inpConcreteType">[IS 456:2000, Table 5]</span>
                                 <select id="inpConcreteType" onchange="runCalculation()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
                                     <option value="RCC" selected>Reinforced Concrete (RCC)</option>
                                     <option value="PCC">Plain Concrete (PCC)</option>
@@ -149,7 +269,7 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Type of Cement</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Type of Cement</label><span class="ref-tag" data-ref-for="inpCementType">[IS 10262:2019; IS 4031 series]</span>
                                 <select id="inpCementType" onchange="runCalculation()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
                                     <option value="OPC43">OPC 43 Grade</option>
                                     <option value="OPC53" selected>OPC 53 Grade</option>
@@ -159,7 +279,7 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Placement & Method</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Placement & Method</label><span class="ref-tag" data-ref-for="inpPlacement">[IS 10262:2019, aggregate proportioning / placement considerations]</span>
                                 <select id="inpPlacement" onchange="runCalculation()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
                                     <option value="PUMP" selected>Pumpable Concrete (-10% CA)</option>
                                     <option value="NON_PUMP">Non-Pumpable / Direct Pour</option>
@@ -168,12 +288,12 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Required Slump / Workability (mm)</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Required Slump / Workability (mm)</label><span class="ref-tag" data-ref-for="inpSlump">[IS 10262:2019, Table 4; IS 1199 series]</span>
                                 <input type="number" id="inpSlump" value="100" step="5" oninput="runCalculation()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Quality Control Level</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Quality Control Level</label><span class="ref-tag" data-ref-for="inpQC">[IS 10262:2019, Cl. 4.1 / quality control assumptions]</span>
                                 <select id="inpQC" onchange="runCalculation()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
                                     <option value="GOOD" selected>Good (Site Supervision + Tested Materials)</option>
                                     <option value="VERY_GOOD">Very Good (Strict Batching Plant QC)</option>
@@ -190,7 +310,7 @@
                         </h2>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Max Nominal Aggregate Size (MSA)</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Max Nominal Aggregate Size (MSA)</label><span class="ref-tag" data-ref-for="inpMSA">[IS 10262:2019, Tables 4 & 5]</span>
                                 <select id="inpMSA" onchange="runCalculation()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
                                     <option value="10">10 mm</option>
                                     <option value="20" selected>20 mm</option>
@@ -199,7 +319,7 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Coarse Aggregate Type</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Coarse Aggregate Type</label><span class="ref-tag" data-ref-for="inpCAType">[IS 10262:2019, Table 4]</span>
                                 <select id="inpCAType" onchange="runCalculation()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
                                     <option value="CRUSHED" selected>Crushed Angular Aggregate</option>
                                     <option value="SUB_ANGULAR">Sub-Angular Aggregate</option>
@@ -208,7 +328,7 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Fine Aggregate Grading (IS 383)</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Fine Aggregate Grading (IS 383)</label><span class="ref-tag" data-ref-for="inpFAZone">[IS 383:2016, grading zones; IS 10262:2019, Table 5]</span>
                                 <select id="inpFAZone" onchange="runCalculation()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
                                     <option value="Zone I">Zone I (Coarse Sand)</option>
                                     <option value="Zone II" selected>Zone II (Medium Sand / M-Sand)</option>
@@ -218,17 +338,17 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Superplasticizer Water Reduction (%)</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Superplasticizer Water Reduction (%)</label><span class="ref-tag" data-ref-for="inpWaterRed">[IS 9103; manufacturer data; trial validation required]</span>
                                 <input type="number" id="inpWaterRed" value="20" min="0" max="30" step="1" oninput="runCalculation()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Admixture Dosage (% of cementitious)</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Admixture Dosage (% of cementitious)</label><span class="ref-tag" data-ref-for="inpAdmixDose">[IS 9103; manufacturer recommended dosage]</span>
                                 <input type="number" id="inpAdmixDose" value="1.0" min="0" max="3.0" step="0.1" oninput="runCalculation()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Initial Design W/C Ratio Target</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Initial Design W/C Ratio Target</label><span class="ref-tag" data-ref-for="inpTargetWC">[IS 10262:2019, Cl. 4.2; strength–w/c relationship and durability limit]</span>
                                 <input type="number" id="inpTargetWC" value="0.45" min="0.25" max="0.60" step="0.01" oninput="runCalculation()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
                             </div>
                         </div>
@@ -242,19 +362,19 @@
                         </h2>
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                             <div>
-                                <label class="block text-xs text-slate-500 mb-1">Cement SG</label>
+                                <label class="block text-xs text-slate-500 mb-1">Cement SG</label><span class="ref-tag" data-ref-for="sgCement">[IS 10262:2019, absolute volume method]</span>
                                 <input type="number" id="sgCement" value="3.15" step="0.01" oninput="runCalculation()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-xs font-mono">
                             </div>
                             <div>
-                                <label class="block text-xs text-slate-500 mb-1">Coarse Agg SG</label>
+                                <label class="block text-xs text-slate-500 mb-1">Coarse Agg SG</label><span class="ref-tag" data-ref-for="sgCA">[IS 10262:2019, absolute volume method]</span>
                                 <input type="number" id="sgCA" value="2.74" step="0.01" oninput="runCalculation()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-xs font-mono">
                             </div>
                             <div>
-                                <label class="block text-xs text-slate-500 mb-1">Fine Agg SG</label>
+                                <label class="block text-xs text-slate-500 mb-1">Fine Agg SG</label><span class="ref-tag" data-ref-for="sgFA">[IS 10262:2019, absolute volume method]</span>
                                 <input type="number" id="sgFA" value="2.65" step="0.01" oninput="runCalculation()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-xs font-mono">
                             </div>
                             <div>
-                                <label class="block text-xs text-slate-500 mb-1">Admixture SG</label>
+                                <label class="block text-xs text-slate-500 mb-1">Admixture SG</label><span class="ref-tag" data-ref-for="sgAdmix">[IS 10262:2019, absolute volume method]</span>
                                 <input type="number" id="sgAdmix" value="1.15" step="0.01" oninput="runCalculation()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-xs font-mono">
                             </div>
                         </div>
@@ -262,7 +382,7 @@
                         <!-- SCM Section -->
                         <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-3">
                             <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold text-slate-700">Supplementary Cementitious Material (SCM)</span>
+                                <span class="text-xs font-bold text-slate-700">Supplementary Cementitious Material (SCM)</span><span class="ref-tag" data-ref-for="scm">[IS 10262:2019; applicable SCM standard]</span>
                                 <select id="inpSCMType" onchange="runCalculation()" class="text-xs border border-slate-300 rounded px-2 py-1">
                                     <option value="NONE">None (100% OPC)</option>
                                     <option value="FLY_ASH">Fly Ash (Flyash)</option>
@@ -273,11 +393,11 @@
 
                             <div id="scmControls" class="grid grid-cols-2 gap-3 hidden">
                                 <div>
-                                    <label class="block text-xs text-slate-500 mb-1">Replacement (% of Binder)</label>
+                                    <label class="block text-xs text-slate-500 mb-1">Replacement (% of Binder)</label><span class="ref-tag" data-ref-for="inpSCMPercent">[IS 10262:2019; project specification / SCM standard]</span>
                                     <input type="number" id="inpSCMPercent" value="20" min="0" max="60" step="5" oninput="runCalculation()" class="w-full bg-white border border-slate-300 rounded p-1.5 text-xs font-mono">
                                 </div>
                                 <div>
-                                    <label class="block text-xs text-slate-500 mb-1">SCM Specific Gravity</label>
+                                    <label class="block text-xs text-slate-500 mb-1">SCM Specific Gravity</label><span class="ref-tag" data-ref-for="sgSCM">[IS 10262:2019, absolute volume method]</span>
                                     <input type="number" id="sgSCM" value="2.20" step="0.01" oninput="runCalculation()" class="w-full bg-white border border-slate-300 rounded p-1.5 text-xs font-mono">
                                 </div>
                             </div>
@@ -299,33 +419,33 @@
                     <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm card-box">
                         <h2 class="text-sm font-bold uppercase tracking-wider text-brand-700 mb-2 flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-                            Aggregate Moisture & Absorption Correction
+                            4. Aggregate Moisture & Absorption Correction
                         </h2>
                         <p class="text-xs text-slate-500 mb-4">Adjust design proportions for real-world site aggregate conditions (wet or dry aggregates).</p>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <!-- Coarse Aggregate -->
                             <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
-                                <span class="text-xs font-bold text-slate-700 block">Coarse Aggregate</span>
+                                <span class="text-xs font-bold text-slate-700 block">Coarse Aggregate</span><span class="ref-tag" data-ref-for="caField">[IS 10262:2019, field moisture/absorption correction]</span>
                                 <div>
-                                    <label class="block text-xs text-slate-500">Water Absorption (%)</label>
+                                    <label class="block text-xs text-slate-500">Water Absorption (%)</label><span class="ref-tag" data-ref-for="fldCAAbs">[IS 10262:2019, field moisture/absorption correction]</span>
                                     <input type="number" id="fldCAAbs" value="0.5" step="0.1" oninput="runCalculation()" class="w-full border border-slate-300 rounded p-1.5 text-xs font-mono">
                                 </div>
                                 <div>
-                                    <label class="block text-xs text-slate-500">Free Moisture Content (%)</label>
+                                    <label class="block text-xs text-slate-500">Free Moisture Content (%)</label><span class="ref-tag" data-ref-for="fldCAMoist">[IS 10262:2019, field moisture/absorption correction]</span>
                                     <input type="number" id="fldCAMoist" value="0.0" step="0.1" oninput="runCalculation()" class="w-full border border-slate-300 rounded p-1.5 text-xs font-mono">
                                 </div>
                             </div>
 
                             <!-- Fine Aggregate -->
                             <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
-                                <span class="text-xs font-bold text-slate-700 block">Fine Aggregate (Sand)</span>
+                                <span class="text-xs font-bold text-slate-700 block">Fine Aggregate (Sand)</span><span class="ref-tag" data-ref-for="faField">[IS 10262:2019, field moisture/absorption correction]</span>
                                 <div>
-                                    <label class="block text-xs text-slate-500">Water Absorption (%)</label>
+                                    <label class="block text-xs text-slate-500">Water Absorption (%)</label><span class="ref-tag" data-ref-for="fldFAAbs">[IS 10262:2019, field moisture/absorption correction]</span>
                                     <input type="number" id="fldFAAbs" value="1.0" step="0.1" oninput="runCalculation()" class="w-full border border-slate-300 rounded p-1.5 text-xs font-mono">
                                 </div>
                                 <div>
-                                    <label class="block text-xs text-slate-500">Free Moisture Content (%)</label>
+                                    <label class="block text-xs text-slate-500">Free Moisture Content (%)</label><span class="ref-tag" data-ref-for="fldFAMoist">[IS 10262:2019, field moisture/absorption correction]</span>
                                     <input type="number" id="fldFAMoist" value="2.0" step="0.1" oninput="runCalculation()" class="w-full border border-slate-300 rounded p-1.5 text-xs font-mono">
                                 </div>
                             </div>
@@ -337,7 +457,7 @@
                         <div class="flex items-center justify-between border-b border-slate-200 pb-3">
                             <h2 class="text-sm font-bold uppercase tracking-wider text-brand-700 flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                                Laboratory Trial Mix Volume Calculator
+                                5. Laboratory Trial Mix Volume & Batching
                             </h2>
                             <span class="text-xs text-brand-700 bg-brand-50 px-2 py-0.5 rounded font-mono font-semibold">
                                 IS 10262 Cl. 5 Batching
@@ -349,22 +469,22 @@
                             <span class="text-xs font-bold text-slate-700 block">Quick Volume Estimator (Molds & Testing)</span>
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                 <div>
-                                    <label class="block text-[11px] text-slate-500">150mm Cubes</label>
+                                    <label class="block text-[11px] text-slate-500">150mm Cubes</label><span class="ref-tag" data-ref-for="numCubes">[IS 516 series; laboratory testing requirement]</span>
                                     <input type="number" id="numCubes" value="6" min="0" max="30" oninput="calcTrialVolumeFromMolds()" class="w-full bg-white border border-slate-300 rounded p-1.5 text-xs font-mono">
                                 </div>
                                 <div>
-                                    <label class="block text-[11px] text-slate-500">Cylinders (15x30cm)</label>
+                                    <label class="block text-[11px] text-slate-500">Cylinders (15x30cm)</label><span class="ref-tag" data-ref-for="numCylinders">[IS 516 series; laboratory testing requirement]</span>
                                     <input type="number" id="numCylinders" value="0" min="0" max="20" oninput="calcTrialVolumeFromMolds()" class="w-full bg-white border border-slate-300 rounded p-1.5 text-xs font-mono">
                                 </div>
                                 <div>
-                                    <label class="block text-[11px] text-slate-500">Slump Test Extra</label>
+                                    <label class="block text-[11px] text-slate-500">Slump Test Extra</label><span class="ref-tag" data-ref-for="inclSlump">[IS 1199 series; trial-batch planning]</span>
                                     <select id="inclSlump" onchange="calcTrialVolumeFromMolds()" class="w-full bg-white border border-slate-300 rounded p-1.5 text-xs">
                                         <option value="6">Yes (+6 Liters)</option>
                                         <option value="0">No</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-[11px] text-slate-500">Wastage / Extra (%)</label>
+                                    <label class="block text-[11px] text-slate-500">Wastage / Extra (%)</label><span class="ref-tag" data-ref-for="wastagePct">[Project/laboratory batching practice; user-defined allowance]</span>
                                     <input type="number" id="wastagePct" value="15" min="0" max="50" step="5" oninput="calcTrialVolumeFromMolds()" class="w-full bg-white border border-slate-300 rounded p-1.5 text-xs font-mono">
                                 </div>
                             </div>
@@ -372,13 +492,13 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Target Trial Volume (m³)</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Target Trial Volume (m³)</label><span class="ref-tag" data-ref-for="inpTrialVol">[IS 10262:2019, trial mix / batching provisions]</span>
                                 <input type="number" id="inpTrialVol" value="0.030" step="0.001" min="0.001" oninput="runCalculation()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-mono font-bold text-brand-800">
                                 <span id="lblTrialLiters" class="text-[10px] text-slate-500 block mt-1">Equivalent: <strong>30.0 Liters</strong></span>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Batching Basis State</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Batching Basis State</label><span class="ref-tag" data-ref-for="inpTrialBasis">[IS 10262:2019, SSD basis and field moisture correction]</span>
                                 <select id="inpTrialBasis" onchange="runCalculation()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-brand-500 transition">
                                     <option value="FIELD" selected>Field Moisture Corrected Mass</option>
                                     <option value="SSD">SSD Mass (Dry Lab Specimen)</option>
@@ -429,7 +549,7 @@
                     <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm card-box">
                         <h2 class="text-sm font-bold uppercase tracking-wider text-brand-700 mb-4 flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                            Step-by-Step Code Computation Log
+                            6. Step-by-Step Audit Log
                         </h2>
                         <div id="auditContainer" class="space-y-3 font-mono text-xs text-slate-700">
                             <!-- Calculation trace will be dynamically injected here -->
@@ -455,7 +575,7 @@
                     <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                         <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                            Mix Proportion Summary (1 m³)
+                            7. Mix Proportion Summary (1 m³)
                         </h2>
                         <span id="badgeCompliance" class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
                             Checks Pending
@@ -508,7 +628,7 @@
                     <!-- Batching Quantities Breakdown Accordion -->
                     <div class="space-y-2 border-t border-slate-200 pt-3 text-xs">
                         <div class="font-bold text-slate-700 flex justify-between items-center">
-                            <span>Batching Basis Quantities</span>
+                            <span>8. Batching Quantities & Trial Batch</span>
                         </div>
                         
                         <!-- 50kg bag basis -->
@@ -1063,8 +1183,27 @@
             });
         }
 
+        // Reference visibility and print helpers
+        function toggleReferences(show) {
+            document.body.classList.toggle('references-on', !!show);
+            const status = document.getElementById('printRefStatus');
+            if (status) status.textContent = show ? 'On' : 'Off';
+            try { localStorage.setItem('mixDesignShowReferences', show ? '1' : '0'); } catch (e) {}
+        }
+
+        function initializeReferences() {
+            let show = false;
+            try { show = localStorage.getItem('mixDesignShowReferences') === '1'; } catch (e) {}
+            const toggle = document.getElementById('referenceToggle');
+            if (toggle) toggle.checked = show;
+            toggleReferences(show);
+            const d = document.getElementById('printDate');
+            if (d) d.textContent = new Date().toLocaleString();
+        }
+
         // Initialize App on load
         window.onload = function() {
+            initializeReferences();
             runCalculation();
         };
     </script>
