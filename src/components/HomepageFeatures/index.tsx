@@ -2,13 +2,15 @@ import type {ReactNode} from 'react';
 import clsx from 'clsx';
 import Heading from '@theme/Heading';
 import styles from './styles.module.css';
+import Link from '@docusaurus/Link';
 
 type FeatureItem = {
   title: string;
   Svg: React.ComponentType<React.ComponentProps<'svg'>>;
   description: ReactNode;
-};
+    link: string;
 
+};
 const FeatureList: FeatureItem[] = [
   {
     title: 'Learn',
@@ -18,6 +20,7 @@ const FeatureList: FeatureItem[] = [
         Comprehensive notes, tutorials, and study material for Civil Engineering students.
       </>
     ),
+    link: '/learn/intro',
   },
   {
     title: 'Teaching & Research',
@@ -27,31 +30,36 @@ const FeatureList: FeatureItem[] = [
         Explore our teaching resources, research publications, and academic projects.
       </>
     ),
+    link: '/research',
   },
   {
-    title: 'Artificial intelligence',
+    title: 'Artificial Intelligence',
     Svg: require('@site/static/img/ai.svg').default,
     description: (
       <>
-        Learn how AI is can help you engineer education and research.
+        Learn how AI can help engineering education and research.
       </>
     ),
+    link: '/learn/Artificial_intelligence/intro',
   },
 ];
 
-function Feature({title, Svg, description}: FeatureItem) {
+
+function Feature({ title, Svg, description, link }: FeatureItem) {
   return (
     <div className="col col--4">
-      <div className={styles.featureCard}>
-        <div className="text--center">
-          <Svg className={styles.featureSvg} role="img" />
-        </div>
+      <Link to={link} className={styles.featureCardLink}>
+        <div className={styles.featureCard}>
+          <div className="text--center">
+            <Svg className={styles.featureSvg} role="img" />
+          </div>
 
-        <div className="text--center padding-horiz--md">
-          <Heading as="h3">{title}</Heading>
-          <p>{description}</p>
+          <div className="text--center padding-horiz--md">
+            <Heading as="h3">{title}</Heading>
+            <p>{description}</p>
+          </div>
         </div>
-      </div>
+      </Link>
     </div>
   );
 }

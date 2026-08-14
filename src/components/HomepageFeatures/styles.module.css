@@ -24,3 +24,14 @@
   height: 90px;
   margin-bottom: 1rem;
 }
+
+.featureCardLink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.featureCardLink:hover {
+  text-decoration: none;
+  color: inherit;
+}

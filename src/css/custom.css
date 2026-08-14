@@ -18,6 +18,11 @@
   --ifm-color-primary-lighter: #16a34a;
   --ifm-color-primary-lightest: #22c55e;
 
+
+
+  --ifm-background-color: #fcfcfb;
+  --ifm-background-surface-color: #ffffff;
+
   /* Typography */
   --ifm-font-color-base: #374151;
   --ifm-font-color-secondary: #6b7280;
@@ -36,6 +41,12 @@
   --ifm-color-primary-lighter: #32d8b4;
   --ifm-color-primary-lightest: #4fddbf;
 
+
+
+
+  --ifm-background-color: #121212;
+  --ifm-background-surface-color: #1b1b1d;  
+
     /* Typography */
   --ifm-font-color-base: #e5e7eb;
   --ifm-font-color-secondary: #9ca3af;
@@ -49,7 +60,7 @@
 ========================================================== */
 
 body {
-  background-color: #fcfcfb;
+  background-color: var(--ifm-background-color);
 }
 
 /* ==========================================================
@@ -90,6 +101,14 @@ body {
     #166534 0%,
     #15803d 100%
   );
+}
+
+.hero--primary .hero__title {
+  color: #ffffff;
+}
+
+.hero--primary .hero__subtitle {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 /* ==========================================================
@@ -136,7 +155,7 @@ body {
 }
 
 .large-text {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
 }
 
 .small-text {
@@ -172,9 +191,8 @@ body {
    8. Table of Contents (Outline)
 ========================================================== */
 
-
 .table-of-contents__link {
-  font-size: 1rem;          /* Default: ~0.875rem */
+  font-size: 1rem;
   line-height: 1.6;
 }
 
@@ -185,70 +203,86 @@ body {
 
 @media (min-width: 997px) {
 
-  /* TOC container */
+  /* Widen the Docusaurus TOC column */
 
-  .theme-doc-toc-desktop {
-    margin-left: -.5rem;
+  .theme-doc-toc-desktop.col {
+    flex: 0 0 360px !important;
+    max-width: 360px !important;
+    width: 360px !important;
+
     position: sticky;
     top: 90px;
+    margin-left: 0;
   }
 
-  /* Card */
+  /* TOC Card */
 
   .theme-doc-toc-desktop > div {
+    width: 100%;
     padding: 1rem;
+
     border-radius: 16px;
     border: 1px solid var(--ifm-color-emphasis-300);
+
     background: var(--ifm-background-surface-color);
     box-shadow: 0 4px 14px rgba(0,0,0,0.05);
   }
 
-  /* Width */
+  /* TOC Width */
 
   .table-of-contents {
-    width: 280px;
+    width: 100%;
   }
 
-  /* TOC links */
+  /* TOC Links */
 
   .table-of-contents__link {
     display: block;
+
     padding: 0.45rem 0.85rem;
     margin: 0.15rem 0;
+
     border-radius: 8px;
 
     color: var(--ifm-font-color-base);
 
+    /* Wrap only at spaces */
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
+
     transition:
-      background-color 0.2s ease,
-      color 0.2s ease,
-      padding-left 0.2s ease;
+      background-color .2s ease,
+      color .2s ease,
+      padding-left .2s ease;
   }
 
   /* Hover */
 
   .table-of-contents__link:hover {
-    background: rgba(22,101,52,0.08);
+    background: rgba(22,101,52,.08);
     color: var(--ifm-color-primary);
     text-decoration: none;
   }
 
-  /* Active section */
+  /* Active */
 
   .table-of-contents__link--active {
     position: relative;
 
-    background: rgba(22,101,52,0.12);
+    background: rgba(22,101,52,.12);
     color: var(--ifm-color-primary);
+
     font-weight: 700;
 
     padding-left: 1.15rem;
   }
 
-  /* Green indicator */
+  /* Green Indicator */
 
   .table-of-contents__link--active::before {
     content: "";
+
     position: absolute;
 
     left: 0;
@@ -258,6 +292,7 @@ body {
     width: 4px;
 
     background: var(--ifm-color-primary);
+
     border-radius: 999px;
   }
 
@@ -303,3 +338,4 @@ img {
   }
 
 }
+

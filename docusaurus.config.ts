@@ -9,9 +9,9 @@ const config: Config = {
   title: 'By Ankit',
   tagline: 'Helping engineering students learn better through teaching, research, and AI.',
   favicon: 'img/favicon.ico',
-   clientModules: [
-    require.resolve('./src/client/security.ts'),
-   ],
+    //clientModules: [
+    //require.resolve('./src/client/security.ts'),
+    //],
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -53,27 +53,32 @@ const config: Config = {
           
           remarkPlugins: [remarkMath],
           rehypePlugins: [rehypeKatex],   
+            admonitions: true,
+
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
             'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
         },
         
-        blog: {
-          showReadingTime: true,
-          feedOptions: {
-            type: ['rss', 'atom'],
-            xslt: true,
-          },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
-          // Useful options to enforce blogging best practices
-          onInlineTags: 'warn',
-          onInlineAuthors: 'warn',
-          onUntruncatedBlogPosts: 'warn',
+      blog: {
+        showReadingTime: true,
+
+        remarkPlugins: [remarkMath],
+        rehypePlugins: [rehypeKatex],
+
+        feedOptions: {
+          type: ['rss', 'atom'],
+          xslt: true,
         },
+
+        editUrl:
+          'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+
+        onInlineTags: 'warn',
+        onInlineAuthors: 'warn',
+        onUntruncatedBlogPosts: 'warn',
+      },
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -176,14 +181,14 @@ const config: Config = {
       title: 'By Ankit',
       items: [
         {
-          label: ' Empowering Civil Engineering education through teaching, research, and innovation.',
+          label: ' Empowering Civil Engineering education.',
           to : '/',
         },
       ],
     },
   ],
   copyright: `© ${new Date().getFullYear()} Dr. Ankit Sharma • Made with ❤️`,
-    },
+    }, 
 
 
   prism: {

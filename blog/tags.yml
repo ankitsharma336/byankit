@@ -17,3 +17,48 @@ hola:
   label: Hola
   permalink: /hola
   description: Hola tag description
+
+civil-engineering:
+  label: Civil Engineering
+  permalink: /civil-engineering
+  description: Articles, research, and reflections on the civil engineering discipline and practice.
+
+motivation:
+  label: Motivation
+  permalink: /motivation
+  description: Inspirational guides, mindset shifts, and philosophical reflections for students and creators.
+
+nation-building:
+  label: Nation Building
+  permalink: /nation-building
+  description: Discussions on the crucial role of civil infrastructure and engineering in national growth.
+
+engineering-life:
+  label: Engineering Life
+  permalink: /engineering-life
+  description: Insights, daily practices, and experiences from academic and professional engineering life.
+
+student-guide:
+  label: Student Guide
+  permalink: /student-guide
+  description: Practical resources, focus frameworks, and advice tailored for aspiring young engineers.
+
+engineering-education:
+  label: Engineering Education
+  permalink: /engineering-education
+  description: Teaching, learning and engineering education.
+
+constructability:
+  label: Constructability
+  permalink: /constructability
+  description: Design for construction and practical engineering.
+
+site-engineering:
+  label: Site Engineering
+  permalink: /site-engineering
+  description: Construction site practices and field engineering.
+
+professional-practice:
+  label: Professional Practice
+  permalink: /professional-practice
+  description: Professional skills, ethics and engineering practice.

@@ -2,7 +2,7 @@ import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment';
 
 if (ExecutionEnvironment.canUseDOM) {
   // Disable right-click context menu
-  document.addEventListener('contextmenu', (e: MouseEvent): void => {
+  document.addEventListener('context menu', (e: MouseEvent): void => {
     e.preventDefault();
   });
 
