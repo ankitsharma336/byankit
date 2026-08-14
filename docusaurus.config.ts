@@ -114,11 +114,10 @@ const config: Config = {
           position: 'left',
           label: 'Learn',
         },
-        {to: '/blog', label: 'Blog', position: 'left'},
-        {to: '/about', label: 'About', position: 'left'},
-        {
-          href: '/byankit/apps/concrete-mix-design/', label: 'Mix Design',position: 'left',},
-        {to: '/contact', label: 'Contact', position: 'left'},
+        {to: '/blog',         label: 'Blog',        position: 'left'},
+        {to: '/about',        label: 'About',       position: 'left'},
+        {to: '/mix-design',   label: 'Mix Design',  position: 'left',},
+        {to: '/contact',      label: 'Contact',     position: 'left'},
         {
           href: 'https://github.com/ankitsharma336/byankit',
           label: 'GitHub',
