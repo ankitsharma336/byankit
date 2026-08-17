@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IS 456 Design & Field Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 0;
+        }
+
+        header.bg-brand-900 { 
+            background-color:#ffffff !important; 
+            color:#374151 !important; 
+            border-bottom:1px solid #e5e7eb; 
+            box-shadow:0 2px 8px rgba(0,0,0,.06) !important; 
+        }
+        header.bg-brand-900 h1 { color:#1f2937 !important; }
+        header.bg-brand-900 p { color:#64748b !important; }
+        header.bg-brand-900 .bg-brand-500 { background-color:#166534 !important; color:#ffffff !important; }
+        header.bg-brand-900 .bg-brand-800 { background-color:#f8fafc !important; color:#374151 !important; border-color:#cbd5e1 !important; }
+        header.bg-brand-900 button.bg-emerald-600 { background-color:#166534 !important; color:#ffffff !important; }
+        header.bg-brand-900 button.bg-emerald-600:hover { background-color:#14532d !important; color:#ffffff !important; }
+        header.bg-brand-900 button.bg-emerald-600:focus-visible { outline:3px solid #86efac; outline-offset:2px; }
+        header.bg-brand-900 .unit-switcher { background:#f8fafc !important; border-color:#cbd5e1 !important; }
+        header.bg-brand-900 .unit-switcher button:not(.bg-emerald-600) { color:#334155 !important; }
+        header.bg-brand-900 .unit-switcher button:not(.bg-emerald-600):hover { color:#14532d !important; background:#f1f5f9 !important; }
+
+        /* General form focus styles */
+        input:focus, select:focus {
+            outline: none;
+            border-color: #166534;
+            box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.2);
+        }
+
+        .tab-btn.active {
+            border-bottom: 2px solid #166534;
+            color: #166534;
+            font-weight: 600;
+        }
+
+        .result-box {
+            transition: all 0.3s ease;
+        }
+
+        /* By Ankit engineering result palette */
+        .status-pass { background:#ecfdf5; color:#166534; border:1px solid #a7f3d0; }
+        .status-review { background:#fffbeb; color:#92400e; border:1px solid #fde68a; }
+        .status-fail { background:#fef2f2; color:#991b1b; border:1px solid #fecaca; }
+        .result-accent-green { border-left-color:#166534 !important; }
+        .result-accent-blue { border-left-color:#15803d !important; }
+        .engineering-note { background:#f0fdf4; border:1px solid #bbf7d0; color:#365314; }
+        .engineering-warning { background:#fffbeb; border:1px solid #fde68a; color:#78350f; }
+        .engineering-danger { background:#fef2f2; border:1px solid #fecaca; color:#7f1d1d; }
+        .clause-tag { display:inline-flex; align-items:center; gap:.35rem; padding:.2rem .5rem; border-radius:999px; background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; font-size:.7rem; font-weight:600; }
+        .calculation-step { padding:.65rem .8rem; background:#fff; border:1px solid #e5e7eb; border-radius:.65rem; }
+        .compact-radio { min-height:42px; }
+        .app-header { width:100%; box-sizing:border-box; }
+        .app-header-inner { width:100%; max-width:72rem; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+        .app-brand { min-width:0; flex:1 1 auto; }
+        .app-title { margin:0; max-width:100%; white-space:normal; overflow-wrap:anywhere; line-height:1.2; }
+        .app-subtitle { max-width:100%; white-space:normal; overflow-wrap:anywhere; line-height:1.35; }
+        .app-header-action { flex:0 0 auto; }
+        @media (max-width:900px) {
+            .app-header-inner { align-items:flex-start; }
+            .app-title { font-size:1.2rem; }
+            .app-subtitle { font-size:.82rem; }
+        }
+        @media (max-width:640px) {
+            .tab-nav-scroll { overflow-x:auto; }
+            .app-header-inner { flex-wrap:wrap; gap:.75rem; }
+            .app-brand { flex-basis:calc(100% - 3rem); }
+            .app-header-action { width:100%; }
+            .app-header-action button { width:100%; justify-content:center; }
+            .app-title { font-size:1.08rem; }
+        }
+
+    </style>
+</head>
+<body class="text-gray-800 antialiased h-screen flex flex-col">
+
+    <header class="bg-brand-900 app-header py-4 px-4 sm:px-6 lg:px-8 sticky top-0 z-10">
+      <div class="app-header-inner">
+        <div class="flex items-center app-brand">
+            <div class="bg-brand-500 w-10 h-10 rounded-lg flex items-center justify-center mr-4 shadow-sm">
+                <i class="fa-solid fa-clipboard-check text-xl"></i>
+            </div>
+            <div>
+                <h1 class="app-title text-xl sm:text-2xl font-bold tracking-tight">IS 456 Design &amp; Field Checker</h1>
+                <p class="app-subtitle text-sm m-0 mt-1">Quick IS 456 checks for development/lap length, workability and nominal cover.</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center space-x-3 app-header-action">
+             <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm flex items-center">
+                <i class="fa-solid fa-print mr-2"></i>Print Report
+            </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-grow flex flex-col max-w-5xl w-full min-w-0 mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        
+        <!-- Tab Navigation -->
+        <div class="border-b border-gray-200">
+            <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                <button onclick="switchTab('lap-length')" id="tab-lap-length" class="tab-btn active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center hover:text-gray-700 hover:border-gray-300 transition-colors">
+                    <i class="fa-solid fa-ruler-combined mr-2"></i>Lap Length Check
+                </button>
+                <button onclick="switchTab('slump')" id="tab-slump" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 flex items-center hover:text-gray-700 hover:border-gray-300 transition-colors">
+                    <i class="fa-solid fa-cone-shape mr-2" style="transform: rotate(180deg);"></i>Slump Reference
+                </button>
+                <button onclick="switchTab('cover')" id="tab-cover" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 flex items-center hover:text-gray-700 hover:border-gray-300 transition-colors">
+                    <i class="fa-solid fa-layer-group mr-2"></i>Clear Cover Alerts
+                </button>
+                <button onclick="switchTab('reference')" id="tab-reference" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 flex items-center hover:text-gray-700 hover:border-gray-300 transition-colors">
+                    <i class="fa-solid fa-book-open mr-2"></i>IS 456 Reference
+                </button>
+            </nav>
+        </div>
+
+        <!-- Tab Content: Lap Length Check -->
+        <div id="content-lap-length" class="tab-content block">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
+                <div class="mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">Development / Lap Length Calculator (IS 456)</h2>
+                    <p class="text-sm text-gray-500 mt-1">Select parameters to calculate required anchorage and lap lengths.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Concrete Grade</label>
+                        <select id="lap-concrete-grade" class="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm bg-white shadow-sm" onchange="calculateLapLength()">
+                            <option value="20">M20</option><option value="25">M25</option><option value="30">M30</option><option value="35">M35</option><option value="40">M40 or above</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Steel Grade (fy)</label>
+                        <select id="lap-steel-grade" class="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm bg-white shadow-sm" onchange="calculateLapLength()">
+                            <option value="415">Fe 415</option><option value="500" selected>Fe 500</option><option value="550">Fe 550</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Bar Diameter (Ø)</label>
+                        <select id="lap-bar-dia" class="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm bg-white shadow-sm" onchange="calculateLapLength()">
+                            <option value="8">8 mm</option><option value="10">10 mm</option><option value="12">12 mm</option><option value="16">16 mm</option><option value="20">20 mm</option><option value="25">25 mm</option><option value="32">32 mm</option><option value="40">40 mm</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Bar Stress Condition</label>
+                        <select id="lap-stress-type" class="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm bg-white shadow-sm" onchange="calculateLapLength()">
+                            <option value="flexural_tension">Flexural Tension</option>
+                            <option value="direct_tension">Direct Tension</option>
+                            <option value="compression">Compression</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+                    <div class="border rounded-lg p-5 bg-gray-50">
+                        <h3 class="text-sm font-semibold text-gray-800 mb-3">Lap / Splice Detailing Modifiers</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <label class="compact-radio flex items-center gap-2 rounded-lg border bg-white px-3 py-2">
+                                <input id="lap-top-bar" type="checkbox" onchange="calculateLapLength()" class="text-emerald-700 focus:ring-emerald-600">
+                                <span class="text-xs text-gray-700">Top-of-section tension bar with cover &lt; 2Ø</span>
+                            </label>
+                            <label class="compact-radio flex items-center gap-2 rounded-lg border bg-white px-3 py-2">
+                                <input id="lap-corner" type="checkbox" onchange="calculateLapLength()" class="text-emerald-700 focus:ring-emerald-600">
+                                <span class="text-xs text-gray-700">Corner condition / adjacent laps close to each other</span>
+                            </label>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Minimum cover to lapped bar (mm)</label>
+                                <input type="number" id="lap-cover" value="30" min="0" step="1" oninput="calculateLapLength()" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Clear distance between adjacent laps (mm)</label>
+                                <input type="number" id="lap-adjacent-distance" value="100" min="0" step="1" oninput="calculateLapLength()" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Splices at one section / arrangement</label>
+                            <select id="lap-splice-arrangement" onchange="calculateLapLength()" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white">
+                                <option value="staggered" selected>Staggered — centres ≥ 1.3 × lap length</option>
+                                <option value="not_staggered">Not staggered / close to one section</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="lap-status-box" class="status-review rounded-lg p-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-semibold">Design Status</h3>
+                            <span id="lap-status-badge" class="px-2.5 py-1 rounded-full text-xs font-bold">REVIEW</span>
+                        </div>
+                        <div id="lap-warning-list" class="text-xs space-y-2"></div>
+                        <div class="mt-4 text-xs"><span class="clause-tag">IS 456:2000 Cl. 26.2.1.1</span> <span class="clause-tag">Cl. 26.2.5.1</span></div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                        <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Calculation Results</h3>
+                        <span class="clause-tag"><i class="fa-solid fa-scale-balanced"></i> Governing IS 456 provisions</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div class="result-box bg-white p-5 rounded-lg border-l-4 result-accent-green shadow-sm">
+                            <p class="text-sm text-gray-600 mb-1">Development Length (Ld)</p>
+                            <div class="flex items-baseline"><span class="text-3xl font-bold text-gray-900" id="res-dev-length">0</span><span class="ml-2 text-sm text-gray-500 font-medium">mm</span></div>
+                            <p class="text-xs text-gray-400 mt-2" id="res-dev-formula">Formula</p>
+                            <p class="text-[11px] text-emerald-700 mt-2 font-semibold">IS 456 Cl. 26.2.1.1</p>
+                        </div>
+                        <div class="result-box bg-white p-5 rounded-lg border-l-4 result-accent-blue shadow-sm">
+                            <p class="text-sm text-gray-600 mb-1">Base Lap Length</p>
+                            <div class="flex items-baseline"><span class="text-3xl font-bold text-gray-900" id="res-lap-length">0</span><span class="ml-2 text-sm text-gray-500 font-medium">mm</span></div>
+                            <p class="text-xs text-gray-400 mt-2" id="res-lap-multiplier">Rule</p>
+                            <p class="text-[11px] text-emerald-700 mt-2 font-semibold">IS 456 Cl. 26.2.5.1</p>
+                        </div>
+                        <div class="result-box bg-white p-5 rounded-lg border-l-4 border-amber-500 shadow-sm">
+                            <p class="text-sm text-gray-600 mb-1">Adopted Lap Length</p>
+                            <div class="flex items-baseline"><span class="text-3xl font-bold text-gray-900" id="res-adopted-lap">0</span><span class="ml-2 text-sm text-gray-500 font-medium">mm</span></div>
+                            <p class="text-xs text-gray-400 mt-2" id="res-adopted-detail">After modifiers / minimum</p>
+                            <p class="text-[11px] text-emerald-700 mt-2 font-semibold">Detailing check</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-5">
+                        <h4 class="text-sm font-semibold text-gray-800 mb-3">Step-by-Step Calculation Breakdown</h4>
+                        <div id="lap-calculation-breakdown" class="space-y-2 text-sm text-gray-700"></div>
+                    </div>
+
+                    <div class="mt-5 engineering-note p-4 rounded-lg text-xs">
+                        <strong>Assumptions:</strong> Deformed high-yield reinforcement is assumed. The tool checks the general IS 456 lap provisions only; structural splice location, bar curtailment, congestion, seismic detailing, coupler/weld alternatives and project-specific drawings must be checked separately.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Slump Reference -->
+        <div id="content-slump" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
+                <div class="mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">Slump Test Reference Guide</h2>
+                    <p class="text-sm text-gray-500 mt-1">Reference ranges and field checking based on IS 456 workability guidance. Special placing methods require project-specific control.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-1">
+                        <div class="bg-gray-50 rounded-lg p-5 border border-gray-200 h-full flex flex-col items-center justify-center text-center">
+                            <div class="relative w-32 h-40 mb-4">
+                                <!-- Slump Cone SVG -->
+                                <svg viewBox="0 0 100 120" class="w-full h-full">
+                                    <!-- Base plate -->
+                                    <line x1="10" y1="110" x2="90" y2="110" stroke="#4b5563" stroke-width="4" stroke-linecap="round"/>
+                                    <!-- Original Cone Outline -->
+                                    <path d="M 40 20 L 60 20 L 75 110 L 25 110 Z" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="4,4"/>
+                                    <!-- Slumped Concrete (Dynamic based on selection - defaulting to medium) -->
+                                    <path id="slump-visual" d="M 30 50 Q 50 45 70 50 Q 80 110 80 110 L 20 110 Q 20 110 30 50" fill="#d1d5db" stroke="#6b7280" stroke-width="2"/>
+                                    <!-- Measurement line -->
+                                    <line x1="85" y1="20" x2="85" y2="50" stroke="#ef4444" stroke-width="2" id="slump-measure-line"/>
+                                    <text x="90" y="38" font-size="10" fill="#ef4444" font-weight="bold" id="slump-measure-text">Slump</text>
+                                </svg>
+                            </div>
+                            <h3 class="font-medium text-gray-800 mb-1">Visual Guide</h3>
+                            <p class="text-xs text-gray-500">The measured difference between the top of the mold and the displaced original center of the top surface.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="lg:col-span-2">
+                        <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Placing Conditions</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Degree of Workability</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slump (mm)</th>
+                                        <th scope="col" class="px-4 py-3 text-center"></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200" id="slump-table-body">
+                                    <!-- Populated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Manual Checker -->
+                        <div class="mt-6 p-5 bg-[#f8fafc] border border-[#cbd5e1] rounded-lg">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-3">Field Value Checker</h4>
+                            <div class="flex flex-col sm:flex-row gap-4 items-end">
+                                <div class="flex-grow">
+                                    <label class="block text-xs text-gray-500 mb-1">Select Condition</label>
+                                    <select id="check-slump-condition" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white" onchange="validateSlump()">
+                                        <!-- Options populated via JS -->
+                                    </select>
+                                </div>
+                                <div class="w-full sm:w-32">
+                                    <label class="block text-xs text-gray-500 mb-1">Measured (mm)</label>
+                                    <input type="number" id="check-slump-val" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" placeholder="e.g. 75" oninput="validateSlump()">
+                                </div>
+                                <div id="slump-result-indicator" class="w-full sm:w-auto px-4 py-2 rounded-md text-sm font-medium text-center bg-gray-100 text-gray-500 border border-gray-200 transition-colors">
+                                    Enter value
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 engineering-note p-4 rounded-lg text-xs"><strong>Reference:</strong> Common slump ranges are presented as workability guidance. For tremie/deep-placement concrete, use IS 456 Cl. 7.1.2 and the project-specific placing/mix requirements; the checker intentionally does not assign a generic numeric pass band.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Clear Cover -->
+        <div id="content-cover" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
+                <div class="mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">Minimum Nominal Cover Alerts</h2>
+                    <p class="text-sm text-gray-500 mt-1">Quick reference for minimum clear cover based on structural element and exposure conditions.</p>
+                </div>
+
+                <div class="mt-8 border-t border-gray-200 pt-6">
+                    <h3 class="text-sm font-medium text-gray-700 mb-4">Governing Nominal Cover Check — IS 456 Cl. 26.4.2</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div><label class="block text-xs font-medium text-gray-600 mb-1">Member Type</label>
+                            <select id="cover-member" onchange="updateCoverAlert()" class="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm bg-white"><option value="slab">Slab</option><option value="beam">Beam</option><option value="column">Column</option><option value="footing">Footing / Foundation</option><option value="staircase">Staircase</option><option value="retaining">Retaining Wall</option></select>
+                        </div>
+                        <div><label class="block text-xs font-medium text-gray-600 mb-1">Exposure Condition</label>
+                            <select id="cover-exposure" onchange="updateCoverAlert()" class="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm bg-white"><option value="mild">Mild</option><option value="moderate" selected>Moderate</option><option value="severe">Severe</option><option value="very_severe">Very Severe</option><option value="extreme">Extreme</option></select>
+                        </div>
+                        <div><label class="block text-xs font-medium text-gray-600 mb-1">Concrete Grade</label>
+                            <select id="cover-concrete-grade" onchange="updateCoverAlert()" class="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm bg-white"><option value="20">M20</option><option value="25">M25</option><option value="30">M30</option><option value="35" selected>M35</option><option value="40">M40+</option></select>
+                        </div>
+                        <div><label class="block text-xs font-medium text-gray-600 mb-1">Main Bar Diameter (mm)</label>
+                            <select id="cover-bar-dia" onchange="updateCoverAlert()" class="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm bg-white"><option value="8">8</option><option value="10">10</option><option value="12">12</option><option value="16" selected>16</option><option value="20">20</option><option value="25">25</option><option value="32">32</option></select>
+                        </div>
+                        <div><label class="block text-xs font-medium text-gray-600 mb-1">Provided Nominal Cover (mm)</label>
+                            <input type="number" id="cover-provided" value="30" min="0" step="1" oninput="updateCoverAlert()" class="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm bg-white">
+                        </div>
+                    </div>
+                    <div id="column-exception-wrap" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 hidden">
+                        <label class="flex items-center gap-2 rounded-lg border bg-gray-50 px-3 py-2 text-xs"><input id="column-small-dim" type="checkbox" onchange="updateCoverAlert()" class="text-emerald-700"> Column minimum dimension ≤ 200 mm</label>
+                        <div class="rounded-lg border bg-gray-50 px-3 py-2 text-xs text-gray-600">The 25 mm column exception is considered only when the main bar diameter is ≤ 12 mm and the small-dimension condition is selected.</div>
+                    </div>
+                    <div class="mt-5 grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200"><p class="text-xs text-emerald-800 font-semibold uppercase">Durability cover</p><div class="text-3xl font-bold text-emerald-900 mt-1"><span id="exposure-cover-val">30</span> <span class="text-sm font-medium">mm</span></div><p class="text-xs text-emerald-800 mt-1" id="exposure-desc"></p></div>
+                        <div class="bg-white rounded-lg p-4 border border-gray-200"><p class="text-xs text-gray-500 font-semibold uppercase">Member / bar requirement</p><div class="text-3xl font-bold text-gray-900 mt-1"><span id="cover-member-required">25</span> <span class="text-sm font-medium text-gray-500">mm</span></div><p class="text-xs text-gray-500 mt-1" id="cover-member-basis"></p></div>
+                        <div id="governing-cover-card" class="status-review rounded-lg p-4"><div class="flex items-center justify-between"><p class="text-xs font-semibold uppercase">Governing nominal cover</p><span id="cover-status-badge" class="px-2 py-1 rounded-full text-[10px] font-bold bg-amber-600 text-white">REVIEW</span></div><div class="text-3xl font-bold mt-1"><span id="governing-cover-val">30</span> <span class="text-sm">mm</span></div><p class="text-xs mt-1" id="governing-cover-basis"></p><p class="text-xs mt-2" id="cover-provided-status"></p></div>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded-lg p-4"><strong>Concrete-grade adjustment:</strong> For severe and very severe exposure, a 5 mm reduction may be made where concrete grade is M35 or above. Fire-resistance cover from Table 16A is not evaluated here and must be checked separately where applicable.</div>
+                </div>
+
+                <div class="mt-8 border-t border-gray-200 pt-6">
+                    <h3 class="text-sm font-medium text-gray-700 mb-4">Cover Reference by Member</h3>
+                    <div id="cover-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: IS 456 Reference -->
+        <div id="content-reference" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8 space-y-6">
+                <div><h2 class="text-xl font-semibold text-gray-800">IS 456 Quick Reference & Assumptions</h2><p class="text-sm text-gray-500 mt-1">The app provides focused checks; it is not a substitute for full structural design or approved drawings.</p></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div class="border rounded-lg p-4"><div class="clause-tag mb-2">Cl. 26.2.1.1</div><h4 class="font-semibold text-gray-800">Development Length</h4><p class="text-gray-600 mt-2">Ld is based on bar stress, diameter and design bond stress. Deformed bars receive the code-specified bond-stress increase; compression receives the specified additional increase.</p></div>
+                    <div class="border rounded-lg p-4"><div class="clause-tag mb-2">Cl. 26.2.5.1</div><h4 class="font-semibold text-gray-800">Lap Splices</h4><p class="text-gray-600 mt-2">Flexural tension: max(Ld, 30Ø). Direct tension: max(2Ld, 30Ø). Compression: max(Ld, 24Ø). Straight lap length not less than 15Ø or 200 mm.</p></div>
+                    <div class="border rounded-lg p-4"><div class="clause-tag mb-2">Cl. 26.4.2 / Table 16</div><h4 class="font-semibold text-gray-800">Nominal Cover</h4><p class="text-gray-600 mt-2">Durability cover depends on exposure and is combined with member/bar requirements. Severe/very severe exposure permits a 5 mm reduction for M35 or above. Fire resistance requires a separate Table 16A check.</p></div>
+                    <div class="border rounded-lg p-4"><div class="clause-tag mb-2">Table 7 / Cl. 7.1.2</div><h4 class="font-semibold text-gray-800">Workability / Slump</h4><p class="text-gray-600 mt-2">Use the tabulated slump ranges as guidance for common placing conditions. Tremie/deep-placement work should be controlled using the specified workability requirements rather than a generic 100–150 mm acceptance band.</p></div>
+                </div>
+                <div class="engineering-warning p-4 rounded-lg text-xs"><strong>Limitations:</strong> The verifier does not design reinforcement area, check member strength, seismic detailing, fire resistance, crack-width limits, bar spacing, anchorage zones or project-specific splice arrangements. Always verify against the governing structural drawings, project specifications and applicable code amendments.</div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- Data Definitions ---
+        const bondStressMap = { "20":1.2, "25":1.4, "30":1.5, "35":1.7, "40":1.9 };
+
+        const slumpData = [
+            { id:'mass', condition:'Mass concrete; lightly reinforced sections in slabs, beams, walls, columns; strip footings', degree:'Low', min:25, max:75, visualD:'M 35 30 Q 50 25 65 30 Q 80 110 80 110 L 20 110 Q 20 110 35 30', visualH:30 },
+            { id:'heavily', condition:'Heavily reinforced sections in slabs, beams, walls, columns', degree:'Medium', min:50, max:100, visualD:'M 30 50 Q 50 45 70 50 Q 80 110 80 110 L 20 110 Q 20 110 30 50', visualH:50 },
+            { id:'trench', condition:'Slipform work; pumped concrete; trench fill', degree:'High', min:75, max:100, visualD:'M 25 70 Q 50 65 75 70 Q 80 110 80 110 L 20 110 Q 20 110 25 70', visualH:70 },
+            { id:'piling', condition:'Tremie concrete / deep-placement work', degree:'Very High', min:null, max:null, referenceOnly:true, reference:'Refer IS 456:2000 Cl. 7.1.2 and project-specific placing requirements.', visualD:'M 20 90 Q 50 85 80 90 Q 80 110 80 110 L 20 110 Q 20 110 20 90', visualH:90 }
+        ];
+
+        const coverData = [
+            { element:'Footing / Foundation', icon:'fa-arrow-down-up-across-line', min:50, desc:'Durability reference: 50 mm; increase where cast directly against earth / project specification.' },
+            { element:'Columns', icon:'fa-table-columns', min:40, desc:'40 mm or bar diameter, whichever is greater; 25 mm exception may apply under the code conditions.' },
+            { element:'Beams', icon:'fa-ruler-horizontal', min:25, desc:'25 mm or bar diameter, whichever is greater; durability governs where larger.' },
+            { element:'Slabs', icon:'fa-layer-group', min:20, desc:'20 mm; 15 mm may apply for mild exposure and main bar diameter up to 12 mm.' },
+            { element:'Staircase', icon:'fa-stairs', min:20, desc:'Use slab-type cover as a practical starting point; project detailing governs.' },
+            { element:'Retaining Walls', icon:'fa-road-barrier', min:20, desc:'Cover is exposure- and face-dependent; project drawings/specification may govern.' }
+        ];
+
+        const exposureData = {
+            mild:{val:20,desc:'Mild — Table 16 durability cover'},
+            moderate:{val:30,desc:'Moderate — Table 16 durability cover'},
+            severe:{val:45,desc:'Severe — Table 16 durability cover'},
+            very_severe:{val:50,desc:'Very severe — Table 16 durability cover'},
+            extreme:{val:75,desc:'Extreme — Table 16 durability cover'}
+        };
+
+        const memberCoverBase = { slab:20, beam:25, column:40, footing:50, staircase:20, retaining:20 };
+        const memberNames = { slab:'Slab', beam:'Beam', column:'Column', footing:'Footing / Foundation', staircase:'Staircase', retaining:'Retaining Wall' };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            calculateLapLength();
+            initSlumpTab();
+            initCoverTab();
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el=>el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el=>{
+                el.classList.remove('active','text-[#166534]','border-[#166534]');
+                el.classList.add('text-gray-500','border-transparent');
+            });
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+            const activeBtn=document.getElementById(`tab-${tabId}`);
+            activeBtn.classList.remove('text-gray-500','border-transparent');
+            activeBtn.classList.add('active','text-[#166534]','border-[#166534]');
+        }
+
+        function calculateLapLength(){
+            const fck=document.getElementById('lap-concrete-grade').value;
+            const fy=parseFloat(document.getElementById('lap-steel-grade').value);
+            const dia=parseFloat(document.getElementById('lap-bar-dia').value);
+            const stressType=document.getElementById('lap-stress-type').value;
+            const topBar=document.getElementById('lap-top-bar').checked;
+            const corner=document.getElementById('lap-corner').checked;
+            const cover=parseFloat(document.getElementById('lap-cover').value)||0;
+            const adjacent=parseFloat(document.getElementById('lap-adjacent-distance').value)||0;
+            const arrangement=document.getElementById('lap-splice-arrangement').value;
+
+            let tauPlain=bondStressMap[fck]||1.2;
+            let tau=tauPlain*1.6;
+            let bondNote='Plain-bar τbd × 1.6 for deformed bar';
+            if(stressType==='compression'){ tau*=1.25; bondNote += ' × 1.25 for compression'; }
+            const fs=0.87*fy;
+            let Ld=Math.ceil((dia*fs)/(4*tau));
+
+            let baseLap, lapRule;
+            if(stressType==='flexural_tension'){ baseLap=Math.max(Ld,30*dia); lapRule='max(Ld, 30Ø) — flexural tension'; }
+            else if(stressType==='direct_tension'){ baseLap=Math.max(2*Ld,30*dia); lapRule='max(2Ld, 30Ø) — direct tension'; }
+            else { baseLap=Math.max(Ld,24*dia); lapRule='max(Ld, 24Ø) — compression'; }
+
+            const straightMin=Math.max(15*dia,200);
+            let modifier=1;
+            const modifierNotes=[];
+            if(stressType!=='compression' && topBar && cover < 2*dia){ modifier*=1.4; modifierNotes.push('×1.4 top-bar/cover condition'); }
+            if(stressType!=='compression' && corner && (cover < 2*dia || adjacent < Math.max(75,6*dia))){ modifier*=1.4; modifierNotes.push('×1.4 corner / adjacent-lap condition'); }
+            if(corner && modifier===1) modifierNotes.push('No 1.4 corner modifier triggered by current cover/spacing');
+            const modifiedLap=Math.ceil(baseLap*modifier);
+            const adoptedLap=Math.ceil(Math.max(modifiedLap,straightMin));
+            const staggerMin=Math.ceil(1.3*adoptedLap);
+
+            const warnings=[];
+            let status='PASS';
+            if(dia>36){ warnings.push('Lap splice is not normally permitted for bars larger than 36 mm; consider welded/mechanical splicing.'); status='FAIL'; }
+            if(stressType!=='compression' && topBar && cover < 2*dia && modifier<1.4) { warnings.push('Top-bar modifier could not be applied.'); status='FAIL'; }
+            if(arrangement==='not_staggered'){ warnings.push(`Splices are not marked staggered. For staggered classification, splice centres should be at least 1.3 × the calculated lap length (≈ ${staggerMin} mm).`); status = status==='FAIL'?'FAIL':'REVIEW'; }
+            if(stressType!=='compression' && corner && adjacent < Math.max(75,6*dia)){ warnings.push(`Adjacent laps are closer than the IS 456 trigger distance of max(75 mm, 6Ø) = ${Math.max(75,6*dia)} mm; 1.4 modifier is applied.`); }
+            if(!warnings.length) warnings.push('No selected condition triggered a warning. Verify splice location and approved detailing drawings.');
+
+            const badge=document.getElementById('lap-status-badge');
+            const box=document.getElementById('lap-status-box');
+            box.className=(status==='PASS'?'status-pass':status==='FAIL'?'status-fail':'status-review')+' rounded-lg p-5';
+            badge.textContent=status;
+            badge.className='px-2.5 py-1 rounded-full text-xs font-bold '+(status==='PASS'?'bg-emerald-700 text-white':status==='FAIL'?'bg-red-700 text-white':'bg-amber-600 text-white');
+            document.getElementById('lap-warning-list').innerHTML=warnings.map(w=>`<div class="flex gap-2"><span>${w.includes('No selected')?'✓':(status==='FAIL'?'✕':'⚠')}</span><span>${w}</span></div>`).join('');
+
+            document.getElementById('res-dev-length').textContent=Ld;
+            document.getElementById('res-dev-formula').textContent=`Ld = Ø×0.87fy/(4τbd) = ${Ld} mm; τbd = ${tau.toFixed(2)} MPa`;
+            document.getElementById('res-lap-length').textContent=baseLap;
+            document.getElementById('res-lap-multiplier').textContent=lapRule;
+            document.getElementById('res-adopted-lap').textContent=adoptedLap;
+            document.getElementById('res-adopted-detail').textContent=`${modifierNotes.length?modifierNotes.join(' + '):'No 1.4 modifier'}; minimum straight length ${straightMin} mm`;
+
+            const steps=[
+                `<div class="calculation-step"><strong>1. Design bond stress:</strong> τbd = ${tauPlain.toFixed(2)} × 1.6${stressType==='compression'?' × 1.25':''} = <strong>${tau.toFixed(2)} MPa</strong>. <span class="clause-tag ml-2">Cl. 26.2.1.1</span></div>`,
+                `<div class="calculation-step"><strong>2. Bar design stress:</strong> fs = 0.87 × ${fy} = <strong>${fs.toFixed(1)} MPa</strong>.</div>`,
+                `<div class="calculation-step"><strong>3. Development length:</strong> Ld = (${dia} × ${fs.toFixed(1)}) / (4 × ${tau.toFixed(2)}) = <strong>${Ld} mm</strong>.</div>`,
+                `<div class="calculation-step"><strong>4. Base lap:</strong> ${lapRule} → <strong>${baseLap} mm</strong>.</div>`,
+                `<div class="calculation-step"><strong>5. Minimum straight lap:</strong> max(15Ø, 200) = max(${15*dia}, 200) = <strong>${straightMin} mm</strong>.</div>`,
+                `<div class="calculation-step"><strong>6. Detailing modifiers:</strong> ${modifierNotes.length?modifierNotes.join('; '):'None triggered'}.</div>`,
+                `<div class="calculation-step"><strong>7. Final adopted lap:</strong> max(modified lap, minimum straight lap) = <strong>${adoptedLap} mm</strong>.${arrangement==='staggered'?` Staggered centre spacing target ≥ <strong>${staggerMin} mm</strong>.`:''}</div>`
+            ];
+            document.getElementById('lap-calculation-breakdown').innerHTML=steps.join('');
+        }
+
+        function initSlumpTab(){
+            const tbody=document.getElementById('slump-table-body');
+            const select=document.getElementById('check-slump-condition');
+            tbody.innerHTML=''; select.innerHTML='<option value="">-- Select Condition to Check --</option>';
+            slumpData.forEach((item,index)=>{
+                const range=item.referenceOnly?item.reference:`${item.min} - ${item.max}`;
+                const tr=document.createElement('tr');
+                tr.innerHTML=`<td class="px-6 py-4 text-sm text-gray-700">${item.condition}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getDegreeColor(item.degree)}">${item.degree}</span></td><td class="px-6 py-4 text-sm font-semibold text-gray-900">${range}</td><td class="px-4 py-4 text-center"><button onclick="previewSlump(${index})" class="text-[#166534] hover:text-[#14532d]" title="Preview visual"><i class="fa-solid fa-eye"></i></button></td>`;
+                tbody.appendChild(tr);
+                const option=document.createElement('option'); option.value=index; option.textContent=item.condition.length>50?item.condition.substring(0,47)+'...':item.condition; select.appendChild(option);
+            });
+        }
+        function getDegreeColor(degree){ return degree==='Low'?'bg-amber-100 text-amber-800':degree==='Medium'?'bg-emerald-100 text-emerald-800':degree==='High'?'bg-blue-100 text-blue-800':degree==='Very High'?'bg-purple-100 text-purple-800':'bg-gray-100 text-gray-800'; }
+        function previewSlump(index){ const data=slumpData[index]; document.getElementById('slump-visual').setAttribute('d',data.visualD); document.getElementById('slump-measure-line').setAttribute('y2',data.visualH); document.getElementById('slump-measure-text').setAttribute('y',20+(data.visualH-20)/2); document.getElementById('check-slump-condition').value=index; validateSlump(); }
+        function validateSlump(){
+            const index=document.getElementById('check-slump-condition').value, valStr=document.getElementById('check-slump-val').value, indicator=document.getElementById('slump-result-indicator');
+            if(index===''||valStr===''){ indicator.className='w-full sm:w-auto px-4 py-2 rounded-md text-sm font-medium text-center bg-gray-100 text-gray-500 border border-gray-200'; indicator.innerHTML=index===''?'Select condition':'Enter value'; return; }
+            const data=slumpData[index];
+            if(data.referenceOnly){ indicator.className='w-full px-4 py-2 rounded-md text-sm font-medium text-center status-review flex items-center justify-center'; indicator.innerHTML='<i class="fa-solid fa-circle-info mr-2"></i>Review IS 456 Cl. 7.1.2 / project workability requirement'; return; }
+            const val=parseFloat(valStr); if(val>=data.min&&val<=data.max){ indicator.className='w-full sm:w-auto px-4 py-2 rounded-md text-sm font-medium text-center status-pass flex items-center justify-center'; indicator.innerHTML=`<i class="fa-solid fa-check-circle mr-2"></i> PASS (${data.min}–${data.max} mm)`; } else { indicator.className='w-full sm:w-auto px-4 py-2 rounded-md text-sm font-medium text-center status-fail flex items-center justify-center'; const msg=val<data.min?'Below suggested range':'Above suggested range'; indicator.innerHTML=`<i class="fa-solid fa-triangle-exclamation mr-2"></i> REVIEW: ${msg}`; }
+        }
+
+        function initCoverTab(){
+            const container=document.getElementById('cover-cards-container'); container.innerHTML='';
+            coverData.forEach(item=>{ const card=document.createElement('div'); card.className='bg-gray-50 border border-gray-200 rounded-lg p-4 flex flex-col justify-between'; card.innerHTML=`<div class="flex items-center"><div class="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 mr-3"><i class="fa-solid ${item.icon}"></i></div><h4 class="font-semibold text-gray-800">${item.element}</h4></div><div class="mt-3 text-center py-3 bg-white rounded border border-gray-100"><span class="text-3xl font-bold text-gray-900">${item.min}</span><span class="text-sm font-medium text-gray-500 ml-1">mm</span></div><p class="text-xs text-gray-500 mt-3">${item.desc}</p>`; container.appendChild(card); });
+            updateCoverAlert();
+        }
+        function updateCoverAlert(){
+            const member=document.getElementById('cover-member').value, exp=document.getElementById('cover-exposure').value, grade=parseInt(document.getElementById('cover-concrete-grade').value), dia=parseFloat(document.getElementById('cover-bar-dia').value), provided=parseFloat(document.getElementById('cover-provided').value)||0;
+            const smallDim=document.getElementById('column-small-dim');
+            document.getElementById('column-exception-wrap').classList.toggle('hidden', member!=='column');
+            const expData=exposureData[exp]; let durability=expData.val; let durabilityBasis=expData.desc;
+            let adjustment='';
+            if((exp==='severe'||exp==='very_severe') && grade>=35){ durability-=5; adjustment=' 5 mm M35+ reduction applied'; }
+            if(exp==='mild' && dia<=12){ durability=Math.max(15,durability-5); adjustment=' 5 mm mild-exposure reduction for main bar ≤12 mm applied'; }
+            if(adjustment) durabilityBasis+=` —${adjustment}`;
+            let memberReq=memberCoverBase[member]; let memberBasis='Member minimum / bar diameter requirement';
+            if(member==='beam'){ memberReq=Math.max(25,dia); memberBasis='max(25 mm, bar diameter)'; }
+            if(member==='column'){
+                memberReq=Math.max(40,dia); memberBasis='max(40 mm, bar diameter)';
+                if(smallDim.checked && dia<=12){ memberReq=25; memberBasis='25 mm column exception (≤200 mm and bar ≤12 mm)'; }
+            }
+            if(member==='slab' && exp==='mild' && dia<=12){ memberReq=Math.max(15,dia); memberBasis='15 mm mild-exposure slab provision / bar diameter'; }
+            const governing=Math.max(durability,memberReq); const basis=durability>=memberReq?`Exposure durability governs (${durability} mm)`: `Member/bar requirement governs (${memberReq} mm)`;
+            document.getElementById('exposure-cover-val').textContent=durability; document.getElementById('exposure-desc').textContent=durabilityBasis; document.getElementById('cover-member-required').textContent=memberReq; document.getElementById('cover-member-basis').textContent=memberBasis; document.getElementById('governing-cover-val').textContent=governing; document.getElementById('governing-cover-basis').textContent=basis;
+            const card=document.getElementById('governing-cover-card'); const badge=document.getElementById('cover-status-badge'); const providedStatus=document.getElementById('cover-provided-status');
+            if(!provided){ card.className='rounded-lg p-4 status-review'; badge.textContent='REVIEW'; badge.className='px-2 py-1 rounded-full text-[10px] font-bold bg-amber-600 text-white'; providedStatus.textContent='Enter the provided cover to verify compliance.'; }
+            else if(provided>=governing){ card.className='rounded-lg p-4 status-pass'; badge.textContent='PASS'; badge.className='px-2 py-1 rounded-full text-[10px] font-bold bg-emerald-700 text-white'; providedStatus.textContent=`Provided ${provided} mm ≥ required ${governing} mm.`; }
+            else { card.className='rounded-lg p-4 status-fail'; badge.textContent='FAIL'; badge.className='px-2 py-1 rounded-full text-[10px] font-bold bg-red-700 text-white'; providedStatus.textContent=`Provided ${provided} mm is ${governing-provided} mm below required cover.`; }
+        }
+
+    </script>
+</body>
+</html>

@@ -147,6 +147,19 @@ const config: Config = {
           label: 'Transportation Engineering Lab',
           to: '/transportation-engineering-manual',
         },
+        {
+          label: 'Site Quantity Estimator',
+          to: '/site-quantity-estimator',
+        },  
+        {
+          label: 'Bar Bending Schedule Generator',
+          to: '/bbs-generator ',
+        }, 
+        {
+          label: 'IS 456 Checker ',
+          to: '/IS456-checker ',
+        },  
+             
       ],
     },
 

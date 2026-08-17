@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ByAnkit | Bar Bending Schedule (BBS) Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        
+        /* Custom scrollbar for tables */
+        .table-container::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        /* SVG Shape Styles */
+        .shape-preview {
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        .shape-svg {
+            stroke: #3b82f6;
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .dim-line {
+            stroke: #9ca3af;
+            stroke-width: 1;
+            stroke-dasharray: 2, 2;
+        }
+        .dim-text {
+            fill: #6b7280;
+            font-size: 10px;
+            font-family: sans-serif;
+        }
+
+        /* Input highlight on focus */
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        /* Modal transition */
+        .modal-enter {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        .modal-enter-active {
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 200ms, transform 200ms;
+        }
+        .modal-exit {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .modal-exit-active {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 200ms, transform 200ms;
+        }
+    
+        :root{
+            --brand-50:#f0fdf4;
+            --brand-100:#dcfce7;
+            --brand-500:#22c55e;
+            --brand-600:#166534;
+            --brand-700:#14532d;
+            --brand-800:#14532d;
+            --brand-900:#0f3d22;
+            --ink:#1f2937;
+            --muted:#64748b;
+            --border:#e2e8f0;
+        }
+        .engineering-note{
+            background:linear-gradient(135deg,#f0fdf4,#ffffff);
+            border:1px solid #bbf7d0;
+        }
+        .section-title{
+            color:#1f2937;
+            font-weight:700;
+        }
+        .status-pass{background:#ecfdf5;color:#166534;border:1px solid #bbf7d0}
+        .status-warn{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+        .status-fail{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+        .dim-badge{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+        .table-shape{min-width:120px}
+        .shape-svg{stroke:#166534;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+        .dim-line{stroke:#94a3b8;stroke-width:1;stroke-dasharray:3 2}
+        .dim-text{fill:#334155;font-size:9px;font-family:Inter,Arial,sans-serif}
+        .small-caps{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:#64748b}
+        input:focus, select:focus, textarea:focus {
+            outline:none !important;
+            border-color:#166534 !important;
+            box-shadow:0 0 0 3px rgba(22,101,52,.14) !important;
+        }
+        /* Data-entry workspace: use the available desktop height without creating a nested scroll area */
+        #bbs-form > .grid:last-of-type {
+            min-height: 360px;
+        }
+        #shape-preview-container {
+            min-height: 14rem;
+        }
+        @media (min-width: 1024px) {
+            #bbs-form > .grid:last-of-type {
+                min-height: 390px;
+            }
+            #shape-preview-container {
+                min-height: 16rem;
+            }
+        }
+
+    </style>
+
+<style>
+  .shape-svg{stroke:#166534!important}
+  .dim-line{stroke:#94a3b8!important}
+  .dim-text{fill:#334155!important}
+  .table-container{min-width:0}
+  @media print{
+    nav{background:#fff!important;color:#111827!important;border-bottom:2px solid #111827!important}
+  }
+</style>
+</head>
+<body class="text-gray-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white text-slate-800 shadow-sm border-b border-slate-200 z-10 flex-shrink-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-wrap items-center justify-between min-h-16 py-2 gap-3">
+                <div class="flex items-center min-w-0">
+                    <div class="p-2.5 rounded-xl text-white mr-3 shadow-sm" style="background:#166534;">
+                        <i class="fa-solid fa-layer-group text-xl"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-bold text-xl tracking-tight text-slate-900">Bar Bending Schedule (BBS) Generator ByAnkit</span>
+                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">IS 2502 / SP 34 workflow</span>
+                        </div>
+                        <p class="text-xs text-slate-500">Bar Bending Schedule, cutting length and reinforcement quantity worksheet</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 no-print">
+                    <button onclick="exportToCSV()" class="bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-300 px-3.5 py-2 rounded-lg text-sm font-semibold transition-colors">
+                        <i class="fa-solid fa-download mr-2"></i>Export CSV
+                    </button>
+                    <button onclick="window.print()" class="bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm">
+                        <i class="fa-solid fa-print mr-2"></i>Print Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow flex flex-col max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 overflow-visible print:py-0 print:space-y-4">
+        
+        <!-- Summary Dashboard -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 print:hidden">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Total Weight (kg)</p>
+                    <p class="text-2xl font-bold text-gray-900" id="summary-total-kg">0.00</p>
+                </div>
+                <div class="p-3 bg-blue-50 rounded-full text-blue-600">
+                    <i class="fa-solid fa-weight-hanging text-xl"></i>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Total Weight (Tonnes)</p>
+                    <p class="text-2xl font-bold text-gray-900" id="summary-total-tonnes">0.000</p>
+                </div>
+                <div class="p-3 bg-indigo-50 rounded-full text-indigo-600">
+                    <i class="fa-solid fa-truck-loading text-xl"></i>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Est. Wastage (5%)</p>
+                    <p class="text-2xl font-bold text-orange-600" id="summary-wastage">0.00 kg</p>
+                </div>
+                <div class="p-3 bg-orange-50 rounded-full text-orange-600">
+                    <i class="fa-solid fa-trash-can-arrow-up text-xl"></i>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Total Bars</p>
+                    <p class="text-2xl font-bold text-green-600" id="summary-total-bars">0</p>
+                </div>
+                <div class="p-3 bg-green-50 rounded-full text-green-600">
+                    <i class="fa-solid fa-bars-staggered text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Data Entry Section (Hidden on Print) -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-visible print:hidden">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="text-lg font-semibold text-gray-800"><i class="fa-solid fa-plus-circle text-blue-600 mr-2"></i>Add New Bar</h2>
+            </div>
+            <div class="p-6">
+                <form id="bbs-form" class="space-y-6">
+                    <!-- General Info Row -->
+                    <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Bar Mark *</label>
+                            <input type="text" id="bar-mark" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="e.g., B1">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Member / Location</label>
+                            <input type="text" id="member-location" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="e.g., Beam B1 / Grid A-B">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Bar Type</label>
+                            <select id="bar-type" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm bg-white">
+                                <option>Main / Flexural</option>
+                                <option>Distribution</option>
+                                <option>Stirrup / Link</option>
+                                <option>Column Tie</option>
+                                <option>Chair / Spacer</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Diameter (Ø mm)</label>
+                            <select id="bar-dia" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm bg-white">
+                                <option value="8">8 mm</option>
+                                <option value="10">10 mm</option>
+                                <option value="12" selected>12 mm</option>
+                                <option value="16">16 mm</option>
+                                <option value="20">20 mm</option>
+                                <option value="25">25 mm</option>
+                                <option value="32">32 mm</option>
+                                <option value="40">40 mm</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">No. of Members</label>
+                            <input type="number" id="num-members" min="1" value="1" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Bars / Member</label>
+                            <input type="number" id="bars-per-member" min="1" value="1" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Bar Grade</label>
+                            <select id="bar-grade" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm bg-white">
+                                <option>Fe 415</option>
+                                <option selected>Fe 500</option>
+                                <option>Fe 500D</option>
+                                <option>Fe 550</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Standard Stock Length (m)</label>
+                            <input type="number" id="stock-length" min="1" step="0.1" value="12" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Wastage / Offcut (%)</label>
+                            <input type="number" id="wastage-pct" min="0" max="25" step="0.5" value="3" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Quantity basis</label>
+                            <select id="quantity-basis" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm bg-white">
+                                <option value="members" selected>Explicit member count × bars/member</option>
+                                <option value="manual">Manual total bar count</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Shape Selection & Dimensions Row -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch border-t border-slate-100 pt-6 pb-1">
+                        <div class="lg:col-span-4">
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Bar Shape / Bending Form</label>
+                            <select id="shape-code" onchange="updateDimensionInputs()" class="w-full rounded-lg border border-slate-300 px-3 py-3 text-sm bg-white shadow-sm">
+                                <option value="straight">S00 — Straight bar</option>
+                                <option value="l_shape">S01 — 90° L-bar</option>
+                                <option value="u_shape">S02 — 2-bend U-bar</option>
+                                <option value="stirrup_rect" selected>S03 — Rectangular stirrup / tie</option>
+                                <option value="stirrup_circ">S04 — Circular stirrup / hoop</option>
+                                <option value="crank">S05 — 45° cranked bar</option>
+                                <option value="chair">S06 — Chair / spacer</option>
+                                <option value="custom_poly">S99 — Special / custom polyline</option>
+                            </select>
+                            <div class="mt-3 engineering-note rounded-lg p-3 text-xs text-slate-600 leading-relaxed">
+                                <strong class="text-emerald-800">Dimensioning note:</strong>
+                                Cutting length should be based on the approved structural drawing/detailing convention. The tool provides common IS 2502-style bend/hook calculations for preliminary BBS preparation; verify special shapes, bend diameters, hooks, laps and anchorage against the project drawings.
+                            </div>
+                            <div class="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200 flex justify-center items-center min-h-56 h-56 lg:h-64" id="shape-preview-container"></div>
+                        </div>
+
+                        <div class="lg:col-span-8">
+                            <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+                                <h3 class="text-sm font-semibold text-slate-700">Bending Dimensions & Detailing Parameters</h3>
+                                <div class="flex flex-wrap gap-2 text-[11px]">
+                                    <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">45° ded. ≈ 1d</span>
+                                    <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">90° ded. ≈ 2d</span>
+                                    <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">135° ded. ≈ 3d</span>
+                                    <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">180° ded. ≈ 4d</span>
+                                </div>
+                            </div>
+                            <div id="dimension-inputs" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
+
+                            <div id="shape-options" class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Hook Angle</label>
+                                    <select id="hook-angle" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm bg-white">
+                                        <option value="none">None</option>
+                                        <option value="90">90°</option>
+                                        <option value="135" selected>135°</option>
+                                        <option value="180">180°</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Hook Extension (d)</label>
+                                    <input type="number" id="hook-mult" min="0" step="1" value="10" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Bend Deduction Basis</label>
+                                    <select id="bend-basis" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm bg-white">
+                                        <option value="simplified" selected>IS 2502-style simplified</option>
+                                        <option value="centreline">Centreline arc basis</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mt-5 bg-emerald-50 rounded-lg border border-emerald-200 p-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                                    <div>
+                                        <p class="text-xs text-emerald-800 mb-1">Calculated Cutting Length</p>
+                                        <p class="text-2xl font-bold text-emerald-800"><span id="live-calc-length">0</span> <span class="text-sm font-normal">mm</span></p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-emerald-800 mb-1">Calculation basis</p>
+                                        <p id="live-calc-basis" class="text-xs font-semibold text-slate-700">—</p>
+                                    </div>
+                                    <div class="flex sm:justify-end">
+                                        <button type="button" onclick="addBarToSchedule()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2.5 px-5 rounded-lg shadow-sm transition-colors flex items-center">
+                                            <i class="fa-solid fa-plus mr-2"></i> Add to BBS
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- BBS Table Section -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col flex-grow overflow-hidden">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center print:bg-white print:border-b-2 print:border-black print:px-0">
+                <h2 class="text-lg font-semibold text-gray-800 print:text-2xl"><i class="fa-solid fa-table-list text-gray-500 mr-2 print:hidden"></i>Bar Bending Schedule</h2>
+                <div class="text-sm text-gray-500 print:block hidden">Project: <span class="font-medium text-black">New Construction</span> | Date: <span id="print-date" class="font-medium text-black"></span></div>
+                <button onclick="clearSchedule()" class="text-red-500 hover:text-red-700 text-sm font-medium transition-colors print:hidden">
+                    <i class="fa-solid fa-trash-can mr-1"></i> Clear All
+                </button>
+            </div>
+            
+            <div class="table-container overflow-auto flex-grow">
+                <table class="min-w-full divide-y divide-gray-200" id="bbs-table">
+                    <thead class="bg-emerald-50 sticky top-0 print:bg-emerald-100">
+                        <tr>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-emerald-900 uppercase tracking-wider">Sr.</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-emerald-900 uppercase tracking-wider">Bar Mark</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-emerald-900 uppercase tracking-wider">Member / Location</th>
+                            <th class="px-3 py-3 text-center text-xs font-semibold text-emerald-900 uppercase tracking-wider">Type</th>
+                            <th class="px-3 py-3 text-center text-xs font-semibold text-emerald-900 uppercase tracking-wider table-shape">Shape</th>
+                            <th class="px-3 py-3 text-center text-xs font-semibold text-emerald-900 uppercase tracking-wider">Ø</th>
+                            <th class="px-3 py-3 text-center text-xs font-semibold text-emerald-900 uppercase tracking-wider">Qty</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-emerald-900 uppercase tracking-wider">Dimensions / Cut</th>
+                            <th class="px-3 py-3 text-right text-xs font-semibold text-emerald-900 uppercase tracking-wider">Cut Len (m)</th>
+                            <th class="px-3 py-3 text-right text-xs font-semibold text-emerald-900 uppercase tracking-wider">Total Len (m)</th>
+                            <th class="px-3 py-3 text-right text-xs font-semibold text-emerald-900 uppercase tracking-wider">Unit Wt.</th>
+                            <th class="px-3 py-3 text-right text-xs font-semibold text-emerald-900 uppercase tracking-wider">Total Wt.</th>
+                            <th class="px-3 py-3 text-center text-xs font-semibold text-emerald-900 uppercase tracking-wider print:hidden">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="bbs-tbody">
+                        <!-- Rows will be added here -->
+                        <tr id="empty-row">
+                            <td colspan="13" class="px-6 py-10 text-center text-gray-400">
+                                <i class="fa-solid fa-box-open text-4xl mb-3 block text-gray-300"></i>
+                                <p class="text-sm">No bars added yet. Use the form above to add bars to the schedule.</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot class="bg-slate-50 font-semibold border-t-2 border-emerald-200 sticky bottom-0 print:border-black">
+                        <tr>
+                            <td colspan="6" class="px-3 py-3 text-right text-slate-700">TOTALS</td>
+                            <td class="px-3 py-3 text-center text-slate-900" id="foot-total-bars">0</td>
+                            <td class="px-3 py-3 text-left text-slate-500">—</td>
+                            <td class="px-3 py-3 text-right text-slate-500">—</td>
+                            <td class="px-3 py-3 text-right text-slate-900" id="foot-total-length">0.00</td>
+                            <td class="px-3 py-3 text-right text-slate-500">—</td>
+                            <td class="px-3 py-3 text-right text-emerald-800 font-bold" id="foot-total-wt">0.00</td>
+                            <td class="px-3 py-3 print:hidden"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            
+            <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex flex-wrap gap-x-8 gap-y-2 justify-between text-sm">
+                <div><span class="text-slate-600">Standard stock length:</span> <span class="font-semibold text-slate-900" id="stock-summary">12.00 m</span></div>
+                <div><span class="text-slate-600">Est. stock bars:</span> <span class="font-bold text-emerald-800" id="est-std-bars">0</span></div>
+                <div><span class="text-slate-600">Wastage allowance:</span> <span class="font-semibold text-slate-900" id="wastage-summary">3%</span></div>
+                <div><span class="text-slate-600">Procurement weight:</span> <span class="font-bold text-emerald-800" id="procurement-weight">0.00 kg</span></div>
+            </div>
+        </div>
+    </main>
+
+    
+<script>
+    // ------------------------------
+    // BBS ENGINE — simple, auditable, client-side
+    // ------------------------------
+    let bbsData = [];
+    let nextId = 1;
+
+    const DEDUCTIONS = {45:1, 90:2, 135:3, 180:4}; // d per bend
+    const SHAPE_NAMES = {
+        straight:'S00 — Straight',
+        l_shape:'S01 — 90° L-bar',
+        u_shape:'S02 — 2-bend U-bar',
+        stirrup_rect:'S03 — Rectangular stirrup / tie',
+        stirrup_circ:'S04 — Circular stirrup / hoop',
+        crank:'S05 — 45° crank',
+        chair:'S06 — Chair / spacer',
+        custom_poly:'S99 — Special / custom'
+    };
+
+    function v(id, fallback=0){
+        const el=document.getElementById(id);
+        const n=parseFloat(el?.value);
+        return Number.isFinite(n) ? n : fallback;
+    }
+    function s(id, fallback=''){
+        const el=document.getElementById(id);
+        return el ? el.value : fallback;
+    }
+    function escapeHtml(x){
+        return String(x ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    const shapeConfig = {
+        straight:{dims:['A'], labels:{A:'A — straight length'}},
+        l_shape:{dims:['A','B'], labels:{A:'A — Leg 1',B:'B — Leg 2'}},
+        u_shape:{dims:['A','B','C'], labels:{A:'A — Leg 1',B:'B — Base',C:'C — Leg 2'}},
+        stirrup_rect:{dims:['A','B'], labels:{A:'A — Width',B:'B — Height'}},
+        stirrup_circ:{dims:['D'], labels:{D:'D — Inner diameter'}},
+        crank:{dims:['A','H','E'], labels:{A:'A — Horizontal run',H:'H — Rise',E:'E — Horizontal run'}},
+        chair:{dims:['A','B','C','D'], labels:{A:'A — Base leg',B:'B — Rise',C:'C — Top leg',D:'D — Return leg'}},
+        custom_poly:{dims:['A','B','C','D','E'], labels:{A:'A',B:'B',C:'C',D:'D',E:'E'}}
+    };
+
+    function hookAllowance(dia){
+        const angle=s('hook-angle','none');
+        const mult=v('hook-mult',10);
+        if(angle==='none') return {mm:0, text:'No hooks'};
+        return {mm:dia*mult* (angle==='180'?1:1), text:`${angle}° hook, ${mult}d extension`};
+    }
+
+    function calcCutLength(code,dims,dia){
+        const hook=hookAllowance(dia);
+        let cl=0, basis='', bends=0, bendDed=0;
+
+        if(code==='straight'){
+            cl=dims.A; basis='Straight length A';
+        } else if(code==='l_shape'){
+            cl=dims.A+dims.B; bends=1; bendDed=DEDUCTIONS[90]*dia; cl-=bendDed; basis='A + B − 2d (90° bend)';
+        } else if(code==='u_shape'){
+            cl=dims.A+dims.B+dims.C; bends=2; bendDed=2*DEDUCTIONS[90]*dia; cl-=bendDed; basis='A + B + C − 4d (2 × 90° bends)';
+        } else if(code==='stirrup_rect'){
+            // Common practical rectangular link expression, with editable hook extension.
+            // The geometry is shown explicitly; user should verify special detailing.
+            cl=2*(dims.A+dims.B);
+            bends=4;
+            bendDed=4*DEDUCTIONS[90]*dia;
+            cl = cl - bendDed + 2*hook.mm;
+            basis=`2(A+B) − 8d + 2 × hook (${hook.text})`;
+        } else if(code==='stirrup_circ'){
+            cl=Math.PI*(dims.D + dia);
+            cl += 2*hook.mm;
+            basis=`π(D+d) + 2 × hook (${hook.text})`;
+        } else if(code==='crank'){
+            const rise=dims.H;
+            const run=dims.A+dims.E;
+            const inclined=Math.sqrt(Math.pow(run,2)+Math.pow(rise,2));
+            cl=inclined;
+            basis='Centreline geometry for 45°/cranked bar; verify drawing dimensions';
+        } else if(code==='chair'){
+            cl=dims.A+dims.B+dims.C+dims.D;
+            basis='A + B + C + D; verify chair geometry and bends against drawing';
+        } else {
+            cl=['A','B','C','D','E'].reduce((sum,k)=>sum+(dims[k]||0),0);
+            basis='Sum of entered straight segments; special shape requires project-specific detailing';
+        }
+
+        if(code==='stirrup_rect' && s('hook-angle','135')==='135'){
+            // Preserve practical hook extension; bend deduction remains conservative.
+            basis=`2(A+B) − 8d + 2 × ${v('hook-mult',10)}d hooks`;
+        }
+        return {mm:Math.max(0,cl), basis, hookText:hook.text, bendDed, bends};
+    }
+
+    function renderShapeSvg(code,dims={}) {
+        const col = '#166534';
+        const text = '#334155';
+        const dim = '#94a3b8';
+        const A=dims.A||100, B=dims.B||80, C=dims.C||80, D=dims.D||80, H=dims.H||60;
+        let body='', labels='';
+        if(code==='straight'){
+            body='<path d="M 15 45 L 185 45" class="bbs-shape"/><line x1="15" y1="60" x2="185" y2="60" class="bbs-dim"/><text x="100" y="75" text-anchor="middle" class="bbs-text">A='+A+'</text>';
+        }else if(code==='l_shape'){
+            body='<path d="M 45 20 L 45 90 L 170 90" class="bbs-shape"/><text x="34" y="58" class="bbs-text">A='+A+'</text><text x="105" y="105" class="bbs-text">B='+B+'</text>';
+        }else if(code==='u_shape'){
+            body='<path d="M 40 20 L 40 90 L 100 90 L 160 90 L 160 20" class="bbs-shape"/><text x="28" y="58" class="bbs-text">A='+A+'</text><text x="100" y="105" text-anchor="middle" class="bbs-text">B='+B+'</text><text x="172" y="58" class="bbs-text">C='+C+'</text>';
+        }else if(code==='stirrup_rect'){
+            body='<rect x="55" y="22" width="90" height="100" rx="5" class="bbs-shape"/><text x="100" y="16" text-anchor="middle" class="bbs-text">A='+A+'</text><text x="46" y="74" text-anchor="end" class="bbs-text">B='+B+'</text><path d="M55 35 Q75 45 55 55" class="bbs-hook"/><path d="M145 35 Q125 45 145 55" class="bbs-hook"/>';
+        }else if(code==='stirrup_circ'){
+            body='<circle cx="100" cy="72" r="46" class="bbs-shape"/><text x="100" y="77" text-anchor="middle" class="bbs-text">D='+D+'</text><path d="M75 35 L62 24 M125 35 L138 24" class="bbs-hook"/>';
+        }else if(code==='crank'){
+            body='<path d="M20 95 L75 95 L100 40 L155 40 L180 95" class="bbs-shape"/><text x="47" y="110" class="bbs-text">A='+A+'</text><text x="100" y="34" class="bbs-text">H='+H+'</text><text x="138" y="34" class="bbs-text">E='+dims.E+'</text>';
+        }else if(code==='chair'){
+            body='<path d="M30 100 L30 65 L70 65 L100 25 L130 65 L170 65 L170 100" class="bbs-shape"/><text x="30" y="116" class="bbs-text">A</text><text x="80" y="58" class="bbs-text">B</text><text x="130" y="58" class="bbs-text">C</text><text x="170" y="116" class="bbs-text">D</text>';
+        }else{
+            body='<path d="M20 90 L60 45 L100 70 L140 30 L180 75" class="bbs-shape"/><text x="20" y="108" class="bbs-text">A…E</text>';
+        }
+        return `<svg viewBox="0 0 200 130" class="w-full h-full" style="max-height:150px">
+            <style>.bbs-shape{stroke:${col};stroke-width:4;fill:none;stroke-linecap:round;stroke-linejoin:round}.bbs-hook{stroke:${col};stroke-width:2;fill:none}.bbs-text{fill:${text};font-size:10px;font-family:Inter,Arial,sans-serif}</style>
+            ${body}
+        </svg>`;
+    }
+
+    function readDims(){
+        const code=s('shape-code');
+        const cfg=shapeConfig[code]||shapeConfig.straight;
+        const dims={};
+        let valid=true;
+        cfg.dims.forEach(k=>{
+            const el=document.getElementById(`dim-${k}`);
+            dims[k]=parseFloat(el?.value);
+            if(!Number.isFinite(dims[k]) || dims[k]<=0) valid=false;
+        });
+        return {dims,valid};
+    }
+
+    function updateDimensionInputs(){
+        const code=s('shape-code');
+        const cfg=shapeConfig[code];
+        const container=document.getElementById('dimension-inputs');
+        container.innerHTML=cfg.dims.map(k=>`
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">${escapeHtml(cfg.labels[k]||k)} (mm)</label>
+                <input type="number" id="dim-${k}" min="1" step="1" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dim-input" placeholder="mm">
+            </div>`).join('');
+        container.querySelectorAll('.dim-input').forEach(el=>el.addEventListener('input',calculateLiveLength));
+        updateHookVisibility();
+        calculateLiveLength();
+        document.getElementById('shape-preview-container').innerHTML=renderShapeSvg(code,{});
+    }
+
+    function updateHookVisibility(){
+        const code=s('shape-code');
+        const row=document.getElementById('shape-options');
+        if(!row) return;
+        row.classList.toggle('opacity-60', !code.includes('stirrup') && code!=='l_shape' && code!=='u_shape');
+    }
+
+    function calculateLiveLength(){
+        const {dims,valid}=readDims();
+        const code=s('shape-code');
+        const dia=v('bar-dia',12);
+        const result=valid?calcCutLength(code,dims,dia):{mm:0,basis:'Enter all dimensions'};
+        document.getElementById('live-calc-length').textContent=result.mm.toFixed(0);
+        document.getElementById('live-calc-basis').textContent=result.basis;
+        document.getElementById('shape-preview-container').innerHTML=renderShapeSvg(code,dims);
+    }
+
+    function addBarToSchedule(){
+        const form=document.getElementById('bbs-form');
+        if(!form.checkValidity()){form.reportValidity();return;}
+        const {dims,valid}=readDims();
+        if(!valid){alert('Please enter all required dimensions.');return;}
+
+        const mark=s('bar-mark').trim();
+        const member=s('member-location').trim()||'—';
+        const type=s('bar-type');
+        const grade=s('bar-grade');
+        const dia=v('bar-dia',12);
+        const numMembers=Math.max(1,Math.floor(v('num-members',1)));
+        const barsPerMember=Math.max(1,Math.floor(v('bars-per-member',1)));
+        const code=s('shape-code');
+        const shape=calcCutLength(code,dims,dia);
+        const totalBars=numMembers*barsPerMember;
+        if(totalBars > 1000000){
+            const proceed = confirm(`This entry creates ${totalBars.toLocaleString()} bars. This is unusually large for a typical BBS item. Please verify the member and bars-per-member values before continuing.
+
+Continue anyway?`);
+            if(!proceed) return;
+        }
+        const cuttingLengthM=shape.mm/1000;
+        const totalLengthM=cuttingLengthM*totalBars;
+        const unitWeight=(dia*dia)/162.2;
+        const totalWeight=unitWeight*totalLengthM;
+
+        const entry={
+            id:nextId++, mark, member, type, grade, dia, code,
+            shapeName:SHAPE_NAMES[code], dims, dimsStr:Object.entries(dims).map(([k,val])=>`${k}=${val} mm`).join(' | '),
+            totalBars, numMembers, barsPerMember, cuttingLengthMM:shape.mm,
+            cuttingLengthM,totalLengthM,unitWeight,totalWeight,basis:shape.basis,
+            hookAngle:s('hook-angle'),hookMult:v('hook-mult',10)
+        };
+        bbsData.push(entry);
+        renderTable();
+        document.querySelectorAll('.dim-input').forEach(input=>input.value='');
+        calculateLiveLength();
+        document.getElementById('bar-mark').focus();
+    }
+
+    function rowSvg(item){ return renderShapeSvg(item.code,item.dims); }
+
+    function renderTable(){
+        const tbody=document.getElementById('bbs-tbody');
+        tbody.innerHTML='';
+        if(!bbsData.length){
+            tbody.innerHTML=`<tr><td colspan="13" class="px-6 py-12 text-center text-slate-400">
+                <i class="fa-solid fa-box-open text-4xl mb-3 block text-slate-300"></i>
+                <p class="text-sm">No bars added yet. Add reinforcement items above to build the BBS.</p>
+            </td></tr>`;
+            updateSummary();
+            return;
+        }
+        let bars=0,length=0,weight=0;
+        bbsData.forEach((item,i)=>{
+            bars+=item.totalBars; length+=item.totalLengthM; weight+=item.totalWeight;
+            const tr=document.createElement('tr');
+            tr.className='hover:bg-emerald-50/40 transition-colors align-top';
+            tr.innerHTML=`
+                <td class="px-3 py-3 text-sm text-slate-500">${i+1}</td>
+                <td class="px-3 py-3 text-sm font-bold text-slate-900">${escapeHtml(item.mark)}</td>
+                <td class="px-3 py-3 text-sm text-slate-700 max-w-40 break-words">${escapeHtml(item.member)}</td>
+                <td class="px-3 py-3 text-xs text-slate-600 text-center">${escapeHtml(item.type)}</td>
+                <td class="px-3 py-3 text-center table-shape">
+                    <div class="w-28 h-20 mx-auto flex items-center justify-center">${rowSvg(item)}</div>
+                    <div class="text-[10px] font-semibold text-emerald-800">${escapeHtml(item.shapeName)}</div>
+                </td>
+                <td class="px-3 py-3 text-sm text-slate-900 text-center font-semibold">${item.dia}</td>
+                <td class="px-3 py-3 text-sm text-slate-700 text-center">${item.totalBars}<div class="text-[10px] text-slate-400">${item.numMembers} × ${item.barsPerMember}</div></td>
+                <td class="px-3 py-3 text-xs text-slate-600 min-w-48">
+                    <div class="font-semibold text-slate-800">${escapeHtml(item.dimsStr)}</div>
+                    <div class="mt-1 text-emerald-800">Cut = ${item.cuttingLengthMM.toFixed(0)} mm</div>
+                    <div class="mt-1 text-[10px] text-slate-400">${escapeHtml(item.basis)}</div>
+                </td>
+                <td class="px-3 py-3 text-sm text-slate-900 text-right">${item.cuttingLengthM.toFixed(3)}</td>
+                <td class="px-3 py-3 text-sm text-slate-900 text-right">${item.totalLengthM.toFixed(2)}</td>
+                <td class="px-3 py-3 text-sm text-slate-600 text-right">${item.unitWeight.toFixed(3)} kg/m</td>
+                <td class="px-3 py-3 text-sm font-bold text-emerald-800 text-right">${item.totalWeight.toFixed(2)}</td>
+                <td class="px-3 py-3 text-center print:hidden"><button onclick="removeRow(${item.id})" class="text-slate-400 hover:text-red-600 p-1.5 rounded hover:bg-red-50" title="Remove row"><i class="fa-solid fa-trash"></i></button></td>`;
+            tbody.appendChild(tr);
+        });
+        document.getElementById('foot-total-bars').textContent=bars;
+        document.getElementById('foot-total-length').textContent=length.toFixed(2);
+        document.getElementById('foot-total-wt').textContent=weight.toFixed(2);
+        updateSummary(bars,length,weight);
+    }
+
+    function updateSummary(bars=0,length=0,weight=0){
+        const wastagePct=Math.max(0,v('wastage-pct',3));
+        const stock=v('stock-length',12);
+        const procurementWeight=weight*(1+wastagePct/100);
+        const setText=(id,value)=>{const el=document.getElementById(id); if(el) el.textContent=value;};
+        setText('summary-total-kg',weight.toFixed(2));
+        setText('summary-total-tonnes',(weight/1000).toFixed(3));
+        setText('summary-wastage',(procurementWeight-weight).toFixed(2)+' kg');
+        setText('summary-total-bars',bars);
+        setText('wastage-summary',`${wastagePct.toFixed(1)}%`);
+        setText('stock-summary',`${stock.toFixed(2)} m`);
+        const estBars=stock>0?Math.ceil((length*(1+wastagePct/100))/stock):0;
+        setText('est-std-bars',estBars);
+        setText('procurement-weight',procurementWeight.toFixed(2)+' kg');
+        updatePrintInfo();
+    }
+
+    function updatePrintInfo(){}
+
+    function removeRow(id){bbsData=bbsData.filter(x=>x.id!==id);renderTable();}
+    function clearSchedule(){if(confirm('Clear the complete BBS?')){bbsData=[];nextId=1;renderTable();}}
+
+    function exportToCSV(){
+        if(!bbsData.length){alert('Schedule is empty.');return;}
+        const q=x=>`"${String(x).replace(/"/g,'""')}"`;
+        let csv=['BBS Report',''];
+        csv.push('Sr No,Bar Mark,Member/Location,Bar Type,Grade,Shape,Dimensions,Diameter (mm),No. Members,Bars/Member,Total No.,Cutting Length (m),Total Length (m),Unit Wt. (kg/m),Total Wt. (kg),Calculation Basis');
+        bbsData.forEach((x,i)=>csv.push([
+            i+1,q(x.mark),q(x.member),q(x.type),q(x.grade),q(x.shapeName),q(x.dimsStr),x.dia,x.numMembers,x.barsPerMember,x.totalBars,
+            x.cuttingLengthM.toFixed(3),x.totalLengthM.toFixed(2),x.unitWeight.toFixed(3),x.totalWeight.toFixed(2),q(x.basis)
+        ].join(',')));
+        const blob=new Blob([csv.join('\n')],{type:'text/csv;charset=utf-8'});
+        const url=URL.createObjectURL(blob); const a=document.createElement('a');
+        a.href=url;a.download=`BBS_${new Date().toISOString().slice(0,10)}.csv`;
+        document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+    }
+
+    document.addEventListener('DOMContentLoaded',()=>{
+        updateDimensionInputs();
+        ['bar-dia','hook-angle','hook-mult','bar-mark','member-location','bar-type','bar-grade','num-members','bars-per-member','stock-length','wastage-pct'].forEach(id=>{
+            document.getElementById(id)?.addEventListener('input',calculateLiveLength);
+            document.getElementById(id)?.addEventListener('change',calculateLiveLength);
+        });
+        ['stock-length','wastage-pct'].forEach(id=>{
+            document.getElementById(id)?.addEventListener('input',updatePrintInfo);
+            document.getElementById(id)?.addEventListener('change',()=>{updatePrintInfo();renderTable();});
+        });
+        renderTable();
+    });
+</script>
+</body>
+</html>

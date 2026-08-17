@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Site Quantity & Cost Estimator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Cost Visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#166534',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* User-specified Brand & Top Bar Override Styles */
+        header.bg-brand-900 { background-color:#ffffff !important; color:#374151 !important; border-bottom:1px solid #e5e7eb; box-shadow:0 2px 8px rgba(0,0,0,.06) !important; }
+        header.bg-brand-900 h1 { color:#1f2937 !important; }
+        header.bg-brand-900 p { color:#64748b !important; }
+        header.bg-brand-900 .bg-brand-500 { background-color:#166534 !important; color:#ffffff !important; }
+        header.bg-brand-900 .bg-brand-800 { background-color:#f8fafc !important; color:#374151 !important; border-color:#cbd5e1 !important; }
+        header.bg-brand-900 button.bg-emerald-600 { background-color:#166534 !important; color:#ffffff !important; }
+        header.bg-brand-900 button.bg-emerald-600:hover { background-color:#14532d !important; color:#ffffff !important; }
+        header.bg-brand-900 button.bg-emerald-600:focus-visible { outline:3px solid #86efac; outline-offset:2px; }
+        header.bg-brand-900 .unit-switcher { background:#f8fafc !important; border-color:#cbd5e1 !important; }
+        header.bg-brand-900 .unit-switcher button:not(.bg-emerald-600) { color:#334155 !important; }
+        header.bg-brand-900 .unit-switcher button:not(.bg-emerald-600):hover { color:#14532d !important; background:#f1f5f9 !important; }
+        @media print { header.bg-brand-900 { display:none !important; } }
+
+        /* Custom UI polish */
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        .tab-btn.active {
+            border-bottom-color: #166534;
+            color: #166534;
+            font-weight: 600;
+            background-color: #f0fdf4;
+        }
+
+        /* Print formatting */
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; font-size: 11pt; color: black; }
+            .card-box { border: 1px solid #cbd5e1 !important; box-shadow: none !important; }
+            .page-break { page-break-before: always; }
+        }
+
+        /* Tooltip styling */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 220px;
+            background-color: #1e293b;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 6px 10px;
+            position: absolute;
+            z-index: 20;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -110px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            font-size: 0.75rem;
+            font-weight: normal;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 0.95;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-brand-900 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo & Title -->
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-emerald-600 text-white rounded-lg flex items-center justify-center shadow">
+                        <i class="fa-solid font-bold fa-calculator text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-white tracking-tight leading-none">Universal Site Quantity & Cost Estimator</h1>
+                        <p class="text-xs text-brand-100 hidden sm:block">Civil & Structural Material Estimations for Engineers, Contractors & Builders</p>
+                    </div>
+                </div>
+
+                <!-- Action Controls -->
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <!-- Unit Selector Switcher -->
+                    <div class="unit-switcher flex items-center bg-brand-800 rounded-lg p-1 border text-xs">
+                        <button id="unitMetricBtn" onclick="setUnitSystem('metric')" class="px-2.5 py-1 rounded-md font-medium bg-emerald-600 text-white transition-all shadow-sm">
+                            Metric (m/mm)
+                        </button>
+                        <button id="unitImperialBtn" onclick="setUnitSystem('imperial')" class="px-2.5 py-1 rounded-md font-medium text-gray-600 hover:text-gray-900 transition-all">
+                            Imperial (ft/in)
+                        </button>
+                    </div>
+
+                    <!-- Reset & Print Buttons -->
+                    <button onclick="resetAllCalculators()" title="Reset inputs" class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                        <i class="fa-solid fa-rotate-right text-base"></i>
+                    </button>
+                    <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium flex items-center space-x-1.5 shadow transition-all">
+                        <i class="fa-solid fa-print"></i>
+                        <span class="hidden sm:inline">Print / PDF</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
+        
+        <!-- Project Context / Quick Banner -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6 no-print">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                <div class="col-span-1 md:col-span-2">
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Project Name & Location</label>
+                    <input type="text" id="projectNameInput" placeholder="e.g., Residential Villa - Block A Concrete & Masonry" class="w-full text-sm font-semibold text-gray-800 border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 p-2 border" value="Site Construction Estimate">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Prepared By</label>
+                    <input type="text" id="engineerNameInput" placeholder="Site Engineer Name" class="w-full text-sm text-gray-700 border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 p-2 border" value="Site Quantity Surveyor">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Estimate Date</label>
+                    <input type="date" id="estimateDateInput" class="w-full text-sm text-gray-700 border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 p-2 border">
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="border-b border-gray-200 mb-6 bg-white rounded-t-xl shadow-sm no-print">
+            <nav class="flex overflow-x-auto space-x-1 sm:space-x-4 px-4 pt-2" aria-label="Tabs">
+                <button onclick="switchTab('concrete')" id="tab-concrete" class="tab-btn active px-4 py-3 border-b-2 font-medium text-sm rounded-t-lg transition-all flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-cubes text-emerald-700"></i>
+                    <span>1. Concrete Volume</span>
+                </button>
+                <button onclick="switchTab('brickwork')" id="tab-brickwork" class="tab-btn px-4 py-3 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 rounded-t-lg transition-all flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-cubes-stacked text-amber-700"></i>
+                    <span>2. Brick & Blockwork</span>
+                </button>
+                <button onclick="switchTab('plastering')" id="tab-plastering" class="tab-btn px-4 py-3 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 rounded-t-lg transition-all flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-trowel text-blue-700"></i>
+                    <span>3. Plastering Area</span>
+                </button>
+                <button onclick="switchTab('summary')" id="tab-summary" class="tab-btn px-4 py-3 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 rounded-t-lg transition-all flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-chart-pie text-emerald-800"></i>
+                    <span>4. Grand Summary & BOQ</span>
+                </button>
+                <button onclick="switchTab('reference')" id="tab-reference" class="tab-btn px-4 py-3 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 rounded-t-lg transition-all flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-book-bookmark text-indigo-700"></i>
+                    <span>Cheat Sheet & Rates</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- TAB 1: CONCRETE VOLUME ESTIMATOR -->
+        <section id="sec-concrete" class="tab-content space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Concrete Inputs Card -->
+                <div class="lg:col-span-7 bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-box">
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <h2 class="text-base font-bold text-gray-800 flex items-center space-x-2">
+                            <i class="fa-solid fa-layer-group text-emerald-700"></i>
+                            <span>Structural Concrete Elements</span>
+                        </h2>
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-full">Standard Dry Factor 1.54</span>
+                    </div>
+
+                    <form id="concreteForm" onsubmit="return false;" class="space-y-4">
+                        <!-- Element Preset & Quantity -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Element Type</label>
+                                <select id="concElementType" onchange="updateConcreteDefaults()" class="w-full text-sm border-gray-300 rounded-lg p-2.5 border focus:ring-emerald-500 focus:border-emerald-500">
+                                    <option value="slab">Floor Slab / Footing</option>
+                                    <option value="beam">Rectangular Beam</option>
+                                    <option value="column">Square/Rect Column</option>
+                                    <option value="retaining">Retaining Wall</option>
+                                    <option value="custom">Custom Volume</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Concrete Grade / Mix Ratio</label>
+                                <select id="concMixGrade" onchange="calculateConcrete()" class="w-full text-sm border-gray-300 rounded-lg p-2.5 border focus:ring-emerald-500 focus:border-emerald-500">
+                                    <option value="M5">M5 (1 : 5 : 10) - Lean Concrete</option>
+                                    <option value="M7.5">M7.5 (1 : 4 : 8) - Foundation Base</option>
+                                    <option value="M10">M10 (1 : 3 : 6) - Sub-base</option>
+                                    <option value="M15">M15 (1 : 2 : 4) - General PCC</option>
+                                    <option value="M20" selected>M20 (1 : 1.5 : 3) - Standard RCC</option>
+                                    <option value="M25">M25 (1 : 1 : 2) - Heavy RCC Column/Beam</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Dimension Inputs -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                            <div>
+                                <label id="lblConcLength" class="block text-xs font-semibold text-gray-600 mb-1">Length (m)</label>
+                                <input type="number" step="0.01" id="concLength" value="10" oninput="calculateConcrete()" class="w-full text-sm border-gray-300 rounded-lg p-2 border font-medium focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label id="lblConcWidth" class="block text-xs font-semibold text-gray-600 mb-1">Width (m)</label>
+                                <input type="number" step="0.01" id="concWidth" value="6" oninput="calculateConcrete()" class="w-full text-sm border-gray-300 rounded-lg p-2 border font-medium focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label id="lblConcDepth" class="block text-xs font-semibold text-gray-600 mb-1">Thickness (mm)</label>
+                                <input type="number" step="1" id="concThickness" value="150" oninput="calculateConcrete()" class="w-full text-sm border-gray-300 rounded-lg p-2 border font-medium focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Number of Items</label>
+                                <input type="number" step="1" min="1" id="concQuantity" value="1" oninput="calculateConcrete()" class="w-full text-sm border-gray-300 rounded-lg p-2 border font-medium focus:ring-emerald-500">
+                            </div>
+                        </div>
+
+                        <!-- Wastage Factor & Unit Cost Settings -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Concrete Wastage (%)</label>
+                                <input type="number" step="0.5" id="concWastage" value="5" oninput="calculateConcrete()" class="w-full text-sm border-gray-300 rounded-lg p-2 border focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Cement Bag Rate (₹/50 kg bag)</label>
+                                <input type="number" step="1" id="rateCementBag" value="400" oninput="calculateConcrete(); calculateBrickwork(); calculatePlastering();" class="w-full text-sm border-gray-300 rounded-lg p-2 border focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Sand Rate per <span class="unitVolText">m³</span></label>
+                                <input type="number" step="10" id="rateSandVol" value="1800" oninput="calculateConcrete(); calculateBrickwork(); calculatePlastering();" class="w-full text-sm border-gray-300 rounded-lg p-2 border focus:ring-emerald-500">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Coarse Aggregate Rate per <span class="unitVolText">m³</span></label>
+                                <input type="number" step="10" id="rateAggVol" value="2200" oninput="calculateConcrete()" class="w-full text-sm border-gray-300 rounded-lg p-2 border focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Water-Cement Ratio</label>
+                                <input type="number" step="0.01" id="concWaterRatio" value="0.45" oninput="calculateConcrete()" class="w-full text-sm border-gray-300 rounded-lg p-2 border focus:ring-emerald-500">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Concrete Outputs Card -->
+                <div class="lg:col-span-5 bg-gradient-to-br from-emerald-900 to-green-950 text-white rounded-xl shadow-md p-6 card-box flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-emerald-800 pb-3 mb-4">
+                            <h3 class="text-base font-bold text-emerald-100 flex items-center space-x-2">
+                                <i class="fa-solid fa-square-poll-vertical text-emerald-400"></i>
+                                <span>Concrete Output Breakdown</span>
+                            </h3>
+                            <span class="text-xs bg-emerald-800 text-emerald-200 px-2 py-0.5 rounded font-mono">1.54 Factor</span>
+                        </div>
+
+                        <!-- Key Headline Stats -->
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="bg-white/10 backdrop-blur-sm p-3 rounded-lg border border-white/10">
+                                <span class="text-xs text-emerald-200 block">Wet Concrete Volume</span>
+                                <span id="outConcWetVol" class="text-2xl font-black text-white">9.00</span>
+                                <span class="text-xs text-emerald-300 ml-1 unitVolText">m³</span>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-sm p-3 rounded-lg border border-white/10">
+                                <span class="text-xs text-emerald-200 block">Dry Volume (+Wastage)</span>
+                                <span id="outConcDryVol" class="text-2xl font-black text-emerald-300">14.55</span>
+                                <span class="text-xs text-emerald-300 ml-1 unitVolText">m³</span>
+                            </div>
+                        </div>
+
+                        <!-- Detail Rows -->
+                        <div class="space-y-2.5 text-sm">
+                            <div class="flex justify-between items-center py-1.5 border-b border-white/10">
+                                <span class="text-emerald-200 flex items-center gap-2">
+                                    <i class="fa-solid fa-sack-xmark text-emerald-400"></i>
+                                    Cement Required:
+                                </span>
+                                <div class="text-right">
+                                    <span id="outConcCementBags" class="font-bold text-white text-base">76.3</span>
+                                    <span class="text-xs text-emerald-300">bags (50kg)</span>
+                                    <div id="outConcCementWeight" class="text-xs text-emerald-400">3,815 kg</div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center py-1.5 border-b border-white/10">
+                                <span class="text-emerald-200 flex items-center gap-2">
+                                    <i class="fa-solid fa-hill-rockslide text-amber-300"></i>
+                                    Fine Aggregate (Sand):
+                                </span>
+                                <div class="text-right">
+                                    <span id="outConcSandVol" class="font-bold text-white">3.97</span>
+                                    <span class="text-xs text-emerald-300 unitVolText">m³</span>
+                                    <div id="outConcSandTons" class="text-xs text-emerald-400">6.35 Tons</div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center py-1.5 border-b border-white/10">
+                                <span class="text-emerald-200 flex items-center gap-2">
+                                    <i class="fa-solid fa-gem text-blue-300"></i>
+                                    Coarse Aggregate (Gravel):
+                                </span>
+                                <div class="text-right">
+                                    <span id="outConcAggVol" class="font-bold text-white">7.94</span>
+                                    <span class="text-xs text-emerald-300 unitVolText">m³</span>
+                                    <div id="outConcAggTons" class="text-xs text-emerald-400">12.06 Tons</div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center py-1.5">
+                                <span class="text-emerald-200 flex items-center gap-2">
+                                    <i class="fa-solid fa-droplet text-sky-300"></i>
+                                    Water Required:
+                                </span>
+                                <div class="text-right">
+                                    <span id="outConcWaterLiters" class="font-bold text-white">1,717</span>
+                                    <span class="text-xs text-emerald-300">Liters</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cost Summary Header Footer -->
+                    <div class="mt-6 pt-3 border-t border-emerald-800 bg-black/20 rounded-lg p-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs uppercase tracking-wider text-emerald-300 font-semibold">Estimated Concrete Material Cost</span>
+                            <span id="outConcTotalCost" class="text-2xl font-black text-emerald-300">₹ 55,200</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: BRICKWORK & BLOCKWORK ESTIMATOR -->
+        <section id="sec-brickwork" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Brick Inputs Card -->
+                <div class="lg:col-span-7 bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-box">
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <h2 class="text-base font-bold text-gray-800 flex items-center space-x-2">
+                            <i class="fa-solid fa-cubes-stacked text-amber-700"></i>
+                            <span>Brickwork / AAC Blockwork Wall Calculator</span>
+                        </h2>
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-full">Wall & Mortar Math</span>
+                    </div>
+
+                    <form id="brickForm" onsubmit="return false;" class="space-y-4">
+                        <!-- Wall Dimensions -->
+                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-3">
+                            <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wide">1. Wall Gross Dimensions</h3>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div>
+                                    <label id="lblBrickWallLen" class="block text-xs font-semibold text-gray-600 mb-1">Wall Length (m)</label>
+                                    <input type="number" step="0.01" id="brickWallLen" value="12" oninput="calculateBrickwork()" class="w-full text-sm border-gray-300 rounded-lg p-2 border font-medium focus:ring-emerald-500">
+                                </div>
+                                <div>
+                                    <label id="lblBrickWallHeight" class="block text-xs font-semibold text-gray-600 mb-1">Wall Height (m)</label>
+                                    <input type="number" step="0.01" id="brickWallHeight" value="3" oninput="calculateBrickwork()" class="w-full text-sm border-gray-300 rounded-lg p-2 border font-medium focus:ring-emerald-500">
+                                </div>
+                                <div>
+                                    <label id="lblBrickWallThick" class="block text-xs font-semibold text-gray-600 mb-1">Wall Thickness (mm)</label>
+                                    <select id="brickWallThickPreset" onchange="applyWallThickPreset()" class="w-full text-sm border-gray-300 rounded-lg p-2 border font-medium focus:ring-emerald-500">
+                                        <option value="230" selected>230 mm (9" Full Brick)</option>
+                                        <option value="115">115 mm (4.5" Half Brick)</option>
+                                        <option value="200">200 mm (8" AAC Block)</option>
+                                        <option value="150">150 mm (6" Block)</option>
+                                        <option value="100">100 mm (4" Partition)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Openings Deduction Sub-Section -->
+                        <div class="bg-amber-50/50 p-4 rounded-xl border border-amber-200/80 space-y-3">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xs font-bold text-amber-900 uppercase tracking-wide flex items-center gap-1.5">
+                                    <i class="fa-solid fa-door-open text-amber-700"></i>
+                                    <span>2. Openings Deductions (Doors, Windows, Vents)</span>
+                                </h3>
+                                <button type="button" onclick="addBrickOpeningRow()" class="text-xs bg-amber-700 hover:bg-amber-800 text-white font-medium px-2.5 py-1 rounded shadow transition-all">
+                                    + Add Opening
+                                </button>
+                            </div>
+
+                            <div id="brickOpeningsContainer" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                                <!-- Dynamic rows inserted via JS -->
+                            </div>
+                        </div>
+
+                        <!-- Brick Unit Selection & Mortar Specs -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Brick / Block Type Preset</label>
+                                <select id="brickPresetSelect" onchange="applyBrickPreset()" class="w-full text-sm border-gray-300 rounded-lg p-2.5 border focus:ring-emerald-500">
+                                    <option value="std_clay" selected>Standard Modular Red Brick (190 x 90 x 90 mm)</option>
+                                    <option value="trad_clay">Traditional Indian/Pak Clay Brick (228 x 112 x 70 mm)</option>
+                                    <option value="aac_600_200_200">AAC Block (600 x 200 x 200 mm)</option>
+                                    <option value="concrete_block">Concrete Solid Block (400 x 200 x 200 mm)</option>
+                                    <option value="flyash">Fly Ash Brick (230 x 110 x 75 mm)</option>
+                                    <option value="custom">Custom Brick Dimensions</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Mortar Mix Ratio (Cement : Sand)</label>
+                                <select id="brickMortarRatio" onchange="calculateBrickwork()" class="w-full text-sm border-gray-300 rounded-lg p-2.5 border focus:ring-emerald-500">
+                                    <option value="1:3">1 : 3 (Rich Mortar for Heavy Load)</option>
+                                    <option value="1:4" selected>1 : 4 (Standard 9" Brickwork Mortar)</option>
+                                    <option value="1:5">1 : 5 (Medium Strength Wall)</option>
+                                    <option value="1:6">1 : 6 (4.5" Wall or Non-Load Bearing)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Custom Brick Size & Joint Specs -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div>
+                                <label id="lblBrickL" class="block text-xs font-semibold text-gray-600 mb-1">Brick L (mm)</label>
+                                <input type="number" id="brickLen" value="190" oninput="calculateBrickwork()" class="w-full text-sm border-gray-300 rounded-lg p-2 border">
+                            </div>
+                            <div>
+                                <label id="lblBrickW" class="block text-xs font-semibold text-gray-600 mb-1">Brick W (mm)</label>
+                                <input type="number" id="brickWidth" value="90" oninput="calculateBrickwork()" class="w-full text-sm border-gray-300 rounded-lg p-2 border">
+                            </div>
+                            <div>
+                                <label id="lblBrickH" class="block text-xs font-semibold text-gray-600 mb-1">Brick H (mm)</label>
+                                <input type="number" id="brickHeight" value="90" oninput="calculateBrickwork()" class="w-full text-sm border-gray-300 rounded-lg p-2 border">
+                            </div>
+                            <div>
+                                <label id="lblJointThick" class="block text-xs font-semibold text-gray-600 mb-1">Mortar Joint (mm)</label>
+                                <input type="number" id="brickJoint" value="10" oninput="calculateBrickwork()" class="w-full text-sm border-gray-300 rounded-lg p-2 border">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Brick Wastage (%)</label>
+                                <input type="number" step="1" id="brickWastage" value="5" oninput="calculateBrickwork()" class="w-full text-sm border-gray-300 rounded-lg p-2 border">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Brick Rate (₹/unit)</label>
+                                <input type="number" step="0.5" id="rateBrickUnit" value="9" oninput="calculateBrickwork()" class="w-full text-sm border-gray-300 rounded-lg p-2 border">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Dry Mortar Factor</label>
+                                <input type="number" step="0.01" id="brickMortarFactor" value="1.33" oninput="calculateBrickwork()" class="w-full text-sm border-gray-300 rounded-lg p-2 border">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Brick Outputs Card -->
+                <div class="lg:col-span-5 bg-gradient-to-br from-amber-950 via-amber-900 to-orange-950 text-white rounded-xl shadow-md p-6 card-box flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-amber-800 pb-3 mb-4">
+                            <h3 class="text-base font-bold text-amber-100 flex items-center space-x-2">
+                                <i class="fa-solid fa-calculator text-amber-400"></i>
+                                <span>Masonry Output Summary</span>
+                            </h3>
+                            <span class="text-xs bg-amber-800 text-amber-200 px-2 py-0.5 rounded font-mono">Wall & Openings</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="bg-white/10 backdrop-blur-sm p-3 rounded-lg border border-white/10">
+                                <span class="text-xs text-amber-200 block">Gross Wall Area</span>
+                                <span id="outBrickGrossArea" class="text-xl font-bold text-white">36.00</span>
+                                <span class="text-xs text-amber-300 ml-1 unitAreaText">m²</span>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-sm p-3 rounded-lg border border-white/10">
+                                <span class="text-xs text-amber-200 block">Net Plaster/Masonry Area</span>
+                                <span id="outBrickNetArea" class="text-xl font-bold text-amber-300">31.80</span>
+                                <span class="text-xs text-amber-300 ml-1 unitAreaText">m²</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 text-sm">
+                            <div class="bg-amber-900/40 p-3 rounded-lg border border-amber-700/50 flex justify-between items-center">
+                                <div>
+                                    <span class="text-xs text-amber-200 uppercase tracking-wide block">Total Bricks Needed</span>
+                                    <span id="outBrickTotalCount" class="text-2xl font-black text-amber-300">3,782</span>
+                                    <span class="text-xs text-amber-200">units (Incl. Wastage)</span>
+                                </div>
+                                <i class="fa-solid fa-cubes text-3xl text-amber-400/40"></i>
+                            </div>
+
+                            <div class="flex justify-between items-center py-1.5 border-b border-white/10">
+                                <span class="text-amber-200">Mortar Volume (Dry):</span>
+                                <span id="outBrickMortarDryVol" class="font-bold text-white">1.82 <span class="unitVolText text-xs font-normal">m³</span></span>
+                            </div>
+
+                            <div class="flex justify-between items-center py-1.5 border-b border-white/10">
+                                <span class="text-amber-200">Cement Bags Required:</span>
+                                <div class="text-right">
+                                    <span id="outBrickCementBags" class="font-bold text-white">12.6</span>
+                                    <span class="text-xs text-amber-300">bags</span>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center py-1.5 border-b border-white/10">
+                                <span class="text-amber-200">Sand Quantity:</span>
+                                <div class="text-right">
+                                    <span id="outBrickSandVol" class="font-bold text-white">1.45</span>
+                                    <span class="text-xs text-amber-300 unitVolText">m³</span>
+                                    <div id="outBrickSandTons" class="text-xs text-amber-400">2.32 Tons</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Masonry Cost Output -->
+                    <div class="mt-6 pt-3 border-t border-amber-800 bg-black/20 rounded-lg p-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs uppercase tracking-wider text-amber-300 font-semibold">Masonry Total Cost</span>
+                            <span id="outBrickTotalCost" class="text-2xl font-black text-amber-300">₹ 41,800</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: PLASTERING AREA ESTIMATOR -->
+        <section id="sec-plastering" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Plaster Inputs Card -->
+                <div class="lg:col-span-7 bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-box">
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <h2 class="text-base font-bold text-gray-800 flex items-center space-x-2">
+                            <i class="fa-solid fa-trowel text-blue-700"></i>
+                            <span>Plastering Area & Mortar Quantity</span>
+                        </h2>
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-blue-50 text-blue-800 border border-blue-200 rounded-full">Auto Opening Deductions</span>
+                    </div>
+
+                    <form id="plasterForm" onsubmit="return false;" class="space-y-4">
+                        <!-- Plaster Wall Specs -->
+                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-3">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wide">1. Surface Dimensions</h3>
+                                <div class="flex items-center space-x-2">
+                                    <input type="checkbox" id="plasterBothSides" onchange="calculatePlastering()" class="rounded text-emerald-600 focus:ring-emerald-500">
+                                    <label for="plasterBothSides" class="text-xs font-medium text-gray-700">Plaster Both Sides (2x)</label>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <div>
+                                    <label id="lblPlasterLen" class="block text-xs font-semibold text-gray-600 mb-1">Wall Length (m)</label>
+                                    <input type="number" step="0.01" id="plasterLen" value="15" oninput="calculatePlastering()" class="w-full text-sm border-gray-300 rounded-lg p-2 border font-medium">
+                                </div>
+                                <div>
+                                    <label id="lblPlasterHeight" class="block text-xs font-semibold text-gray-600 mb-1">Wall Height (m)</label>
+                                    <input type="number" step="0.01" id="plasterHeight" value="3.2" oninput="calculatePlastering()" class="w-full text-sm border-gray-300 rounded-lg p-2 border font-medium">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Number of Walls</label>
+                                    <input type="number" step="1" id="plasterWallQty" value="1" oninput="calculatePlastering()" class="w-full text-sm border-gray-300 rounded-lg p-2 border font-medium">
+                                </div>
+                                <div>
+                                    <label id="lblPlasterThick" class="block text-xs font-semibold text-gray-600 mb-1">Thickness (mm)</label>
+                                    <select id="plasterThickness" onchange="calculatePlastering()" class="w-full text-sm border-gray-300 rounded-lg p-2 border font-medium">
+                                        <option value="12" selected>12 mm (Internal Brick)</option>
+                                        <option value="15">15 mm (Rough Masonry)</option>
+                                        <option value="20">20 mm (External Plaster / 2 Coats)</option>
+                                        <option value="6">6 mm (Ceiling Concrete)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Openings Deduction Sub-Section for Plaster -->
+                        <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-200/80 space-y-3">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xs font-bold text-blue-900 uppercase tracking-wide flex items-center gap-1.5">
+                                    <i class="fa-solid fa-window-maximize text-blue-700"></i>
+                                    <span>2. Window & Door Openings to Deduct</span>
+                                </h3>
+                                <button type="button" onclick="addPlasterOpeningRow()" class="text-xs bg-blue-700 hover:bg-blue-800 text-white font-medium px-2.5 py-1 rounded shadow transition-all">
+                                    + Add Opening
+                                </button>
+                            </div>
+
+                            <!-- Standard IS Code Deduction rule radio -->
+                            <div class="bg-white p-2.5 rounded-lg border text-xs text-gray-700 space-y-1">
+                                <span class="font-semibold text-gray-800 block">Opening Deduction Standard Rules:</span>
+                                <div class="flex flex-wrap gap-4">
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="deductionRule" value="simple" checked onchange="calculatePlastering()" class="text-emerald-600">
+                                        <span class="ml-1">Direct 100% Deduction</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="deductionRule" value="is1200" onchange="calculatePlastering()" class="text-emerald-600">
+                                        <span class="ml-1">IS 1200 Standard (50% deduction for 0.5 - 3 m² openings)</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="plasterOpeningsContainer" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                                <!-- Dynamic rows inserted via JS -->
+                            </div>
+                        </div>
+
+                        <!-- Plaster Mortar Ratio & Labor Cost -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Plaster Mix Ratio</label>
+                                <select id="plasterMixRatio" onchange="calculatePlastering()" class="w-full text-sm border-gray-300 rounded-lg p-2.5 border">
+                                    <option value="1:3">1 : 3 (Ceiling / External)</option>
+                                    <option value="1:4" selected>1 : 4 (Standard Wall Plaster)</option>
+                                    <option value="1:5">1 : 5 (Internal Wall)</option>
+                                    <option value="1:6">1 : 6 (Low Strength Internal)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Plaster Dry Factor</label>
+                                <input type="number" step="0.01" id="plasterDryFactor" value="1.35" oninput="calculatePlastering()" class="w-full text-sm border-gray-300 rounded-lg p-2 border">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Labor Rate per <span class="unitAreaText">m²</span></label>
+                                <input type="number" step="5" id="ratePlasterLabor" value="120" oninput="calculatePlastering()" class="w-full text-sm border-gray-300 rounded-lg p-2 border">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Plaster Outputs Card -->
+                <div class="lg:col-span-5 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 text-white rounded-xl shadow-md p-6 card-box flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-blue-800 pb-3 mb-4">
+                            <h3 class="text-base font-bold text-blue-100 flex items-center space-x-2">
+                                <i class="fa-solid fa-square-check text-blue-400"></i>
+                                <span>Plastering Quantity Results</span>
+                            </h3>
+                            <span class="text-xs bg-blue-900 text-blue-200 px-2 py-0.5 rounded font-mono">Net Area Math</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="bg-white/10 backdrop-blur-sm p-3 rounded-lg border border-white/10">
+                                <span class="text-xs text-blue-200 block">Gross Plaster Area</span>
+                                <span id="outPlasterGrossArea" class="text-xl font-bold text-white">48.00</span>
+                                <span class="text-xs text-blue-300 ml-1 unitAreaText">m²</span>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-sm p-3 rounded-lg border border-white/10">
+                                <span class="text-xs text-blue-200 block">Net Plastering Area</span>
+                                <span id="outPlasterNetArea" class="text-xl font-bold text-blue-300">42.20</span>
+                                <span class="text-xs text-blue-300 ml-1 unitAreaText">m²</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between items-center py-1.5 border-b border-white/10">
+                                <span class="text-blue-200">Total Deductions:</span>
+                                <span id="outPlasterDeductionArea" class="font-bold text-red-300">- 5.80 <span class="unitAreaText text-xs font-normal">m²</span></span>
+                            </div>
+
+                            <div class="flex justify-between items-center py-1.5 border-b border-white/10">
+                                <span class="text-blue-200">Wet Plaster Volume:</span>
+                                <span id="outPlasterWetVol" class="font-bold text-white">0.51 <span class="unitVolText text-xs font-normal">m³</span></span>
+                            </div>
+
+                            <div class="flex justify-between items-center py-1.5 border-b border-white/10">
+                                <span class="text-blue-200">Cement Bags:</span>
+                                <div class="text-right">
+                                    <span id="outPlasterCementBags" class="font-bold text-white">4.9</span>
+                                    <span class="text-xs text-blue-300">bags</span>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center py-1.5 border-b border-white/10">
+                                <span class="text-blue-200">Sand Volume:</span>
+                                <div class="text-right">
+                                    <span id="outPlasterSandVol" class="font-bold text-white">0.55</span>
+                                    <span class="text-xs text-blue-300 unitVolText">m³</span>
+                                    <div id="outPlasterSandTons" class="text-xs text-blue-400">0.88 Tons</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Plaster Total Cost -->
+                    <div class="mt-6 pt-3 border-t border-blue-800 bg-black/20 rounded-lg p-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs uppercase tracking-wider text-blue-300 font-semibold">Plaster Material & Labor Cost</span>
+                            <span id="outPlasterTotalCost" class="text-2xl font-black text-blue-300">₹ 8,020</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: COMBINED SUMMARY & BOQ -->
+        <section id="sec-summary" class="tab-content hidden space-y-6">
+            <!-- Grand BOQ Summary Table Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-box">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-4 mb-4 gap-2">
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-800 flex items-center space-x-2">
+                            <i class="fa-solid fa-list-check text-emerald-700"></i>
+                            <span>Master Bill of Quantities (BOQ) & Aggregated Site Material Sheet</span>
+                        </h2>
+                        <p class="text-xs text-gray-500">Live total material requirement compiled across Concrete, Brickwork, and Plaster modules.</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-gray-500 block">Total Estimated Project Cost</span>
+                        <span id="grandTotalCostDisplay" class="text-2xl font-black text-emerald-800">₹ 105,020</span>
+                    </div>
+                </div>
+
+                <!-- Aggregated Material Cards Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
+                        <div class="text-xs text-emerald-800 font-semibold uppercase">Total Cement</div>
+                        <div class="text-2xl font-black text-emerald-900 mt-1" id="totalCementBagsAgg">93.8 Bags</div>
+                        <div class="text-xs text-emerald-700 mt-1" id="totalCementWeightAgg">4,690 kg (4.69 Tons)</div>
+                    </div>
+
+                    <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl">
+                        <div class="text-xs text-amber-800 font-semibold uppercase">Total Sand</div>
+                        <div class="text-2xl font-black text-amber-900 mt-1" id="totalSandVolAgg">5.97 m³</div>
+                        <div class="text-xs text-amber-700 mt-1" id="totalSandTonsAgg">9.55 Tons</div>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl">
+                        <div class="text-xs text-blue-800 font-semibold uppercase">Coarse Aggregate</div>
+                        <div class="text-2xl font-black text-blue-900 mt-1" id="totalAggVolAgg">7.94 m³</div>
+                        <div class="text-xs text-blue-700 mt-1" id="totalAggTonsAgg">12.06 Tons</div>
+                    </div>
+
+                    <div class="bg-orange-50 border border-orange-200 p-4 rounded-xl">
+                        <div class="text-xs text-orange-800 font-semibold uppercase">Bricks / Blocks</div>
+                        <div class="text-2xl font-black text-orange-900 mt-1" id="totalBricksAgg">3,782 Units</div>
+                        <div class="text-xs text-orange-700 mt-1">Incl. 5% Wastage</div>
+                    </div>
+                </div>
+
+                <!-- Detailed Breakdown Table -->
+                <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead class="bg-gray-100 text-gray-700 font-semibold uppercase text-xs">
+                            <tr>
+                                <th class="px-4 py-3 text-left">Work Item / Material</th>
+                                <th class="px-4 py-3 text-right">Cement (Bags)</th>
+                                <th class="px-4 py-3 text-right">Sand (<span class="unitVolText">m³</span>)</th>
+                                <th class="px-4 py-3 text-right">Aggregate (<span class="unitVolText">m³</span>)</th>
+                                <th class="px-4 py-3 text-right">Bricks / Units</th>
+                                <th class="px-4 py-3 text-right">Subtotal Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 bg-white" id="boqTableBody">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                        <tfoot class="bg-gray-50 font-bold text-gray-900 border-t-2 border-gray-300">
+                            <tr>
+                                <td class="px-4 py-3">GRAND TOTALS</td>
+                                <td class="px-4 py-3 text-right" id="footTotalCement">93.8</td>
+                                <td class="px-4 py-3 text-right" id="footTotalSand">5.97</td>
+                                <td class="px-4 py-3 text-right" id="footTotalAgg">7.94</td>
+                                <td class="px-4 py-3 text-right" id="footTotalBricks">3,782</td>
+                                <td class="px-4 py-3 text-right text-emerald-800 font-black text-base" id="footTotalCost">₹ 105,020</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Visual Charts Section -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 pt-6 border-t no-print">
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-col items-center">
+                        <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">Cost Share by Work Type</h3>
+                        <div class="w-full max-w-xs">
+                            <canvas id="costTypeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-col items-center">
+                        <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">Material Share Distribution</h3>
+                        <div class="w-full max-w-xs">
+                            <canvas id="materialShareChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: CHEAT SHEET & SITE REFERENCE -->
+        <section id="sec-reference" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Concrete Mix Ratios -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 card-box">
+                    <h3 class="text-sm font-bold text-gray-800 border-b pb-2 mb-3 flex items-center space-x-2">
+                        <i class="fa-solid fa-list-ol text-emerald-700"></i>
+                        <span>Standard Concrete Mix Ratios & Compressive Strength</span>
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-xs divide-y divide-gray-200">
+                            <thead class="bg-gray-50 font-semibold text-gray-700">
+                                <tr>
+                                    <th class="p-2 text-left">Grade</th>
+                                    <th class="p-2 text-left">Nominal Mix (C : S : A)</th>
+                                    <th class="p-2 text-left">Strength (N/mm²)</th>
+                                    <th class="p-2 text-left">Typical Application</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr><td class="p-2 font-bold text-emerald-800">M5</td><td class="p-2">1 : 5 : 10</td><td class="p-2">5 MPa</td><td class="p-2">Sub-base PCC mass foundation</td></tr>
+                                <tr><td class="p-2 font-bold text-emerald-800">M7.5</td><td class="p-2">1 : 4 : 8</td><td class="p-2">7.5 MPa</td><td class="p-2">Leveling course below footings</td></tr>
+                                <tr><td class="p-2 font-bold text-emerald-800">M10</td><td class="p-2">1 : 3 : 6</td><td class="p-2">10 MPa</td><td class="p-2">Patio slabs, pathway bases</td></tr>
+                                <tr><td class="p-2 font-bold text-emerald-800">M15</td><td class="p-2">1 : 2 : 4</td><td class="p-2">15 MPa</td><td class="p-2">Plain concrete beds & curbs</td></tr>
+                                <tr><td class="p-2 font-bold text-emerald-800">M20</td><td class="p-2">1 : 1.5 : 3</td><td class="p-2">20 MPa</td><td class="p-2">Standard RCC Slabs, Beams, Columns</td></tr>
+                                <tr><td class="p-2 font-bold text-emerald-800">M25</td><td class="p-2">1 : 1 : 2</td><td class="p-2">25 MPa</td><td class="p-2">Heavy Structural Columns & Footings</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Material Densities Reference -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 card-box">
+                    <h3 class="text-sm font-bold text-gray-800 border-b pb-2 mb-3 flex items-center space-x-2">
+                        <i class="fa-solid fa-weight-hanging text-amber-700"></i>
+                        <span>Standard Civil Engineering Densities & Constants</span>
+                    </h3>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between py-1.5 border-b">
+                            <span class="text-gray-600 font-medium">Cement Density:</span>
+                            <span class="font-bold text-gray-800">1,440 kg/m³ (approx. 28.8 bags/m³)</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b">
+                            <span class="text-gray-600 font-medium">River Sand (Dry Fine Aggregate):</span>
+                            <span class="font-bold text-gray-800">1,600 kg/m³ (1.6 Tons/m³)</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b">
+                            <span class="text-gray-600 font-medium">Coarse Aggregate (Gravel):</span>
+                            <span class="font-bold text-gray-800">1,520 kg/m³ (1.52 Tons/m³)</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b">
+                            <span class="text-gray-600 font-medium">Red Clay Bricks Density:</span>
+                            <span class="font-bold text-gray-800">1,800 to 1,900 kg/m³</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b">
+                            <span class="text-gray-600 font-medium">AAC Block Density:</span>
+                            <span class="font-bold text-gray-800">550 to 650 kg/m³</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b">
+                            <span class="text-gray-600 font-medium">Dry Volume Safety Expansion:</span>
+                            <span class="font-bold text-gray-800">1.54 for Concrete | 1.33 for Mortar</span>
+                        </div>
+                        <div class="flex justify-between py-1.5">
+                            <span class="text-gray-600 font-medium">Standard Cement Bag Weight:</span>
+                            <span class="font-bold text-gray-800">50 kg (1.25 cu ft)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Embedded Application JavaScript Engine -->
+    <script>
+        // Global State & Data Store
+        let currentUnit = 'metric'; // 'metric' or 'imperial'
+        let costChartInstance = null;
+        let materialChartInstance = null;
+
+        // Openings Dynamic Store
+        let brickOpenings = [
+            { name: 'Door D1', width: 1.0, height: 2.1, count: 2 },
+            { name: 'Window W1', width: 1.2, height: 1.2, count: 2 }
+        ];
+
+        let plasterOpenings = [
+            { name: 'Main Door', width: 1.2, height: 2.1, count: 1 },
+            { name: 'Window W1', width: 1.5, height: 1.2, count: 2 }
+        ];
+
+        // Concrete Grade Mix Ratio Mapping (Cement : Sand : Aggregate)
+        const concreteGrades = {
+            'M5':   [1, 5, 10],
+            'M7.5': [1, 4, 8],
+            'M10':  [1, 3, 6],
+            'M15':  [1, 2, 4],
+            'M20':  [1, 1.5, 3],
+            'M25':  [1, 1, 2]
+        };
+
+        // Brick Size Presets (mm)
+        const brickPresets = {
+            'std_clay': { l: 190, w: 90, h: 90 },
+            'trad_clay': { l: 228, w: 112, h: 70 },
+            'aac_600_200_200': { l: 600, w: 200, h: 200 },
+            'concrete_block': { l: 400, w: 200, h: 200 },
+            'flyash': { l: 230, w: 110, h: 75 }
+        };
+
+        // Initialize App on DOM Load
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('footerYear').textContent = new Date().getFullYear();
+            document.getElementById('estimateDateInput').valueAsDate = new Date();
+
+            // Render Dynamic Opening Rows
+            renderBrickOpenings();
+            renderPlasterOpenings();
+
+            // Perform Initial Calculations
+            calculateConcrete();
+            calculateBrickwork();
+            calculatePlastering();
+            updateBOQAndCharts();
+        });
+
+        // Tab Switcher Logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'border-emerald-700', 'text-emerald-700');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+            document.querySelectorAll('.tab-content').forEach(sec => sec.classList.add('hidden'));
+
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.classList.remove('border-transparent', 'text-gray-500');
+            }
+
+            const activeSec = document.getElementById(`sec-${tabId}`);
+            if (activeSec) {
+                activeSec.classList.remove('hidden');
+            }
+
+            if (tabId === 'summary') {
+                updateBOQAndCharts();
+            }
+        }
+
+        // Unit Switcher Handler (Metric vs Imperial Display)
+        function setUnitSystem(system) {
+            currentUnit = system;
+            const btnM = document.getElementById('unitMetricBtn');
+            const btnI = document.getElementById('unitImperialBtn');
+
+            if (system === 'metric') {
+                btnM.className = "px-2.5 py-1 rounded-md font-medium bg-emerald-600 text-white transition-all shadow-sm";
+                btnI.className = "px-2.5 py-1 rounded-md font-medium text-gray-600 hover:text-gray-900 transition-all";
+                
+                document.querySelectorAll('.unitVolText').forEach(el => el.textContent = 'm³');
+                document.querySelectorAll('.unitAreaText').forEach(el => el.textContent = 'm²');
+
+                document.getElementById('lblConcLength').textContent = "Length (m)";
+                document.getElementById('lblConcWidth').textContent = "Width (m)";
+                document.getElementById('lblConcDepth').textContent = "Thickness (mm)";
+
+                document.getElementById('lblBrickWallLen').textContent = "Wall Length (m)";
+                document.getElementById('lblBrickWallHeight').textContent = "Wall Height (m)";
+                document.getElementById('lblBrickWallThick').textContent = "Wall Thickness (mm)";
+
+                document.getElementById('lblPlasterLen').textContent = "Wall Length (m)";
+                document.getElementById('lblPlasterHeight').textContent = "Wall Height (m)";
+            } else {
+                btnI.className = "px-2.5 py-1 rounded-md font-medium bg-emerald-600 text-white transition-all shadow-sm";
+                btnM.className = "px-2.5 py-1 rounded-md font-medium text-gray-600 hover:text-gray-900 transition-all";
+
+                document.querySelectorAll('.unitVolText').forEach(el => el.textContent = 'ft³');
+                document.querySelectorAll('.unitAreaText').forEach(el => el.textContent = 'ft²');
+
+                document.getElementById('lblConcLength').textContent = "Length (ft)";
+                document.getElementById('lblConcWidth').textContent = "Width (ft)";
+                document.getElementById('lblConcDepth').textContent = "Thickness (in)";
+
+                document.getElementById('lblBrickWallLen').textContent = "Wall Length (ft)";
+                document.getElementById('lblBrickWallHeight').textContent = "Wall Height (ft)";
+                document.getElementById('lblBrickWallThick').textContent = "Wall Thickness (in)";
+
+                document.getElementById('lblPlasterLen').textContent = "Wall Length (ft)";
+                document.getElementById('lblPlasterHeight').textContent = "Wall Height (ft)";
+            }
+
+            // Recalculate all modules with updated units
+            calculateConcrete();
+            calculateBrickwork();
+            calculatePlastering();
+            updateBOQAndCharts();
+        }
+
+        // --- 1. CONCRETE CALCULATOR MATH ---
+        function updateConcreteDefaults() {
+            const type = document.getElementById('concElementType').value;
+            if (type === 'slab') {
+                document.getElementById('concLength').value = "10";
+                document.getElementById('concWidth').value = "6";
+                document.getElementById('concThickness').value = currentUnit === 'metric' ? "150" : "6";
+            } else if (type === 'beam') {
+                document.getElementById('concLength').value = "5";
+                document.getElementById('concWidth').value = "0.3";
+                document.getElementById('concThickness').value = currentUnit === 'metric' ? "450" : "18";
+            } else if (type === 'column') {
+                document.getElementById('concLength').value = "0.4";
+                document.getElementById('concWidth').value = "0.4";
+                document.getElementById('concThickness').value = currentUnit === 'metric' ? "3000" : "120";
+            }
+            calculateConcrete();
+        }
+
+        let calcDataConcrete = {};
+
+        function calculateConcrete() {
+            const len = parseFloat(document.getElementById('concLength').value) || 0;
+            const width = parseFloat(document.getElementById('concWidth').value) || 0;
+            const thickInput = parseFloat(document.getElementById('concThickness').value) || 0;
+            const qty = parseFloat(document.getElementById('concQuantity').value) || 1;
+            const wastage = parseFloat(document.getElementById('concWastage').value) || 0;
+            const gradeKey = document.getElementById('concMixGrade').value;
+            const waterRatio = parseFloat(document.getElementById('concWaterRatio').value) || 0.45;
+
+            // Unit conversion factors to meters
+            let thickInMeters = currentUnit === 'metric' ? thickInput / 1000 : thickInput / 12 * 0.3048;
+            let lenInMeters = currentUnit === 'metric' ? len : len * 0.3048;
+            let widthInMeters = currentUnit === 'metric' ? width : width * 0.3048;
+
+            let wetVolM3 = lenInMeters * widthInMeters * thickInMeters * qty;
+            let dryVolM3 = wetVolM3 * 1.54 * (1 + wastage / 100);
+
+            // Mix ratio computation
+            const parts = concreteGrades[gradeKey] || [1, 1.5, 3];
+            const totalParts = parts[0] + parts[1] + parts[2];
+
+            const cementVolM3 = (dryVolM3 * parts[0]) / totalParts;
+            const sandVolM3 = (dryVolM3 * parts[1]) / totalParts;
+            const aggVolM3 = (dryVolM3 * parts[2]) / totalParts;
+
+            const cementKg = cementVolM3 * 1440;
+            const cementBags = cementKg / 50;
+            const sandTons = (sandVolM3 * 1600) / 1000;
+            const aggTons = (aggVolM3 * 1520) / 1000;
+            const waterLiters = cementKg * waterRatio;
+
+            // Unit Rate Pricing
+            const rateBag = parseFloat(document.getElementById('rateCementBag').value) || 0;
+            const rateSand = parseFloat(document.getElementById('rateSandVol').value) || 0;
+            const rateAgg = parseFloat(document.getElementById('rateAggVol').value) || 0;
+
+            // Compute rates based on current volume unit
+            let costCement = cementBags * rateBag;
+            let costSand = (currentUnit === 'metric' ? sandVolM3 : sandVolM3 * 35.3147) * rateSand;
+            let costAgg = (currentUnit === 'metric' ? aggVolM3 : aggVolM3 * 35.3147) * rateAgg;
+            let totalCost = costCement + costSand + costAgg;
+
+            // Save global concrete data object
+            calcDataConcrete = {
+                wetVolM3, dryVolM3, cementBags, cementKg, sandVolM3, sandTons, aggVolM3, aggTons, waterLiters, totalCost
+            };
+
+            // Display Outputs
+            const volDispFactor = currentUnit === 'metric' ? 1 : 35.3147;
+            document.getElementById('outConcWetVol').textContent = (wetVolM3 * volDispFactor).toFixed(2);
+            document.getElementById('outConcDryVol').textContent = (dryVolM3 * volDispFactor).toFixed(2);
+            document.getElementById('outConcCementBags').textContent = cementBags.toFixed(1);
+            document.getElementById('outConcCementWeight').textContent = `${Math.round(cementKg).toLocaleString()} kg`;
+            document.getElementById('outConcSandVol').textContent = (sandVolM3 * volDispFactor).toFixed(2);
+            document.getElementById('outConcSandTons').textContent = `${sandTons.toFixed(2)} Tons`;
+            document.getElementById('outConcAggVol').textContent = (aggVolM3 * volDispFactor).toFixed(2);
+            document.getElementById('outConcAggTons').textContent = `${aggTons.toFixed(2)} Tons`;
+            document.getElementById('outConcWaterLiters').textContent = Math.round(waterLiters).toLocaleString();
+            document.getElementById('outConcTotalCost').textContent = `₹ ${Math.round(totalCost).toLocaleString()}`;
+
+            updateBOQAndCharts();
+        }
+
+        // --- 2. BRICKWORK CALCULATOR MATH ---
+        function applyWallThickPreset() {
+            calculateBrickwork();
+        }
+
+        function applyBrickPreset() {
+            const presetKey = document.getElementById('brickPresetSelect').value;
+            if (presetKey in brickPresets) {
+                const b = brickPresets[presetKey];
+                document.getElementById('brickLen').value = b.l;
+                document.getElementById('brickWidth').value = b.w;
+                document.getElementById('brickHeight').value = b.h;
+            }
+            calculateBrickwork();
+        }
+
+        function renderBrickOpenings() {
+            const container = document.getElementById('brickOpeningsContainer');
+            container.innerHTML = '';
+            brickOpenings.forEach((op, index) => {
+                const row = document.createElement('div');
+                row.className = "flex items-center space-x-2 text-xs bg-white p-2 rounded-lg border";
+                row.innerHTML = `
+                    <input type="text" value="${op.name}" onchange="brickOpenings[${index}].name=this.value; calculateBrickwork();" class="w-1/3 p-1 border rounded text-xs" placeholder="Label">
+                    <input type="number" step="0.01" value="${op.width}" oninput="brickOpenings[${index}].width=parseFloat(this.value)||0; calculateBrickwork();" class="w-1/4 p-1 border rounded text-xs" placeholder="W (${currentUnit==='metric'?'m':'ft'})">
+                    <input type="number" step="0.01" value="${op.height}" oninput="brickOpenings[${index}].height=parseFloat(this.value)||0; calculateBrickwork();" class="w-1/4 p-1 border rounded text-xs" placeholder="H (${currentUnit==='metric'?'m':'ft'})">
+                    <input type="number" step="1" value="${op.count}" oninput="brickOpenings[${index}].count=parseInt(this.value)||0; calculateBrickwork();" class="w-1/6 p-1 border rounded text-xs" placeholder="Qty">
+                    <button type="button" onclick="removeBrickOpeningRow(${index})" class="text-red-500 hover:text-red-700 px-1"><i class="fa-solid fa-trash"></i></button>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function addBrickOpeningRow() {
+            brickOpenings.push({ name: 'Opening ' + (brickOpenings.length + 1), width: 1.0, height: 1.2, count: 1 });
+            renderBrickOpenings();
+            calculateBrickwork();
+        }
+
+        function removeBrickOpeningRow(index) {
+            brickOpenings.splice(index, 1);
+            renderBrickOpenings();
+            calculateBrickwork();
+        }
+
+        let calcDataBrick = {};
+
+        function calculateBrickwork() {
+            const wallLen = parseFloat(document.getElementById('brickWallLen').value) || 0;
+            const wallHeight = parseFloat(document.getElementById('brickWallHeight').value) || 0;
+            const wallThickMm = parseFloat(document.getElementById('brickWallThickPreset').value) || 230;
+
+            const brickL = parseFloat(document.getElementById('brickLen').value) || 190;
+            const brickW = parseFloat(document.getElementById('brickWidth').value) || 90;
+            const brickH = parseFloat(document.getElementById('brickHeight').value) || 90;
+            const jointMm = parseFloat(document.getElementById('brickJoint').value) || 10;
+            const wastage = parseFloat(document.getElementById('brickWastage').value) || 5;
+            const dryFactor = parseFloat(document.getElementById('brickMortarFactor').value) || 1.33;
+
+            // Unit conversions
+            const lenM = currentUnit === 'metric' ? wallLen : wallLen * 0.3048;
+            const heightM = currentUnit === 'metric' ? wallHeight : wallHeight * 0.3048;
+            const thickM = wallThickMm / 1000;
+
+            const grossAreaM2 = lenM * heightM;
+
+            // Openings deduction
+            let totalDeductionM2 = 0;
+            brickOpenings.forEach(op => {
+                const opW = currentUnit === 'metric' ? op.width : op.width * 0.3048;
+                const opH = currentUnit === 'metric' ? op.height : op.height * 0.3048;
+                totalDeductionM2 += opW * opH * (op.count || 0);
+            });
+
+            const netAreaM2 = Math.max(0, grossAreaM2 - totalDeductionM2);
+            const netWallVolM3 = netAreaM2 * thickM;
+
+            // Single brick calculations in meters
+            const bL = brickL / 1000;
+            const bW = brickW / 1000;
+            const bH = brickH / 1000;
+            const jM = jointMm / 1000;
+
+            const volWithoutMortar = bL * bW * bH;
+            const volWithMortar = (bL + jM) * (bW + jM) * (bH + jM);
+
+            const bricksCountNet = volWithMortar > 0 ? netWallVolM3 / volWithMortar : 0;
+            const bricksCountGross = Math.round(bricksCountNet * (1 + wastage / 100));
+
+            // Mortar calculations
+            const volBricksNet = bricksCountNet * volWithoutMortar;
+            const wetMortarVolM3 = Math.max(0, netWallVolM3 - volBricksNet);
+            const dryMortarVolM3 = wetMortarVolM3 * dryFactor;
+
+            // Ratio breakdown
+            const ratioStr = document.getElementById('brickMortarRatio').value;
+            const ratioParts = ratioStr.split(':').map(Number);
+            const sumParts = ratioParts[0] + ratioParts[1];
+
+            const cementVolM3 = (dryMortarVolM3 * ratioParts[0]) / sumParts;
+            const sandVolM3 = (dryMortarVolM3 * ratioParts[1]) / sumParts;
+
+            const cementBags = (cementVolM3 * 1440) / 50;
+            const sandTons = (sandVolM3 * 1600) / 1000;
+
+            // Costing
+            const rateBrick = parseFloat(document.getElementById('rateBrickUnit').value) || 0;
+            const rateCementBag = parseFloat(document.getElementById('rateCementBag').value) || 0;
+            const rateSandVol = parseFloat(document.getElementById('rateSandVol').value) || 0;
+
+            const costBricks = bricksCountGross * rateBrick;
+            const costCement = cementBags * rateCementBag;
+            const costSand = (currentUnit === 'metric' ? sandVolM3 : sandVolM3 * 35.3147) * rateSandVol;
+            const totalCost = costBricks + costCement + costSand;
+
+            calcDataBrick = {
+                grossAreaM2, netAreaM2, netWallVolM3, bricksCountGross, dryMortarVolM3, cementBags, sandVolM3, sandTons, totalCost
+            };
+
+            // Display outputs
+            const areaDispFactor = currentUnit === 'metric' ? 1 : 10.7639;
+            const volDispFactor = currentUnit === 'metric' ? 1 : 35.3147;
+
+            document.getElementById('outBrickGrossArea').textContent = (grossAreaM2 * areaDispFactor).toFixed(2);
+            document.getElementById('outBrickNetArea').textContent = (netAreaM2 * areaDispFactor).toFixed(2);
+            document.getElementById('outBrickTotalCount').textContent = bricksCountGross.toLocaleString();
+            document.getElementById('outBrickMortarDryVol').textContent = (dryMortarVolM3 * volDispFactor).toFixed(2);
+            document.getElementById('outBrickCementBags').textContent = cementBags.toFixed(1);
+            document.getElementById('outBrickSandVol').textContent = (sandVolM3 * volDispFactor).toFixed(2);
+            document.getElementById('outBrickSandTons').textContent = `${sandTons.toFixed(2)} Tons`;
+            document.getElementById('outBrickTotalCost').textContent = `₹ ${Math.round(totalCost).toLocaleString()}`;
+
+            updateBOQAndCharts();
+        }
+
+        // --- 3. PLASTERING CALCULATOR MATH ---
+        function renderPlasterOpenings() {
+            const container = document.getElementById('plasterOpeningsContainer');
+            container.innerHTML = '';
+            plasterOpenings.forEach((op, index) => {
+                const row = document.createElement('div');
+                row.className = "flex items-center space-x-2 text-xs bg-white p-2 rounded-lg border";
+                row.innerHTML = `
+                    <input type="text" value="${op.name}" onchange="plasterOpenings[${index}].name=this.value; calculatePlastering();" class="w-1/3 p-1 border rounded text-xs" placeholder="Label">
+                    <input type="number" step="0.01" value="${op.width}" oninput="plasterOpenings[${index}].width=parseFloat(this.value)||0; calculatePlastering();" class="w-1/4 p-1 border rounded text-xs" placeholder="W (${currentUnit==='metric'?'m':'ft'})">
+                    <input type="number" step="0.01" value="${op.height}" oninput="plasterOpenings[${index}].height=parseFloat(this.value)||0; calculatePlastering();" class="w-1/4 p-1 border rounded text-xs" placeholder="H (${currentUnit==='metric'?'m':'ft'})">
+                    <input type="number" step="1" value="${op.count}" oninput="plasterOpenings[${index}].count=parseInt(this.value)||0; calculatePlastering();" class="w-1/6 p-1 border rounded text-xs" placeholder="Qty">
+                    <button type="button" onclick="removePlasterOpeningRow(${index})" class="text-red-500 hover:text-red-700 px-1"><i class="fa-solid fa-trash"></i></button>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function addPlasterOpeningRow() {
+            plasterOpenings.push({ name: 'Opening ' + (plasterOpenings.length + 1), width: 1.2, height: 1.2, count: 1 });
+            renderPlasterOpenings();
+            calculatePlastering();
+        }
+
+        function removePlasterOpeningRow(index) {
+            plasterOpenings.splice(index, 1);
+            renderPlasterOpenings();
+            calculatePlastering();
+        }
+
+        let calcDataPlaster = {};
+
+        function calculatePlastering() {
+            const wallLen = parseFloat(document.getElementById('plasterLen').value) || 0;
+            const wallHeight = parseFloat(document.getElementById('plasterHeight').value) || 0;
+            const wallQty = parseFloat(document.getElementById('plasterWallQty').value) || 1;
+            const bothSides = document.getElementById('plasterBothSides').checked;
+            const thickMm = parseFloat(document.getElementById('plasterThickness').value) || 12;
+            const dryFactor = parseFloat(document.getElementById('plasterDryFactor').value) || 1.35;
+
+            // Deduction Rule choice
+            const deductionRule = document.querySelector('input[name="deductionRule"]:checked')?.value || 'simple';
+
+            // Convert to meters
+            const lenM = currentUnit === 'metric' ? wallLen : wallLen * 0.3048;
+            const heightM = currentUnit === 'metric' ? wallHeight : wallHeight * 0.3048;
+
+            let grossAreaM2 = lenM * heightM * wallQty;
+            if (bothSides) grossAreaM2 *= 2;
+
+            let totalDeductionM2 = 0;
+            plasterOpenings.forEach(op => {
+                const opW = currentUnit === 'metric' ? op.width : op.width * 0.3048;
+                const opH = currentUnit === 'metric' ? op.height : op.height * 0.3048;
+                const singleArea = opW * opH;
+                const count = op.count || 0;
+
+                if (deductionRule === 'simple') {
+                    // Direct 100% deduction
+                    totalDeductionM2 += singleArea * count * (bothSides ? 2 : 1);
+                } else if (deductionRule === 'is1200') {
+                    // IS 1200 Code logic:
+                    // Area < 0.5m2: No deduction
+                    // Area 0.5m2 to 3.0m2: 50% deduction (deduct one face)
+                    // Area > 3.0m2: 100% deduction (both faces)
+                    if (singleArea < 0.5) {
+                        totalDeductionM2 += 0;
+                    } else if (singleArea <= 3.0) {
+                        totalDeductionM2 += singleArea * 0.5 * count * (bothSides ? 2 : 1);
+                    } else {
+                        totalDeductionM2 += singleArea * count * (bothSides ? 2 : 1);
+                    }
+                }
+            });
+
+            const netAreaM2 = Math.max(0, grossAreaM2 - totalDeductionM2);
+            const wetVolM3 = netAreaM2 * (thickMm / 1000);
+            const dryVolM3 = wetVolM3 * dryFactor;
+
+            // Ratio calculation
+            const ratioStr = document.getElementById('plasterMixRatio').value;
+            const parts = ratioStr.split(':').map(Number);
+            const sumParts = parts[0] + parts[1];
+
+            const cementVolM3 = (dryVolM3 * parts[0]) / sumParts;
+            const sandVolM3 = (dryVolM3 * parts[1]) / sumParts;
+
+            const cementBags = (cementVolM3 * 1440) / 50;
+            const sandTons = (sandVolM3 * 1600) / 1000;
+
+            // Costing
+            const rateCementBag = parseFloat(document.getElementById('rateCementBag').value) || 0;
+            const rateSandVol = parseFloat(document.getElementById('rateSandVol').value) || 0;
+            const rateLaborArea = parseFloat(document.getElementById('ratePlasterLabor').value) || 0;
+
+            const costCement = cementBags * rateCementBag;
+            const costSand = (currentUnit === 'metric' ? sandVolM3 : sandVolM3 * 35.3147) * rateSandVol;
+            const costLabor = (currentUnit === 'metric' ? netAreaM2 : netAreaM2 * 10.7639) * rateLaborArea;
+            const totalCost = costCement + costSand + costLabor;
+
+            calcDataPlaster = {
+                grossAreaM2, netAreaM2, deductionAreaM2: totalDeductionM2, wetVolM3, dryVolM3, cementBags, sandVolM3, sandTons, totalCost
+            };
+
+            // Display outputs
+            const areaDispFactor = currentUnit === 'metric' ? 1 : 10.7639;
+            const volDispFactor = currentUnit === 'metric' ? 1 : 35.3147;
+
+            document.getElementById('outPlasterGrossArea').textContent = (grossAreaM2 * areaDispFactor).toFixed(2);
+            document.getElementById('outPlasterNetArea').textContent = (netAreaM2 * areaDispFactor).toFixed(2);
+            document.getElementById('outPlasterDeductionArea').textContent = `- ${(totalDeductionM2 * areaDispFactor).toFixed(2)}`;
+            document.getElementById('outPlasterWetVol').textContent = (wetVolM3 * volDispFactor).toFixed(2);
+            document.getElementById('outPlasterCementBags').textContent = cementBags.toFixed(1);
+            document.getElementById('outPlasterSandVol').textContent = (sandVolM3 * volDispFactor).toFixed(2);
+            document.getElementById('outPlasterSandTons').textContent = `${sandTons.toFixed(2)} Tons`;
+            document.getElementById('outPlasterTotalCost').textContent = `₹ ${Math.round(totalCost).toLocaleString()}`;
+
+            updateBOQAndCharts();
+        }
+
+        // --- 4. GRAND BOQ SUMMARY & CHARTS ENGINE ---
+        function updateBOQAndCharts() {
+            const volDispFactor = currentUnit === 'metric' ? 1 : 35.3147;
+
+            // Cumulative Material Totals
+            const totalCementBags = (calcDataConcrete.cementBags || 0) + (calcDataBrick.cementBags || 0) + (calcDataPlaster.cementBags || 0);
+            const totalCementKg = totalCementBags * 50;
+            const totalSandVol = (calcDataConcrete.sandVolM3 || 0) + (calcDataBrick.sandVolM3 || 0) + (calcDataPlaster.sandVolM3 || 0);
+            const totalSandTons = (calcDataConcrete.sandTons || 0) + (calcDataBrick.sandTons || 0) + (calcDataPlaster.sandTons || 0);
+            const totalAggVol = (calcDataConcrete.aggVolM3 || 0);
+            const totalAggTons = (calcDataConcrete.aggTons || 0);
+            const totalBricks = (calcDataBrick.bricksCountGross || 0);
+            const grandTotalCost = (calcDataConcrete.totalCost || 0) + (calcDataBrick.totalCost || 0) + (calcDataPlaster.totalCost || 0);
+
+            // Update Aggregated KPI Display
+            document.getElementById('totalCementBagsAgg').textContent = `${totalCementBags.toFixed(1)} Bags`;
+            document.getElementById('totalCementWeightAgg').textContent = `${Math.round(totalCementKg).toLocaleString()} kg (${(totalCementKg/1000).toFixed(2)} Tons)`;
+            document.getElementById('totalSandVolAgg').textContent = `${(totalSandVol * volDispFactor).toFixed(2)} ${currentUnit==='metric'?'m³':'ft³'}`;
+            document.getElementById('totalSandTonsAgg').textContent = `${totalSandTons.toFixed(2)} Tons`;
+            document.getElementById('totalAggVolAgg').textContent = `${(totalAggVol * volDispFactor).toFixed(2)} ${currentUnit==='metric'?'m³':'ft³'}`;
+            document.getElementById('totalAggTonsAgg').textContent = `${totalAggTons.toFixed(2)} Tons`;
+            document.getElementById('totalBricksAgg').textContent = `${totalBricks.toLocaleString()} Units`;
+            document.getElementById('grandTotalCostDisplay').textContent = `₹ ${Math.round(grandTotalCost).toLocaleString()}`;
+
+            // Populate Table
+            const tbody = document.getElementById('boqTableBody');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td class="px-4 py-3 font-semibold text-gray-800 flex items-center space-x-2">
+                            <i class="fa-solid fa-cubes text-emerald-700"></i>
+                            <span>Structural Concrete Works</span>
+                        </td>
+                        <td class="px-4 py-3 text-right font-medium">${(calcDataConcrete.cementBags||0).toFixed(1)}</td>
+                        <td class="px-4 py-3 text-right font-medium">${((calcDataConcrete.sandVolM3||0)*volDispFactor).toFixed(2)}</td>
+                        <td class="px-4 py-3 text-right font-medium">${((calcDataConcrete.aggVolM3||0)*volDispFactor).toFixed(2)}</td>
+                        <td class="px-4 py-3 text-right font-medium text-gray-400">-</td>
+                        <td class="px-4 py-3 text-right font-bold text-gray-900">₹ ${Math.round(calcDataConcrete.totalCost||0).toLocaleString()}</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-3 font-semibold text-gray-800 flex items-center space-x-2">
+                            <i class="fa-solid fa-cubes-stacked text-amber-700"></i>
+                            <span>Brickwork / Blockwork Wall</span>
+                        </td>
+                        <td class="px-4 py-3 text-right font-medium">${(calcDataBrick.cementBags||0).toFixed(1)}</td>
+                        <td class="px-4 py-3 text-right font-medium">${((calcDataBrick.sandVolM3||0)*volDispFactor).toFixed(2)}</td>
+                        <td class="px-4 py-3 text-right font-medium text-gray-400">-</td>
+                        <td class="px-4 py-3 text-right font-medium">${(calcDataBrick.bricksCountGross||0).toLocaleString()}</td>
+                        <td class="px-4 py-3 text-right font-bold text-gray-900">₹ ${Math.round(calcDataBrick.totalCost||0).toLocaleString()}</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-3 font-semibold text-gray-800 flex items-center space-x-2">
+                            <i class="fa-solid fa-trowel text-blue-700"></i>
+                            <span>Plastering Surface Finish</span>
+                        </td>
+                        <td class="px-4 py-3 text-right font-medium">${(calcDataPlaster.cementBags||0).toFixed(1)}</td>
+                        <td class="px-4 py-3 text-right font-medium">${((calcDataPlaster.sandVolM3||0)*volDispFactor).toFixed(2)}</td>
+                        <td class="px-4 py-3 text-right font-medium text-gray-400">-</td>
+                        <td class="px-4 py-3 text-right font-medium text-gray-400">-</td>
+                        <td class="px-4 py-3 text-right font-bold text-gray-900">₹ ${Math.round(calcDataPlaster.totalCost||0).toLocaleString()}</td>
+                    </tr>
+                `;
+
+                document.getElementById('footTotalCement').textContent = totalCementBags.toFixed(1);
+                document.getElementById('footTotalSand').textContent = (totalSandVol * volDispFactor).toFixed(2);
+                document.getElementById('footTotalAgg').textContent = (totalAggVol * volDispFactor).toFixed(2);
+                document.getElementById('footTotalBricks').textContent = totalBricks.toLocaleString();
+                document.getElementById('footTotalCost').textContent = `₹ ${Math.round(grandTotalCost).toLocaleString()}`;
+            }
+
+            // Render Chart Visualizations
+            renderCharts(grandTotalCost, totalCementBags, totalSandVol, totalAggVol, totalBricks);
+        }
+
+        function renderCharts(grandTotalCost, totalCementBags, totalSandVol, totalAggVol, totalBricks) {
+            const ctx1 = document.getElementById('costTypeChart')?.getContext('2d');
+            const ctx2 = document.getElementById('materialShareChart')?.getContext('2d');
+
+            if (!ctx1 || !ctx2) return;
+
+            // Destroy previous chart instances on recalculation
+            if (costChartInstance) costChartInstance.destroy();
+            if (materialChartInstance) materialChartInstance.destroy();
+
+            // 1. Cost Share Doughnut Chart
+            costChartInstance = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Concrete Works', 'Brick Masonry', 'Plastering'],
+                    datasets: [{
+                        data: [
+                            Math.round(calcDataConcrete.totalCost || 0),
+                            Math.round(calcDataBrick.totalCost || 0),
+                            Math.round(calcDataPlaster.totalCost || 0)
+                        ],
+                        backgroundColor: ['#166534', '#b45309', '#1d4ed8']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                    }
+                }
+            });
+
+            // 2. Relative Material Share Bar Chart
+            materialChartInstance = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Cement (Bags)', 'Sand (m³)', 'Agg. (m³)', 'Bricks (x100)'],
+                    datasets: [{
+                        label: 'Quantity Summary',
+                        data: [
+                            totalCementBags.toFixed(1),
+                            totalSandVol.toFixed(1),
+                            totalAggVol.toFixed(1),
+                            (totalBricks / 100).toFixed(1)
+                        ],
+                        backgroundColor: ['#22c55e', '#f59e0b', '#3b82f6', '#f97316']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        function resetAllCalculators() {
+            if (confirm("Reset all inputs to site defaults?")) {
+                document.getElementById('concreteForm').reset();
+                document.getElementById('brickForm').reset();
+                document.getElementById('plasterForm').reset();
+
+                brickOpenings = [
+                    { name: 'Door D1', width: 1.0, height: 2.1, count: 2 },
+                    { name: 'Window W1', width: 1.2, height: 1.2, count: 2 }
+                ];
+
+                plasterOpenings = [
+                    { name: 'Main Door', width: 1.2, height: 2.1, count: 1 },
+                    { name: 'Window W1', width: 1.5, height: 1.2, count: 2 }
+                ];
+
+                renderBrickOpenings();
+                renderPlasterOpenings();
+
+                calculateConcrete();
+                calculateBrickwork();
+                calculatePlastering();
+                updateBOQAndCharts();
+            }
+        }
+    </script>
+</body>
+</html>
