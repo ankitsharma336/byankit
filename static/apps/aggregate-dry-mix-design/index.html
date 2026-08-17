@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aggregate Mix Design & Blending Analyzer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --ifm-color-primary: #166534;
+            --ifm-color-primary-dark: #14532d;
+            --ifm-color-primary-darker: #134e2b;
+            --ifm-color-primary-darkest: #0f3d22;
+            --ifm-color-primary-light: #15803d;
+            --ifm-color-primary-lighter: #16a34a;
+            --ifm-color-primary-lightest: #22c55e;
+
+            --ifm-background-color: #fcfcfb;
+            --ifm-background-surface-color: #ffffff;
+
+            /* Typography */
+            --ifm-font-color-base: #374151;
+            --ifm-font-color-secondary: #6b7280;
+            --ifm-heading-color: #1f2937;
+
+            --ifm-code-font-size: 95%;
+            --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+            --border-color: #e5e7eb;
+            --card-border-color: rgba(229, 231, 235, 0.8);
+            --input-bg: #f9fafb;
+        }
+
+        [data-theme='dark'] {
+            --ifm-color-primary: #25c2a0;
+            --ifm-color-primary-dark: #21af90;
+            --ifm-color-primary-darker: #1fa588;
+            --ifm-color-primary-darkest: #1a8870;
+            --ifm-color-primary-light: #29d5b0;
+            --ifm-color-primary-lighter: #32d8b4;
+            --ifm-color-primary-lightest: #4fddbf;
+
+            --ifm-background-color: #121212;
+            --ifm-background-surface-color: #1b1b1d;  
+
+            /* Typography */
+            --ifm-font-color-base: #e5e7eb;
+            --ifm-font-color-secondary: #9ca3af;
+            --ifm-heading-color: #ffffff;
+
+            --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+            --border-color: #2e2e32;
+            --card-border-color: #27272a;
+            --input-bg: #262629;
+        }
+
+        body {
+            background-color: var(--ifm-background-color);
+            color: var(--ifm-font-color-base);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .bg-surface {
+            background-color: var(--ifm-background-surface-color);
+        }
+
+        .text-heading {
+            color: var(--ifm-heading-color);
+        }
+
+        .text-secondary {
+            color: var(--ifm-font-color-secondary);
+        }
+
+        .border-theme {
+            border-color: var(--border-color);
+        }
+
+        .btn-primary {
+            background-color: var(--ifm-color-primary);
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            background-color: var(--ifm-color-primary-dark);
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--ifm-background-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--ifm-font-color-secondary);
+            border-radius: 4px;
+            opacity: 0.5;
+        }
+            #paste-modal.flex, #report-modal.flex { display:flex; }
+
+        /* Responsive layout + overflow hardening */
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { max-width: 100%; overflow-x: hidden; }
+        main, main > div, .bg-surface, .grid > *, .flex > * { min-width: 0; }
+        h1, h2, h3, h4, h5, h6, p, label, span, button, th, td, option {
+            overflow-wrap: anywhere;
+            word-break: normal;
+        }
+        input, select, textarea, button { max-width: 100%; }
+        input, select, textarea { min-width: 0; }
+        table { max-width: 100%; }
+        th, td { white-space: normal; vertical-align: top; }
+        .overflow-x-auto { scrollbar-gutter: stable; }
+        #gradation-table { min-width: 920px; }
+        #constraint-body { word-break: normal; }
+        #constraint-body td, #constraint-body th { overflow-wrap: anywhere; }
+        #proportion-sliders-container > div { min-width: 0; }
+        #proportion-sliders-container input[type="text"] { min-width: 0; width: 100%; }
+        #moisture-table, #sg-table, #batch-quantities, #sensitivity-results, #alternatives-results { min-width: 0; }
+        #moisture-table input, #sg-table input { width: 100%; min-width: 0; }
+        #moisture-table > div, #sg-table > div { min-width: 0; }
+        #report-content { min-width: 0; overflow-wrap: anywhere; }
+        #report-content table { width: 100%; max-width: 100%; table-layout: auto; }
+        #report-content th, #report-content td { overflow-wrap: anywhere; white-space: normal; }
+
+
+        /* Horizontal insight/summary card strip: prevents the lower utility cards from
+           becoming a long vertical column, while allowing each card to wrap internally. */
+        .insight-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+            min-width: 0;
+        }
+        .insight-grid > * {
+            min-width: 0;
+            width: 100%;
+            align-self: start;
+        }
+        .insight-grid .grid {
+            min-width: 0;
+        }
+        .insight-grid span,
+        .insight-grid p,
+        .insight-grid h3,
+        .insight-grid button,
+        .insight-grid label,
+        .insight-grid td,
+        .insight-grid th {
+            overflow-wrap: anywhere;
+            word-break: normal;
+        }
+        .insight-grid .overflow-x-auto {
+            min-width: 0;
+            max-width: 100%;
+        }
+        @media (min-width: 1100px) {
+            .insight-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        @media (max-width: 640px) {
+            .insight-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: .75rem;
+            }
+            .insight-grid > * {
+                padding: .8rem !important;
+                border-radius: 1rem !important;
+            }
+            .insight-grid .grid.grid-cols-2 {
+                gap: .5rem;
+            }
+            .insight-grid .text-lg { font-size: 1rem; line-height: 1.15; }
+            .insight-grid .text-sm { font-size: .72rem; line-height: 1.2; }
+            .insight-grid .text-xs { font-size: .64rem; line-height: 1.2; }
+            .insight-grid .text-\[11px\] { font-size: .62rem; line-height: 1.25; }
+            .insight-grid .text-\[10px\] { font-size: .58rem; line-height: 1.3; }
+            .insight-grid input,
+            .insight-grid select,
+            .insight-grid button {
+                min-width: 0;
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 767px) {
+            header > div {
+                height: auto !important;
+                min-height: 4rem;
+                flex-wrap: wrap;
+                gap: .5rem;
+                padding-top: .5rem;
+                padding-bottom: .5rem;
+            }
+            header > div > div:first-child { flex: 1 1 100%; min-width: 0; }
+            header > div > div:last-child {
+                width: 100%;
+                justify-content: flex-end;
+                flex-wrap: wrap;
+                gap: .4rem;
+            }
+            header button { flex: 0 1 auto; }
+            main { padding-left: .75rem !important; padding-right: .75rem !important; }
+            body > div.max-w-7xl { padding-left: .75rem !important; padding-right: .75rem !important; }
+
+            /* Project controls become a readable vertical form */
+            body > div.max-w-7xl > div > .grid {
+                grid-template-columns: 1fr !important;
+            }
+            body > div.max-w-7xl > div > .grid > div,
+            body > div.max-w-7xl > div > .grid > div.lg\\:col-span-2 {
+                grid-column: auto !important;
+            }
+            body > div.max-w-7xl > div > .grid > div:last-child {
+                flex-wrap: wrap;
+            }
+            body > div.max-w-7xl > div > .grid > div:last-child > * { min-width: 0; }
+
+            /* Keep card headings and controls aligned without clipping */
+            .bg-surface { overflow: hidden; }
+            .bg-surface > .flex.items-center.justify-between { flex-wrap: wrap; gap: .5rem; }
+            .bg-surface > .flex.items-center.justify-between > * { min-width: 0; }
+
+            /* Long specification and descriptive text wraps instead of forcing width */
+            #spec-description { white-space: normal; }
+            #spec-preset { white-space: normal; }
+
+            /* Constraint table: allow horizontal scroll, but never overflow the card */
+            #constraint-body { min-width: 430px; }
+            #constraint-body input { max-width: 100%; }
+
+            /* Moisture table: convert 5-column rows into compact 2-row blocks */
+            #moisture-table > div:not(:last-child) {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                row-gap: .35rem;
+                column-gap: .4rem;
+            }
+            #moisture-table > div:not(:last-child) > span:first-child {
+                grid-column: 1 / -1;
+                font-weight: 600;
+                min-width: 0;
+            }
+            #moisture-table > div:last-child {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                row-gap: .25rem;
+                column-gap: .4rem;
+            }
+            #moisture-table > div:last-child > span:first-child { grid-column: 1 / -1; }
+
+            /* Specific gravity rows stay compact */
+            #sg-table > div { grid-template-columns: minmax(0, 1.5fr) minmax(55px, .8fr) minmax(55px, .8fr) !important; }
+
+            /* Better wrapping for metric / status cards */
+            .grid.grid-cols-2 > * { min-width: 0; }
+            .grid.grid-cols-2 span, .grid.grid-cols-4 span { overflow-wrap: anywhere; }
+
+            /* Main gradation matrix intentionally scrolls horizontally on phones */
+            .overflow-x-auto { max-width: 100%; }
+            #gradation-table input { min-width: 3.5rem; }
+
+            /* Make chart title/controls stack cleanly */
+            #gradationChart { max-width: 100%; }
+        }
+
+        @media (min-width: 768px) and (max-width: 1100px) {
+            #gradation-table { min-width: 860px; }
+            .lg\\:col-span-4, .lg\\:col-span-8 { min-width: 0; }
+        }
+
+        @media print {
+            html, body { overflow: visible !important; }
+            #gradation-table { min-width: 0 !important; }
+            #report-content table { table-layout: fixed; font-size: 8pt; }
+            #report-content th, #report-content td { padding: 4px !important; overflow-wrap: anywhere; }
+        }
+
+        @media print { .fixed { position:static !important; } #report-modal { display:block !important; background:#fff !important; } #report-modal > div { max-width:none !important; max-height:none !important; box-shadow:none !important; border:none !important; } body > *:not(#report-modal) { display:none !important; } }
+    
+        /* Application tabs */
+        .app-tabs {
+            display:flex;
+            gap:.5rem;
+            flex-wrap:wrap;
+            margin-bottom:1rem;
+            padding:.25rem;
+            background:var(--ifm-background-surface-color);
+            border:1px solid var(--border-color);
+            border-radius:1rem;
+        }
+        .app-tab {
+            flex:0 0 auto;
+            border:1px solid transparent;
+            color:var(--ifm-font-color-secondary);
+            background:transparent;
+            padding:.65rem 1rem;
+            border-radius:.75rem;
+            font-size:.75rem;
+            font-weight:700;
+            cursor:pointer;
+            transition:all .2s ease;
+        }
+        .app-tab:hover { background:rgba(22,101,52,.08); color:var(--ifm-heading-color); }
+        .app-tab.active {
+            color:#fff;
+            background:var(--ifm-color-primary);
+            box-shadow:0 4px 12px rgba(22,101,52,.18);
+        }
+        .app-panel { display:none; }
+        .app-panel.active { display:block; }
+        .analysis-grid {
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:1rem;
+            align-items:start;
+        }
+        .analysis-grid > * { min-width:0; }
+        .analysis-grid .analysis-wide { grid-column:1 / -1; }
+        .analysis-card { min-width:0; overflow:hidden; }
+        .analysis-card * { min-width:0; max-width:100%; }
+        .analysis-card table { width:100%; }
+        @media (max-width: 768px) {
+            .app-tabs { overflow-x:auto; flex-wrap:nowrap; scrollbar-width:thin; }
+            .app-tab { white-space:nowrap; }
+            .analysis-grid { grid-template-columns:1fr; }
+            .analysis-grid .analysis-wide { grid-column:auto; }
+        }
+        @media print {
+            .app-tabs { display:none !important; }
+            .app-panel { display:block !important; }
+            .analysis-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+        }
+</style>
+    <script>
+        tailwind.config = {
+            darkMode: ['selector', '[data-theme="dark"]'],
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: 'var(--ifm-color-primary-lightest)',
+                            100: 'var(--ifm-color-primary-lighter)',
+                            500: 'var(--ifm-color-primary)',
+                            600: 'var(--ifm-color-primary-dark)',
+                            700: 'var(--ifm-color-primary-darker)',
+                            900: 'var(--ifm-color-primary-darkest)',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full font-sans flex flex-col min-h-screen antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-surface text-heading border-b border-theme sticky top-0 z-30 shadow-sm transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="p-2.5 rounded-xl text-white shadow-md transition-all" style="background-color: var(--ifm-color-primary);">
+                    <i class="fa-solid fa-layer-group text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-tight leading-none text-heading flex items-center gap-2">
+                        Agg Mix Design ByAnkit <span class="text-xs font-semibold px-2 py-0.5 rounded-full border" style="background-color: var(--ifm-color-primary-lightest); color: var(--ifm-color-primary-darkest); border-color: var(--ifm-color-primary-lighter);">MoRTH / IRC Spec</span>
+                    </h1>
+                    <p class="text-xs text-secondary mt-0.5">Dry Aggregate Blending & Job Mix Formula Optimizer</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <button id="theme-toggle" onclick="toggleTheme()" class="p-2 rounded-lg border border-theme text-secondary hover:text-heading transition flex items-center gap-1.5 text-xs font-medium" title="Toggle Light/Dark Theme">
+                    <i id="theme-toggle-icon" class="fa-solid fa-moon text-amber-500"></i>
+                    <span id="theme-toggle-text" class="hidden sm:inline">Dark Mode</span>
+                </button>
+                <button id="btn-auto-optimize" onclick="autoOptimizeMix()" class="px-3.5 py-2 btn-primary rounded-lg text-xs sm:text-sm font-semibold shadow-md hover:shadow-lg transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+                    <span>Optimize Blend</span>
+                </button>
+                <button onclick="exportToCSV()" class="px-3 py-2 bg-surface hover:bg-slate-100 dark:hover:bg-zinc-800 text-secondary hover:text-heading border border-theme rounded-lg text-xs sm:text-sm font-medium transition flex items-center gap-1.5" title="Export CSV Data">
+                    <i class="fa-solid fa-file-csv text-emerald-500"></i>
+                    <span class="hidden sm:inline">Export CSV</span>
+                </button>
+                <button onclick="openProfessionalReport()" class="px-3 py-2 bg-surface hover:bg-slate-100 dark:hover:bg-zinc-800 text-secondary hover:text-heading border border-theme rounded-lg text-xs sm:text-sm font-medium transition flex items-center gap-1.5" title="Professional JMF Report">
+                    <i class="fa-solid fa-print text-sky-500"></i>
+                    <span class="hidden sm:inline">Report</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Project / workflow controls -->
+    <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-4">
+        <div class="bg-surface rounded-2xl border border-theme shadow-sm p-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2.5 text-xs">
+                <div class="lg:col-span-2"><label class="block text-secondary mb-1">Project</label><input id="project-name" value="Aggregate Blend / JMF" class="w-full bg-slate-50 dark:bg-zinc-900 border border-theme rounded-lg px-2.5 py-2 text-heading" /></div>
+                <div class="lg:col-span-2"><label class="block text-secondary mb-1">Prepared By</label><input id="prepared-by" placeholder="Name / Department" class="w-full bg-slate-50 dark:bg-zinc-900 border border-theme rounded-lg px-2.5 py-2 text-heading" /></div>
+                <div><label class="block text-secondary mb-1">Batch Qty (t)</label><input id="batch-qty" type="number" value="100" min="0.1" step="0.1" oninput="updateBatchQuantities()" class="w-full bg-slate-50 dark:bg-zinc-900 border border-theme rounded-lg px-2.5 py-2 text-heading" /></div>
+                <div><label class="block text-secondary mb-1">Mode</label><select id="optimization-mode" onchange="updateOptimizationObjective()" class="w-full bg-slate-50 dark:bg-zinc-900 border border-theme rounded-lg px-2 py-2 text-heading"><option value="balanced">Balanced</option><option value="target">Target curve</option><option value="cost">Minimum cost</option><option value="fines">Minimum fines</option></select></div>
+                <div class="lg:col-span-2 flex gap-2 items-end"><button onclick="openDataTools()" class="flex-1 py-2 rounded-lg border border-theme text-heading font-semibold hover:bg-slate-100 dark:hover:bg-zinc-800"><i class="fa-solid fa-file-import mr-1.5"></i>Lab Data</button><button onclick="saveProject()" class="flex-1 py-2 rounded-lg border border-theme text-heading font-semibold hover:bg-slate-100 dark:hover:bg-zinc-800"><i class="fa-solid fa-floppy-disk mr-1.5"></i>Save</button><button onclick="document.getElementById('load-project-input').click()" class="py-2 px-3 rounded-lg border border-theme text-heading font-semibold hover:bg-slate-100 dark:hover:bg-zinc-800" title="Load project"><i class="fa-solid fa-folder-open"></i></button><input id="load-project-input" type="file" accept="application/json" class="hidden" onchange="loadProjectFile(this.files[0])"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <div class="app-tabs no-print" role="tablist" aria-label="AggBlend sections">
+            <button id="app-tab-design" class="app-tab active" onclick="switchAppTab('design')" role="tab" aria-selected="true">
+                <i class="fa-solid fa-layer-group mr-1.5"></i> Blend Design
+            </button>
+            <button id="app-tab-analysis" class="app-tab" onclick="switchAppTab('analysis')" role="tab" aria-selected="false">
+                <i class="fa-solid fa-chart-pie mr-1.5"></i> Analysis & JMF
+            </button>
+        </div>
+    </div>
+
+    <div id="app-panel-design" class="app-panel active">
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Controls Column (4 cols on lg) -->
+        <div class="lg:col-span-4 flex flex-col space-y-6">
+            
+            <!-- Specification Selector Card -->
+            <div class="bg-surface rounded-2xl shadow-sm border border-theme p-5 transition-all">
+                <div class="flex items-center justify-between mb-3">
+                    <label for="spec-preset" class="text-xs font-bold uppercase tracking-wider text-secondary flex items-center gap-2">
+                        <i class="fa-solid fa-book border-l-2 pl-1.5" style="border-color: var(--ifm-color-primary); color: var(--ifm-color-primary);"></i> Mix Specification
+                    </label>
+                    <span id="spec-status-badge" class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
+                        <i class="fa-solid fa-check-circle mr-1"></i> Pass
+                    </span>
+                </div>
+                <select id="spec-preset" onchange="loadPresetSpecification(this.value)" class="w-full bg-slate-50 dark:bg-zinc-900 border border-theme rounded-xl px-3.5 py-2.5 text-heading font-semibold text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                    <optgroup label="GSB (Granular Sub-Base - MoRTH)">
+                        <option value="gsb1" selected>GSB Grade 1 (Coarse Graded: 75mm - 0.075mm)</option>
+                        <option value="gsb2">GSB Grade 2 (Coarse Graded: 53mm - 0.075mm)</option>
+                        <option value="gsb3">GSB Grade 3 (Close Graded: 75mm - 0.075mm)</option>
+                        <option value="gsb4">GSB Grade 4 (Close Graded: 53mm - 0.075mm)</option>
+                        <option value="gsb5">GSB Grade 5 (53mm Max)</option>
+                        <option value="gsb6">GSB Grade 6 (26.5mm Max)</option>
+                    </optgroup>
+                    <optgroup label="WMM & Concrete Sub-Bases">
+                        <option value="wmm">WMM (Wet Mix Macadam: 53mm - 0.075mm)</option>
+                        <option value="dlc">DLC (Dry Lean Concrete: 37.5mm - 0.075mm)</option>
+                    </optgroup>
+                    <optgroup label="Bituminous Mixes">
+                        <option value="dbm2">DBM Grade 2 (Dense Bituminous Macadam: 26.5mm)</option>
+                        <option value="bc1">BC Grade 1 (Bituminous Concrete: 19mm)</option>
+                        <option value="bc2">BC Grade 2 (Bituminous Concrete: 13.2mm)</option>
+                    </optgroup>
+                    <optgroup label="Custom Options">
+                        <option value="custom">Custom Specification Band</option>
+                    </optgroup>
+                </select>
+                <p id="spec-description" class="text-xs text-secondary mt-2 leading-relaxed">
+                    Standard coarse-graded Granular Sub-Base specification as per MoRTH Table 400-1 (5th Revision).
+                </p>
+                <div class="mt-3 flex gap-2">
+                    <button onclick="loadSampleGradationData()" class="w-full text-xs font-semibold rounded-lg py-1.5 px-3 transition flex items-center justify-center gap-1.5 border border-theme" style="color: var(--ifm-color-primary); background-color: rgba(22, 101, 52, 0.08);">
+                        <i class="fa-solid fa-rotate-left"></i> Load Typical Aggregate Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- Aggregate Mix Proportion Controls -->
+            <div class="bg-surface rounded-2xl shadow-sm border border-theme p-5 flex-1 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-secondary flex items-center gap-2">
+                            <i class="fa-solid fa-sliders border-l-2 pl-1.5" style="border-color: var(--ifm-color-primary); color: var(--ifm-color-primary);"></i> Blending Proportions
+                        </h2>
+                        <div class="text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-zinc-800 border border-theme text-heading" id="total-proportion-display">
+                            Total: <span id="total-proportion-val" style="color: var(--ifm-color-primary);">100</span>%
+                        </div>
+                    </div>
+
+                    <!-- Aggregate Weight Sliders Container -->
+                    <div id="proportion-sliders-container" class="space-y-4 max-h-[380px] overflow-y-auto pr-1">
+                        <!-- Dynamic sliders injected via JS -->
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-theme mt-4 space-y-2">
+                    <div class="flex gap-2">
+                        <button onclick="normalizeProportions()" class="flex-1 text-xs font-semibold text-heading bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 border border-theme rounded-xl py-2 px-3 transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-scale-balanced text-secondary"></i> Normalize to 100%
+                        </button>
+                        <button onclick="addAggregateColumn()" class="text-xs font-semibold rounded-xl py-2 px-3 transition flex items-center justify-center gap-1 border border-theme" style="color: var(--ifm-color-primary); background-color: rgba(22, 101, 52, 0.08);">
+                            <i class="fa-solid fa-plus"></i> Add Fraction
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-surface rounded-2xl shadow-sm border border-theme p-5">
+                <div class="flex items-center justify-between mb-3"><h3 class="text-xs font-bold uppercase tracking-wider text-secondary flex items-center gap-2"><i class="fa-solid fa-bullseye text-brand-500"></i> Target Curve & Constraints</h3><button onclick="resetConstraintsAndTarget()" class="text-[10px] text-secondary hover:text-heading">Reset</button></div>
+                <div class="grid grid-cols-2 gap-2 text-xs mb-3">
+                    <label class="flex items-center gap-2"><input type="checkbox" id="use-target-curve" onchange="renderGradationTable();updateChart();updateMetrics()" class="accent-emerald-600"> Use target curve</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" id="show-margins" checked onchange="renderGradationTable()" class="accent-emerald-600"> Show margins</label>
+                </div>
+                <div class="overflow-x-auto rounded-xl border border-theme">
+                    <table class="w-full text-[11px]"><thead class="bg-slate-50 dark:bg-zinc-900"><tr><th class="p-2 text-left">Aggregate</th><th class="p-2">Min%</th><th class="p-2">Max%</th><th class="p-2">Lock</th><th class="p-2">Cost ₹/t</th></tr></thead><tbody id="constraint-body"></tbody></table>
+                </div>
+                <p class="mt-2 text-[10px] text-secondary">Locked values remain fixed during optimization. Min/max constraints define feasible production ranges.</p>
+            </div>
+
+            <!-- Lab Data Tools -->
+            <div id="data-tools-card" class="bg-surface rounded-2xl shadow-sm border border-theme p-5">
+                <div class="flex items-center justify-between mb-3"><h3 class="text-xs font-bold uppercase tracking-wider text-secondary flex items-center gap-2"><i class="fa-solid fa-flask text-brand-500"></i> Laboratory Data Import</h3><button onclick="closeDataTools()" class="text-secondary">×</button></div>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <label class="border border-dashed border-theme rounded-xl p-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-900"><i class="fa-solid fa-file-csv mr-1"></i> CSV / Excel file<input id="lab-file" type="file" accept=".csv,.txt,.xlsx,.xls" onchange="importLabFile(this.files[0])" class="hidden"></label>
+                    <button onclick="document.getElementById('paste-modal').classList.remove('hidden')" class="border border-dashed border-theme rounded-xl p-3 text-heading hover:bg-slate-50 dark:hover:bg-zinc-900"><i class="fa-solid fa-paste mr-1"></i> Paste from Excel</button>
+                </div>
+                <p id="lab-import-status" class="text-[10px] text-secondary mt-2">Import columns should contain Sieve (mm) and one or more aggregate % passing columns.</p>
+            </div>
+
+
+
+        </div>
+
+        <!-- Right Main Column: Chart and Input Gradation Matrix (8 cols on lg) -->
+        <div class="lg:col-span-8 flex flex-col space-y-6">
+
+            <!-- Particle Size Distribution Chart Card -->
+            <div class="bg-surface rounded-2xl shadow-sm border border-theme p-5">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <div>
+                        <h2 class="text-sm font-bold uppercase tracking-wider text-heading flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line" style="color: var(--ifm-color-primary);"></i> Particle Size Distribution Envelope
+                        </h2>
+                        <p class="text-xs text-secondary">Semi-logarithmic cumulative percentage passing vs standard sieve size (mm)</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="inline-flex items-center cursor-pointer text-xs font-medium text-secondary">
+                            <input type="checkbox" id="toggle-individual-lines" checked onchange="updateChart()" class="sr-only peer">
+                            <div class="w-8 h-4 bg-slate-200 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all relative" style="--tw-bg-opacity: 1;" id="toggle-slider-bg"></div>
+                            <span class="ml-2">Show Fraction Lines</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Canvas Chart Area -->
+                <div class="relative w-full h-[340px] sm:h-[400px]">
+                    <canvas id="gradationChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Gradation Matrix & Table Input Section -->
+            <div class="bg-surface rounded-2xl shadow-sm border border-theme p-5 overflow-hidden">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <div>
+                        <h2 class="text-sm font-bold uppercase tracking-wider text-heading flex items-center gap-2">
+                            <i class="fa-solid fa-table border-l-2 pl-1.5" style="border-color: var(--ifm-color-primary); color: var(--ifm-color-primary);"></i> Aggregate Gradation Inputs (% Passing)
+                        </h2>
+                        <p class="text-xs text-secondary">Enter laboratory sieve analysis results for each source aggregate</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="addSieveRow()" class="px-2.5 py-1.5 text-xs font-medium bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-heading rounded-lg border border-theme transition flex items-center gap-1">
+                            <i class="fa-solid fa-plus text-secondary"></i> Add Sieve
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto -mx-5 px-5">
+                    <table class="w-full text-left text-xs border-collapse" id="gradation-table">
+                        <thead>
+                            <tr class="bg-slate-50 dark:bg-zinc-900/60 border-y border-theme text-secondary font-bold uppercase tracking-wider">
+                                <th class="py-3 px-3 min-w-[100px]">Sieve (mm)</th>
+                                <th class="py-3 px-2 text-center min-w-[75px] bg-slate-100/60 dark:bg-zinc-800/60">Lower Limit</th>
+                                <th class="py-3 px-2 text-center min-w-[75px] bg-slate-100/60 dark:bg-zinc-800/60">Upper Limit</th>
+                                <!-- Dynamic Aggregate Source Headers -->
+                                <th id="aggregates-header-anchor" class="hidden"></th>
+                                <th class="py-3 px-3 text-center min-w-[100px] text-heading" style="background-color: rgba(22, 101, 52, 0.1);">Combined %</th>
+                                <th class="py-3 px-3 text-center min-w-[90px]">Status</th>
+                                <th class="py-3 px-2 text-center w-8"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="gradation-tbody" class="divide-y divide-theme font-medium text-heading">
+                            <!-- Rows populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+    </div>
+
+    <div id="app-panel-analysis" class="app-panel">
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="mb-5">
+                <h2 class="text-base font-bold text-heading">Analysis, JMF & Quality</h2>
+                <p class="text-xs text-secondary mt-1">Review gradation metrics, blend quality, production quantities, moisture, volumetrics, robustness and alternative designs in one workspace.</p>
+            </div>
+            <div class="analysis-grid">
+            <!-- Quick Physical Metrics Summary -->
+            <div class="analysis-card rounded-2xl shadow-md p-5 border border-theme text-white" style="background: linear-gradient(135deg, var(--ifm-color-primary-darkest), var(--ifm-color-primary-dark));">
+                <h3 class="text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2 opacity-90"><i class="fa-solid fa-chart-pie"></i> Gradation Parameters</h3>
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div class="bg-black/20 border border-white/10 rounded-xl p-3"><span class="opacity-75 block mb-0.5">Fineness Modulus (FM)</span><span id="metric-fm" class="text-lg font-bold text-amber-300">N/A</span></div>
+                    <div class="bg-black/20 border border-white/10 rounded-xl p-3"><span class="opacity-75 block mb-0.5">Fines (&lt;0.075mm)</span><span id="metric-fines" class="text-lg font-bold text-emerald-300">N/A</span></div>
+                    <div class="bg-black/20 border border-white/10 rounded-xl p-3"><span class="opacity-75 block mb-0.5">D10 / D30 / D60 (mm)</span><span id="metric-dsizes" class="text-sm font-semibold text-white">N/A / N/A / N/A</span></div>
+                    <div class="bg-black/20 border border-white/10 rounded-xl p-3"><span class="opacity-75 block mb-0.5">Cu / Cc</span><span id="metric-cu-cc" class="text-sm font-semibold text-white">N/A / N/A</span></div>
+                </div>
+            </div>
+
+            <div class="analysis-card bg-surface rounded-2xl shadow-sm border border-theme p-5">
+                <div class="flex items-center justify-between mb-3"><h3 class="text-xs font-bold uppercase tracking-wider text-secondary flex items-center gap-2"><i class="fa-solid fa-bullseye text-brand-500"></i> Blend Quality</h3><span id="robustness-badge" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-zinc-800 text-secondary">Not evaluated</span></div>
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div class="p-3 rounded-xl border border-theme bg-slate-50 dark:bg-zinc-900"><span class="text-secondary block">Critical sieve</span><span id="critical-sieve" class="font-bold text-heading">—</span></div>
+                    <div class="p-3 rounded-xl border border-theme bg-slate-50 dark:bg-zinc-900"><span class="text-secondary block">Minimum margin</span><span id="critical-margin" class="font-bold text-heading">—</span></div>
+                </div>
+                <div class="mt-3 text-[11px] text-secondary">Robustness measures the closest normalized distance of the blend to the specification boundaries; a passing blend can still be low-robustness.</div>
+            </div>
+
+            <div class="analysis-card bg-surface rounded-2xl shadow-sm border border-theme p-5">
+                <div class="flex items-center justify-between mb-3"><h3 class="text-xs font-bold uppercase tracking-wider text-secondary flex items-center gap-2"><i class="fa-solid fa-industry text-brand-500"></i> JMF Batch Quantities</h3><span class="text-[10px] text-secondary">Dry basis</span></div>
+                <div id="batch-quantities" class="space-y-1.5 text-xs"></div>
+            </div>
+
+            <div class="analysis-card bg-surface rounded-2xl shadow-sm border border-theme p-5">
+                <div class="flex items-center justify-between mb-3"><h3 class="text-xs font-bold uppercase tracking-wider text-secondary flex items-center gap-2"><i class="fa-solid fa-droplet text-brand-500"></i> Moisture Correction</h3><span class="text-[10px] text-secondary">Optional</span></div>
+                <div id="moisture-table" class="space-y-2 text-[11px]"></div>
+                <div class="mt-3 p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-theme text-[10px] text-secondary">Free water contribution is estimated as dry mass × (moisture − absorption). Wet batch mass is dry mass × (1 + moisture). Use project/lab practice for final plant water control.</div>
+            </div>
+
+            <div class="analysis-card bg-surface rounded-2xl shadow-sm border border-theme p-5">
+                <div class="flex items-center justify-between mb-3"><h3 class="text-xs font-bold uppercase tracking-wider text-secondary flex items-center gap-2"><i class="fa-solid fa-flask-vial text-brand-500"></i> Specific Gravity / Volumetrics</h3><span class="text-[10px] text-secondary">Optional</span></div>
+                <div id="sg-table" class="space-y-2 text-[11px]"></div>
+                <div class="mt-3 grid grid-cols-2 gap-2"><div class="p-2 rounded-xl border border-theme bg-slate-50 dark:bg-zinc-900"><span class="text-secondary block">Combined Gsb</span><span id="combined-gsb" class="font-bold text-heading">N/A</span></div><div class="p-2 rounded-xl border border-theme bg-slate-50 dark:bg-zinc-900"><span class="text-secondary block">Blend dry mass</span><span id="blend-dry-mass" class="font-bold text-heading">—</span></div></div>
+            </div>
+
+            <div class="analysis-card bg-surface rounded-2xl shadow-sm border border-theme p-5">
+                <div class="flex items-center justify-between mb-3"><h3 class="text-xs font-bold uppercase tracking-wider text-secondary flex items-center gap-2"><i class="fa-solid fa-chart-line text-brand-500"></i> Robustness & Sensitivity</h3><button onclick="runSensitivityAnalysis()" class="text-[10px] font-semibold text-brand-600 hover:text-brand-700">Run ±5%</button></div>
+                <div id="sensitivity-results" class="space-y-2 text-[11px]"><span class="text-secondary">Run sensitivity to see which source most affects compliance.</span></div>
+            </div>
+
+            <div class="analysis-card bg-surface rounded-2xl shadow-sm border border-theme p-5">
+                <div class="flex items-center justify-between mb-3"><h3 class="text-xs font-bold uppercase tracking-wider text-secondary flex items-center gap-2"><i class="fa-solid fa-code-compare text-brand-500"></i> Design Alternatives</h3><button onclick="generateAlternatives()" class="text-[10px] font-semibold text-brand-600 hover:text-brand-700">Generate</button></div>
+                <div id="alternatives-results" class="space-y-2 text-[11px]"><span class="text-secondary">Generate up to three feasible alternative blends.</span></div>
+            </div>
+
+            </div>
+        </section>
+    </div>
+
+    <div id="paste-modal" class="hidden fixed inset-0 bg-black/50 z-50 items-center justify-center p-4">
+      <div class="bg-surface rounded-2xl shadow-2xl border border-theme w-full max-w-3xl p-5">
+        <div class="flex items-center justify-between mb-3"><h3 class="font-bold text-heading">Paste Laboratory Gradation</h3><button onclick="document.getElementById('paste-modal').classList.add('hidden')" class="text-secondary">×</button></div>
+        <p class="text-xs text-secondary mb-2">Paste tab-separated or CSV data from Excel. First column should be sieve size (mm); remaining columns are % passing by aggregate source.</p>
+        <textarea id="lab-paste" rows="12" class="w-full bg-slate-50 dark:bg-zinc-900 border border-theme rounded-xl p-3 text-xs font-mono text-heading" placeholder="Sieve	Aggregate A	Aggregate B
+75	100	100
+53	90	100
+..."></textarea>
+        <div class="flex justify-end gap-2 mt-3"><button onclick="document.getElementById('paste-modal').classList.add('hidden')" class="px-3 py-2 rounded-lg border border-theme text-xs">Cancel</button><button onclick="importLabPaste()" class="px-3 py-2 rounded-lg btn-primary text-xs font-semibold">Import Data</button></div>
+      </div>
+    </div>
+
+    <div id="report-modal" class="hidden fixed inset-0 bg-black/50 z-50 items-center justify-center p-4">
+      <div class="bg-surface rounded-2xl shadow-2xl border border-theme w-full max-w-5xl max-h-[90vh] overflow-y-auto p-6">
+        <div class="flex items-center justify-between mb-4"><h3 class="font-bold text-heading">Professional Blend / JMF Report Preview</h3><div class="flex gap-2"><button onclick="window.print()" class="px-3 py-2 btn-primary rounded-lg text-xs font-semibold">Print</button><button onclick="document.getElementById('report-modal').classList.add('hidden')" class="text-secondary px-2">×</button></div></div>
+        <div id="report-content"></div>
+      </div>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Color Palette for Aggregate Sources
+        const colorPalette = ['#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#06b6d4'];
+
+        // MoRTH & IRC Preset Specifications & Sample Aggregate Data
+        const PRESET_SPECS = {
+            gsb1: {
+                name: "GSB Grade 1 (Coarse Graded)",
+                desc: "Granular Sub-Base Grade I (Coarse Graded: 75mm - 0.075mm) per MoRTH Table 400-1.",
+                sieves: [
+                    { size: 75, lower: 100, upper: 100 },
+                    { size: 53, lower: 80, upper: 100 },
+                    { size: 26.5, lower: 55, upper: 90 },
+                    { size: 9.5, lower: 35, upper: 65 },
+                    { size: 4.75, lower: 25, upper: 55 },
+                    { size: 2.36, lower: 20, upper: 40 },
+                    { size: 0.425, lower: 10, upper: 25 },
+                    { size: 0.075, lower: 0, upper: 5 }
+                ],
+                sampleAggregates: [
+                    { name: "Coarse Agg (40mm+)", proportion: 40, color: "#3b82f6", passing: [100, 92, 25, 2, 0, 0, 0, 0] },
+                    { name: "Medium Agg (20mm)", proportion: 30, color: "#f59e0b", passing: [100, 100, 95, 45, 8, 1, 0, 0] },
+                    { name: "Screenings (10mm-)", proportion: 20, color: "#8b5cf6", passing: [100, 100, 100, 98, 85, 48, 12, 2] },
+                    { name: "Crusher Dust / Soil", proportion: 10, color: "#ec4899", passing: [100, 100, 100, 100, 100, 92, 65, 18] }
+                ]
+            },
+            gsb2: {
+                name: "GSB Grade 2 (Coarse Graded)",
+                desc: "Granular Sub-Base Grade II (Coarse Graded: 53mm - 0.075mm) per MoRTH Table 400-1.",
+                sieves: [
+                    { size: 53, lower: 100, upper: 100 },
+                    { size: 26.5, lower: 70, upper: 100 },
+                    { size: 9.5, lower: 50, upper: 80 },
+                    { size: 4.75, lower: 40, upper: 65 },
+                    { size: 2.36, lower: 30, upper: 50 },
+                    { size: 0.425, lower: 15, upper: 25 },
+                    { size: 0.075, lower: 0, upper: 5 }
+                ],
+                sampleAggregates: [
+                    { name: "Agg 40mm", proportion: 35, color: "#3b82f6", passing: [100, 45, 8, 2, 0, 0, 0] },
+                    { name: "Agg 20mm", proportion: 35, color: "#f59e0b", passing: [100, 98, 62, 20, 4, 0, 0] },
+                    { name: "Stone Dust", proportion: 30, color: "#8b5cf6", passing: [100, 100, 98, 88, 70, 38, 7] }
+                ]
+            },
+            gsb3: {
+                name: "GSB Grade 3 (Close Graded)",
+                desc: "Granular Sub-Base Grade III (Close Graded: 75mm - 0.075mm) per MoRTH Table 400-1.",
+                sieves: [
+                    { size: 75, lower: 100, upper: 100 },
+                    { size: 53, lower: 80, upper: 100 },
+                    { size: 26.5, lower: 60, upper: 90 },
+                    { size: 9.5, lower: 45, upper: 75 },
+                    { size: 4.75, lower: 35, upper: 60 },
+                    { size: 2.36, lower: 25, upper: 45 },
+                    { size: 0.425, lower: 12, upper: 28 },
+                    { size: 0.075, lower: 0, upper: 8 }
+                ],
+                sampleAggregates: [
+                    { name: "Fraction 1 (40mm+)", proportion: 30, color: "#3b82f6", passing: [100, 85, 20, 5, 0, 0, 0, 0] },
+                    { name: "Fraction 2 (20mm)", proportion: 35, color: "#f59e0b", passing: [100, 100, 92, 55, 12, 2, 0, 0] },
+                    { name: "Fine Agg / Dust", proportion: 35, color: "#8b5cf6", passing: [100, 100, 100, 96, 82, 58, 28, 6] }
+                ]
+            },
+            gsb4: {
+                name: "GSB Grade 4 (Close Graded)",
+                desc: "Granular Sub-Base Grade IV (Close Graded: 53mm - 0.075mm) per MoRTH Table 400-1.",
+                sieves: [
+                    { size: 53, lower: 100, upper: 100 },
+                    { size: 26.5, lower: 75, upper: 100 },
+                    { size: 9.5, lower: 55, upper: 85 },
+                    { size: 4.75, lower: 40, upper: 70 },
+                    { size: 2.36, lower: 30, upper: 55 },
+                    { size: 0.425, lower: 15, upper: 30 },
+                    { size: 0.075, lower: 0, upper: 8 }
+                ],
+                sampleAggregates: [
+                    { name: "Coarse Metal", proportion: 40, color: "#3b82f6", passing: [100, 60, 12, 3, 0, 0, 0] },
+                    { name: "Grit / Small Metal", proportion: 30, color: "#f59e0b", passing: [100, 100, 85, 45, 10, 1, 0] },
+                    { name: "Crusher Run Dust", proportion: 30, color: "#8b5cf6", passing: [100, 100, 98, 90, 72, 36, 8] }
+                ]
+            },
+            gsb5: {
+                name: "GSB Grade 5",
+                desc: "Granular Sub-Base Grade V (53mm Max Nominal Size) per MoRTH Table 400-1.",
+                sieves: [
+                    { size: 53, lower: 100, upper: 100 },
+                    { size: 26.5, lower: 70, upper: 100 },
+                    { size: 4.75, lower: 30, upper: 65 },
+                    { size: 0.075, lower: 0, upper: 5 }
+                ],
+                sampleAggregates: [
+                    { name: "40mm Agg", proportion: 45, color: "#3b82f6", passing: [100, 50, 5, 0] },
+                    { name: "20mm Agg", proportion: 25, color: "#f59e0b", passing: [100, 95, 20, 0] },
+                    { name: "Quarry Dust", proportion: 30, color: "#8b5cf6", passing: [100, 100, 88, 5] }
+                ]
+            },
+            gsb6: {
+                name: "GSB Grade 6",
+                desc: "Granular Sub-Base Grade VI (26.5mm Max Nominal Size) per MoRTH Table 400-1.",
+                sieves: [
+                    { size: 26.5, lower: 100, upper: 100 },
+                    { size: 9.5, lower: 65, upper: 95 },
+                    { size: 4.75, lower: 50, upper: 80 },
+                    { size: 2.36, lower: 40, upper: 65 },
+                    { size: 0.425, lower: 20, upper: 35 },
+                    { size: 0.075, lower: 0, upper: 5 }
+                ],
+                sampleAggregates: [
+                    { name: "20mm Agg", proportion: 35, color: "#3b82f6", passing: [100, 45, 10, 2, 0, 0] },
+                    { name: "10mm Agg", proportion: 35, color: "#f59e0b", passing: [100, 95, 75, 25, 2, 0] },
+                    { name: "Stone Dust", proportion: 30, color: "#8b5cf6", passing: [100, 100, 98, 85, 52, 6] }
+                ]
+            },
+            wmm: {
+                name: "WMM (Wet Mix Macadam)",
+                desc: "Wet Mix Macadam Sub-base / Base course grading per MoRTH Table 400-11.",
+                sieves: [
+                    { size: 53, lower: 100, upper: 100 },
+                    { size: 45, lower: 95, upper: 100 },
+                    { size: 22.4, lower: 60, upper: 80 },
+                    { size: 11.2, lower: 40, upper: 60 },
+                    { size: 4.75, lower: 25, upper: 40 },
+                    { size: 2.36, lower: 15, upper: 30 },
+                    { size: 0.6, lower: 8, upper: 22 },
+                    { size: 0.075, lower: 0, upper: 5 }
+                ],
+                sampleAggregates: [
+                    { name: "40mm Aggregate", proportion: 35, color: "#3b82f6", passing: [100, 98, 25, 5, 0, 0, 0, 0] },
+                    { name: "20mm Aggregate", proportion: 25, color: "#f59e0b", passing: [100, 100, 95, 40, 5, 1, 0, 0] },
+                    { name: "10mm Aggregate", proportion: 15, color: "#8b5cf6", passing: [100, 100, 100, 98, 60, 10, 1, 0] },
+                    { name: "Stone Dust", proportion: 25, color: "#ec4899", passing: [100, 100, 100, 100, 90, 72, 38, 7] }
+                ]
+            },
+            dlc: {
+                name: "DLC (Dry Lean Concrete)",
+                desc: "Dry Lean Concrete Sub-base per IRC:SP:49 & IRC:15.",
+                sieves: [
+                    { size: 37.5, lower: 100, upper: 100 },
+                    { size: 26.5, lower: 75, upper: 95 },
+                    { size: 19, lower: 50, upper: 80 },
+                    { size: 9.5, lower: 30, upper: 60 },
+                    { size: 4.75, lower: 20, upper: 45 },
+                    { size: 0.6, lower: 10, upper: 25 },
+                    { size: 0.075, lower: 0, upper: 6 }
+                ],
+                sampleAggregates: [
+                    { name: "40mm Single Size", proportion: 30, color: "#3b82f6", passing: [100, 60, 20, 2, 0, 0, 0] },
+                    { name: "20mm Single Size", proportion: 35, color: "#f59e0b", passing: [100, 100, 92, 45, 6, 0, 0] },
+                    { name: "Fine Agg (Zone II)", proportion: 35, color: "#8b5cf6", passing: [100, 100, 100, 96, 80, 32, 4] }
+                ]
+            },
+            dbm2: {
+                name: "DBM Grade 2 (Dense Bituminous Macadam)",
+                desc: "Dense Bituminous Macadam Grade 2 (26.5mm Nominal Size) per MoRTH Table 500-10.",
+                sieves: [
+                    { size: 37.5, lower: 100, upper: 100 },
+                    { size: 26.5, lower: 90, upper: 100 },
+                    { size: 19, lower: 71, upper: 95 },
+                    { size: 13.2, lower: 56, upper: 80 },
+                    { size: 4.75, lower: 38, upper: 54 },
+                    { size: 2.36, lower: 28, upper: 42 },
+                    { size: 0.3, lower: 7, upper: 21 },
+                    { size: 0.075, lower: 2, upper: 8 }
+                ],
+                sampleAggregates: [
+                    { name: "20mm Metal", proportion: 32, color: "#3b82f6", passing: [100, 95, 45, 10, 1, 0, 0, 0] },
+                    { name: "10mm Metal", proportion: 28, color: "#f59e0b", passing: [100, 100, 100, 88, 15, 2, 0, 0] },
+                    { name: "Crusher Dust", proportion: 37, color: "#8b5cf6", passing: [100, 100, 100, 100, 94, 76, 32, 8] },
+                    { name: "Mineral Filler (Lime)", proportion: 3, color: "#ec4899", passing: [100, 100, 100, 100, 100, 100, 98, 85] }
+                ]
+            },
+            bc1: {
+                name: "BC Grade 1 (Bituminous Concrete)",
+                desc: "Bituminous Concrete Grade 1 (19mm Nominal Size) per MoRTH Table 500-17.",
+                sieves: [
+                    { size: 26.5, lower: 100, upper: 100 },
+                    { size: 19, lower: 90, upper: 100 },
+                    { size: 13.2, lower: 59, upper: 79 },
+                    { size: 9.5, lower: 52, upper: 72 },
+                    { size: 4.75, lower: 35, upper: 55 },
+                    { size: 2.36, lower: 28, upper: 44 },
+                    { size: 1.18, lower: 20, upper: 34 },
+                    { size: 0.3, lower: 10, upper: 20 },
+                    { size: 0.075, lower: 3, upper: 8 }
+                ],
+                sampleAggregates: [
+                    { name: "20mm Agg", proportion: 22, color: "#3b82f6", passing: [100, 75, 15, 4, 0, 0, 0, 0, 0] },
+                    { name: "10mm Agg", proportion: 34, color: "#f59e0b", passing: [100, 100, 92, 70, 12, 2, 0, 0, 0] },
+                    { name: "Stone Dust", proportion: 41, color: "#8b5cf6", passing: [100, 100, 100, 100, 90, 75, 52, 26, 6] },
+                    { name: "Lime Filler", proportion: 3, color: "#ec4899", passing: [100, 100, 100, 100, 100, 100, 100, 95, 90] }
+                ]
+            },
+            bc2: {
+                name: "BC Grade 2 (Bituminous Concrete)",
+                desc: "Bituminous Concrete Grade 2 (13.2mm Nominal Size) per MoRTH Table 500-17.",
+                sieves: [
+                    { size: 19, lower: 100, upper: 100 },
+                    { size: 13.2, lower: 90, upper: 100 },
+                    { size: 9.5, lower: 70, upper: 88 },
+                    { size: 4.75, lower: 53, upper: 71 },
+                    { size: 2.36, lower: 42, upper: 58 },
+                    { size: 1.18, lower: 34, upper: 48 },
+                    { size: 0.3, lower: 15, upper: 25 },
+                    { size: 0.075, lower: 4, upper: 10 }
+                ],
+                sampleAggregates: [
+                    { name: "10mm Agg", proportion: 42, color: "#3b82f6", passing: [100, 95, 62, 10, 2, 0, 0, 0] },
+                    { name: "Stone Dust", proportion: 54, color: "#f59e0b", passing: [100, 100, 100, 92, 76, 55, 28, 5] },
+                    { name: "Filler", proportion: 4, color: "#8b5cf6", passing: [100, 100, 100, 100, 100, 100, 96, 90] }
+                ]
+            },
+            custom: {
+                name: "Custom Specification",
+                desc: "User-defined upper and lower specification limits and aggregate gradations.",
+                sieves: [
+                    { size: 50, lower: 100, upper: 100 },
+                    { size: 20, lower: 60, upper: 90 },
+                    { size: 10, lower: 40, upper: 70 },
+                    { size: 4.75, lower: 20, upper: 50 },
+                    { size: 0.075, lower: 0, upper: 10 }
+                ],
+                sampleAggregates: [
+                    { name: "Agg A", proportion: 50, color: "#3b82f6", passing: [100, 50, 20, 5, 0] },
+                    { name: "Agg B", proportion: 50, color: "#f59e0b", passing: [100, 100, 90, 60, 8] }
+                ]
+            }
+        };
+
+        // Active Application State
+        let currentSieves = [];
+        let aggregates = [];
+        let gradationChart = null;
+        let optimizationResult = null;
+        let targetCurve = [];
+        let sourceConstraints = [];
+
+        function switchAppTab(tabName) {
+            const design = document.getElementById('app-panel-design');
+            const analysis = document.getElementById('app-panel-analysis');
+            const designBtn = document.getElementById('app-tab-design');
+            const analysisBtn = document.getElementById('app-tab-analysis');
+            const isAnalysis = tabName === 'analysis';
+            design.classList.toggle('active', !isAnalysis);
+            analysis.classList.toggle('active', isAnalysis);
+            designBtn.classList.toggle('active', !isAnalysis);
+            analysisBtn.classList.toggle('active', isAnalysis);
+            designBtn.setAttribute('aria-selected', String(!isAnalysis));
+            analysisBtn.setAttribute('aria-selected', String(isAnalysis));
+            if (isAnalysis) {
+                requestAnimationFrame(() => {
+                    if (typeof updateChart === 'function') updateChart();
+                });
+            }
+        }
+
+        // Load Preset Specification
+        function loadPresetSpecification(presetKey) {
+            const spec = PRESET_SPECS[presetKey] || PRESET_SPECS.gsb1;
+            document.getElementById('spec-description').innerText = spec.desc;
+            currentSieves = JSON.parse(JSON.stringify(spec.sieves));
+            aggregates = JSON.parse(JSON.stringify(spec.sampleAggregates));
+            targetCurve = currentSieves.map(s => (s.lower + s.upper) / 2);
+            sourceConstraints = aggregates.map(a => ({ min: 0, max: 100, locked: false }));
+            document.getElementById('data-tools-card').classList.remove('hidden');
+            renderAll();
+            showToast(`Loaded ${spec.name}`, 'info');
+        }
+
+        // Initialize App on Window Load
+        window.onload = function() {
+            initChart();
+            loadPresetSpecification('gsb1');
+        };
+
+        // Theme Toggle Handler
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            if (newTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.getElementById('theme-toggle-icon').className = 'fa-solid fa-sun text-amber-400';
+                document.getElementById('theme-toggle-text').innerText = 'Light Mode';
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                document.getElementById('theme-toggle-icon').className = 'fa-solid fa-moon text-amber-500';
+                document.getElementById('theme-toggle-text').innerText = 'Dark Mode';
+            }
+            
+            updateChartTheme();
+        }
+
+        // Reset to preset aggregate sample data
+        function loadSampleGradationData() {
+            const presetKey = document.getElementById('spec-preset').value;
+            const spec = PRESET_SPECS[presetKey] || PRESET_SPECS.gsb1;
+            aggregates = JSON.parse(JSON.stringify(spec.sampleAggregates));
+            renderAll();
+            showToast('Reset aggregate sample data', 'info');
+        }
+
+
+        // Master Render Function
+        function renderAll() {
+            renderProportionsSliders();
+            renderConstraints();
+            renderGradationTable();
+            updateChart();
+            updateMetrics();
+            updateBatchQuantities();
+            updateCostSummary();
+            updateMoistureTable();
+            updateSGTable();
+        }
+
+        // Render Aggregate Proportion Sliders
+        function renderProportionsSliders() {
+            const container = document.getElementById('proportion-sliders-container');
+            container.innerHTML = '';
+
+            let sum = 0;
+            aggregates.forEach((agg, idx) => {
+                sum += (agg.proportion || 0);
+                const wrapper = document.createElement('div');
+                wrapper.className = "bg-slate-50 dark:bg-zinc-900 border border-theme rounded-xl p-3 flex flex-col space-y-2";
+                
+                wrapper.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <input type="color" value="${agg.color}" onchange="updateAggColor(${idx}, this.value)" class="w-4 h-4 rounded cursor-pointer border-0 bg-transparent">
+                            <input type="text" value="${agg.name}" onchange="updateAggName(${idx}, this.value)" class="bg-transparent font-semibold text-xs text-heading border-b border-transparent hover:border-slate-300 focus:border-emerald-600 focus:outline-none px-1">
+                        </div>
+                        <div class="flex items-center space-x-1">
+                            <input type="number" min="0" max="100" step="0.5" value="${agg.proportion.toFixed(1)}" onchange="updateAggProportion(${idx}, parseFloat(this.value)||0)" class="w-16 bg-white dark:bg-zinc-800 border border-theme text-center font-bold text-xs text-heading rounded-md py-0.5 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                            <span class="text-xs font-bold text-secondary">%</span>
+                            ${aggregates.length > 2 ? `<button onclick="removeAggregate(${idx})" class="text-secondary hover:text-rose-500 ml-1 transition" title="Delete Aggregate"><i class="fa-solid fa-trash-can text-xs"></i></button>` : ''}
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <input type="range" min="0" max="100" step="0.5" value="${agg.proportion}" oninput="updateAggProportion(${idx}, parseFloat(this.value)||0)" class="w-full h-1.5 bg-slate-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                    </div>
+                `;
+                container.appendChild(wrapper);
+            });
+
+            const totalDisplay = document.getElementById('total-proportion-val');
+            totalDisplay.innerText = sum.toFixed(1);
+            if (Math.abs(sum - 100) > 0.1) {
+                totalDisplay.className = "text-rose-500 font-bold";
+            } else {
+                totalDisplay.style.color = "var(--ifm-color-primary)";
+                totalDisplay.className = "font-bold";
+            }
+        }
+
+        function updateAggProportion(idx, val) {
+            aggregates[idx].proportion = Math.max(0, Math.min(100, val));
+            renderAll();
+        }
+
+        function updateAggName(idx, val) {
+            aggregates[idx].name = val || `Agg ${idx + 1}`;
+            renderAll();
+        }
+
+        function updateAggColor(idx, val) {
+            aggregates[idx].color = val;
+            renderAll();
+        }
+
+        function updatePassingValue(aggIdx, sieveIdx, val) {
+            if (!aggregates[aggIdx].passing) aggregates[aggIdx].passing = [];
+            aggregates[aggIdx].passing[sieveIdx] = Math.max(0, Math.min(100, val));
+            renderAll();
+        }
+
+        function updateSieveSize(sieveIdx, val) {
+            currentSieves[sieveIdx].size = Math.max(0.001, val);
+            renderAll();
+        }
+
+        function updateSieveLimit(sieveIdx, field, val) {
+            currentSieves[sieveIdx][field] = Math.max(0, Math.min(100, val));
+            renderAll();
+        }
+
+        function addAggregateColumn() {
+            if (aggregates.length >= 7) {
+                showToast("Maximum 7 aggregate fractions supported", "warning");
+                return;
+            }
+            const color = colorPalette[aggregates.length % colorPalette.length];
+            const defaultPassing = currentSieves.map(() => 50);
+            aggregates.push({
+                name: `Agg Fraction ${aggregates.length + 1}`,
+                proportion: 0,
+                color: color,
+                passing: defaultPassing
+            });
+            renderAll();
+            showToast("Added new aggregate source", "info");
+        }
+
+        function removeAggregate(idx) {
+            if (aggregates.length <= 2) return;
+            aggregates.splice(idx, 1);
+            normalizeProportions();
+            renderAll();
+            showToast("Aggregate removed", "info");
+        }
+
+        function addSieveRow() {
+            currentSieves.push({ size: 1.0, lower: 0, upper: 100 });
+            // Sort sieves descending by size
+            currentSieves.sort((a, b) => b.size - a.size);
+            // Ensure all aggregates have array entries
+            aggregates.forEach(agg => {
+                while (agg.passing.length < currentSieves.length) {
+                    agg.passing.push(50);
+                }
+            });
+            renderAll();
+            showToast("Sieve added", "info");
+        }
+
+        function removeSieveRow(idx) {
+            if (currentSieves.length <= 3) return;
+            currentSieves.splice(idx, 1);
+            aggregates.forEach(agg => {
+                if (agg.passing && agg.passing.length > idx) {
+                    agg.passing.splice(idx, 1);
+                }
+            });
+            renderAll();
+        }
+
+        function normalizeProportions() {
+            let sum = aggregates.reduce((acc, a) => acc + (a.proportion || 0), 0);
+            if (sum <= 0) {
+                const equal = 100 / aggregates.length;
+                aggregates.forEach(a => a.proportion = equal);
+            } else {
+                aggregates.forEach(a => a.proportion = (a.proportion / sum) * 100);
+            }
+            renderAll();
+            showToast("Proportions normalized to 100%", "info");
+        }
+
+
+        function calculateCombinedBlend() {
+            let sumProps = aggregates.reduce((s,a)=>s+(Number(a.proportion)||0),0);
+            return currentSieves.map((sieve, sIdx) => {
+                let c=0;
+                aggregates.forEach(agg => c += (Number(agg.passing?.[sIdx])||0) * ((Number(agg.proportion)||0)/100));
+                if (sumProps > 0 && Math.abs(sumProps-100)>0.01) c = c/sumProps*100;
+                return { ...sieve, passing:c };
+            });
+        }
+
+        function validateGradationData() {
+            const issues=[];
+            if (!currentSieves.length) issues.push('No sieve rows available.');
+            const sizes=currentSieves.map(s=>Number(s.size));
+            if (sizes.some(v=>!Number.isFinite(v)||v<=0)) issues.push('All sieve sizes must be positive numbers.');
+            for(let i=1;i<sizes.length;i++) if (!(sizes[i-1]>sizes[i])) issues.push('Sieve sizes must be strictly descending.');
+            currentSieves.forEach((s,si)=>{
+                if (!(Number(s.lower)>=0 && Number(s.upper)<=100 && Number(s.lower)<=Number(s.upper))) issues.push(`Invalid specification limits at ${s.size} mm.`);
+                aggregates.forEach(a=>{
+                    const v=Number(a.passing?.[si]);
+                    if(!Number.isFinite(v)||v<0||v>100) issues.push(`Invalid % passing for ${a.name} at ${s.size} mm.`);
+                });
+            });
+            aggregates.forEach(a=>{
+                for(let i=1;i<a.passing.length;i++) if(Number(a.passing[i])>Number(a.passing[i-1])+0.001) issues.push(`${a.name}: % passing increases between ${currentSieves[i-1]?.size} and ${currentSieves[i]?.size} mm.`);
+            });
+            const total=aggregates.reduce((s,a)=>s+(Number(a.proportion)||0),0);
+            if(Math.abs(total-100)>0.1) issues.push(`Aggregate proportions total ${total.toFixed(1)}%, not 100%.`);
+            return {valid: issues.length===0, issues};
+        }
+
+        function computeMargins() {
+            const combined=calculateCombinedBlend();
+            const rows=combined.map((s,i)=>{
+                const lo=Number(s.lower), hi=Number(s.upper), y=Number(s.passing);
+                const span=Math.max(hi-lo,0.000001);
+                const lowerMargin=y-lo, upperMargin=hi-y;
+                const normalized=Math.min(lowerMargin,upperMargin)/span;
+                return {size:s.size, passing:y, lower:lo, upper:hi, lowerMargin, upperMargin, normalized, pass:y>=lo-1e-9&&y<=hi+1e-9};
+            });
+            const critical=rows.reduce((a,r)=>!a || r.normalized<a.normalized ? r : a,null);
+            return {rows, critical};
+        }
+
+        function updateRobustness() {
+            const {rows,critical}=computeMargins();
+            const allPass=rows.every(r=>r.pass);
+            const badge=document.getElementById('robustness-badge');
+            if(!critical){ badge.textContent='Not evaluated'; return; }
+            const score=Math.max(0,Math.min(100,critical.normalized*200));
+            let label=score>=75?'Robust':score>=40?'Moderate':'Tight';
+            badge.textContent=`${label} • ${score.toFixed(0)}/100`;
+            badge.className=`px-2.5 py-1 rounded-full text-[10px] font-bold ${score>=75?'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300':score>=40?'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300':'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'}`;
+            document.getElementById('critical-sieve').textContent=`${critical.size} mm`;
+            document.getElementById('critical-margin').textContent=`${Math.min(critical.lowerMargin,critical.upperMargin).toFixed(2)} percentage points`;
+        }
+
+        function renderConstraints() {
+            const body=document.getElementById('constraint-body'); if(!body)return;
+            while(sourceConstraints.length<aggregates.length) sourceConstraints.push({min:0,max:100,locked:false});
+            sourceConstraints=sourceConstraints.slice(0,aggregates.length); body.innerHTML='';
+            aggregates.forEach((a,i)=>{ const c=sourceConstraints[i]||{min:0,max:100,locked:false}; if(a.cost==null)a.cost=0; const row=document.createElement('tr'); row.className='border-t border-theme';
+              row.innerHTML=`<td class="p-2 font-semibold text-heading">${a.name}</td><td class="p-2"><input type="number" min="0" max="100" step="0.5" value="${c.min}" onchange="setConstraint(${i},'min',this.value)" class="w-16 bg-slate-50 dark:bg-zinc-900 border border-theme rounded px-1.5 py-1 text-center"></td><td class="p-2"><input type="number" min="0" max="100" step="0.5" value="${c.max}" onchange="setConstraint(${i},'max',this.value)" class="w-16 bg-slate-50 dark:bg-zinc-900 border border-theme rounded px-1.5 py-1 text-center"></td><td class="p-2 text-center"><input type="checkbox" ${c.locked?'checked':''} onchange="setConstraint(${i},'locked',this.checked)" class="accent-emerald-600"></td><td class="p-2"><input type="number" min="0" step="1" value="${Number(a.cost||0)}" onchange="aggregates[${i}].cost=Math.max(0,parseFloat(this.value)||0);renderConstraints()" class="w-16 bg-slate-50 dark:bg-zinc-900 border border-theme rounded px-1.5 py-1 text-center"></td>`; body.appendChild(row); });
+            updateCostSummary(); updateMoistureTable(); updateSGTable(); }
+        function setConstraint(i,k,v){ if(!sourceConstraints[i]) sourceConstraints[i]={min:0,max:100,locked:false}; sourceConstraints[i][k]=(k==='locked'?!!v:Math.max(0,Math.min(100,parseFloat(v)||0))); if(sourceConstraints[i].min>sourceConstraints[i].max) [sourceConstraints[i].min,sourceConstraints[i].max]=[sourceConstraints[i].max,sourceConstraints[i].min]; renderConstraints(); }
+
+        function validateAndShow() {
+            const r=validateGradationData();
+            const status=document.getElementById('lab-import-status');
+            if(status) { status.textContent=r.valid?'Data quality: Ready for analysis.':`Data quality: ${r.issues[0]}${r.issues.length>1?' + '+(r.issues.length-1)+' more issues.':''}`; status.className=`text-[10px] mt-2 ${r.valid?'text-emerald-600':'text-rose-600'}`; }
+            return r;
+        }
+
+        function updateMetrics() {
+            const combined=calculateCombinedBlend();
+            const validation=validateGradationData();
+            const stdSieves=[75,37.5,19,9.5,4.75,2.36,1.18,0.6,0.3,0.15];
+            let fmValid=true, sumRet=0;
+            stdSieves.forEach(ss=>{
+                const m=combined.find(x=>Math.abs(x.size-ss)<0.001);
+                if(!m) fmValid=false; else sumRet += (100-m.passing);
+            });
+            document.getElementById('metric-fm').innerText=fmValid?(sumRet/100).toFixed(2):'N/A';
+            const fines=combined.find(x=>Math.abs(x.size-0.075)<0.001);
+            document.getElementById('metric-fines').innerText=fines?`${fines.passing.toFixed(1)}%`:'N/A';
+            function getD(target){
+                if(!validation.valid) return null;
+                const pts=combined;
+                if(pts[0].passing<target || pts[pts.length-1].passing>target) return null;
+                for(let i=0;i<pts.length-1;i++){
+                    const a=pts[i],b=pts[i+1];
+                    if((a.passing>=target&&b.passing<=target)||(a.passing<=target&&b.passing>=target)){
+                        if(Math.abs(a.passing-b.passing)<1e-9) return a.size;
+                        const t=(target-a.passing)/(b.passing-a.passing);
+                        return Math.pow(10,Math.log10(a.size)+t*(Math.log10(b.size)-Math.log10(a.size)));
+                    }
+                }
+                return null;
+            }
+            const d10=getD(10),d30=getD(30),d60=getD(60);
+            document.getElementById('metric-dsizes').innerText=[d10,d30,d60].map(v=>v? v.toFixed(3):'N/A').join(' / ');
+            const cu=d10&&d60?d60/d10:null, cc=d10&&d30&&d60?(d30*d30)/(d10*d60):null;
+            document.getElementById('metric-cu-cc').innerText=`${cu?cu.toFixed(2):'N/A'} / ${cc?cc.toFixed(2):'N/A'}`;
+            updateRobustness(); validateAndShow();
+        }
+        
+        function resetConstraintsAndTarget(){ sourceConstraints=aggregates.map(()=>({min:0,max:100,locked:false})); targetCurve=currentSieves.map(s=>(s.lower+s.upper)/2); aggregates.forEach(a=>a.targetProportion=0); document.getElementById('use-target-curve').checked=false; renderAll(); }
+        function updateOptimizationObjective(){ document.getElementById('use-target-curve').checked=document.getElementById('optimization-mode').value==='target'; renderGradationTable(); updateChart(); }
+        function updateBatchQuantities(){ const q=Math.max(0,parseFloat(document.getElementById('batch-qty')?.value)||0), el=document.getElementById('batch-quantities'); if(!el)return; el.innerHTML=aggregates.map(a=>`<div class="flex justify-between"><span>${a.name}</span><span class="font-mono font-semibold">${(q*(a.proportion/100)).toFixed(2)} t</span></div>`).join(''); }
+
+        function openDataTools(){ document.getElementById('data-tools-card').classList.remove('hidden'); document.getElementById('data-tools-card').scrollIntoView({behavior:'smooth',block:'nearest'}); }
+        function closeDataTools(){ document.getElementById('data-tools-card').classList.add('hidden'); }
+        function parseMatrix(text){
+            const lines=text.trim().split(/\r?\n/).filter(Boolean); if(lines.length<2) throw new Error('Need at least a header and one data row.');
+            const rows=lines.map(line=>line.includes('\t')?line.split('\t'):line.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/).map(x=>x.replace(/^\"|\"$/g,'').trim()));
+            const headers=rows[0].map((x,i)=>String(x||'').trim()||`Aggregate ${i}`); if(headers.length<2) throw new Error('Need at least one aggregate column.');
+            const raw=rows.slice(1).map(r=>r.map(x=>parseFloat(String(x).trim()))).filter(r=>Number.isFinite(r[0]));
+            const oldSpec=currentSieves.map(s=>({size:Number(s.size),lower:Number(s.lower),upper:Number(s.upper)}));
+            const aggCount=headers.length-1;
+            currentSieves=raw.map(r=>{const prior=oldSpec.find(s=>Math.abs(s.size-r[0])<0.001);return {size:r[0],lower:prior?prior.lower:0,upper:prior?prior.upper:100};}).sort((a,b)=>b.size-a.size);
+            aggregates=Array.from({length:aggCount},(_,j)=>({name:headers[j+1],proportion:100/aggCount,color:colorPalette[j%colorPalette.length],passing:[],targetProportion:0,cost:0,moisture:0,absorption:0,gsb:2.65}));
+            for(const a of aggregates){ for(const s of currentSieves){const src=raw.find(r=>Math.abs(r[0]-s.size)<0.001); const hdrIndex=headers.indexOf(a.name); a.passing.push(Number.isFinite(src?.[hdrIndex])?src[hdrIndex]:0);} }
+            targetCurve=currentSieves.map(s=>{const p=oldSpec.find(o=>Math.abs(o.size-s.size)<0.001);return p?(p.lower+p.upper)/2:50;});
+            sourceConstraints=aggregates.map(()=>({min:0,max:100,locked:false}));
+        }
+        function importLabPaste(){ try{ parseMatrix(document.getElementById('lab-paste').value); document.getElementById('paste-modal').classList.add('hidden'); renderAll(); showToast('Laboratory gradation imported','success'); }catch(e){showToast(e.message,'warning');} }
+        function importLabFile(file){ if(!file)return; const reader=new FileReader(); reader.onload=e=>{ try{ let text=e.target.result; if(/\.xlsx?$/i.test(file.name)){ const wb=XLSX.read(text,{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]]; text=XLSX.utils.sheet_to_csv(ws); } parseMatrix(text); renderAll(); showToast(`Imported ${file.name}`,'success'); }catch(err){showToast(err.message,'warning');} }; if(/\.xlsx?$/i.test(file.name)) reader.readAsArrayBuffer(file); else reader.readAsText(file); }
+
+        function applyOptimizationWeights(weights){ aggregates.forEach((a,i)=>a.proportion=Math.round(weights[i]*1000)/10); const total=aggregates.reduce((s,a)=>s+a.proportion,0); if(aggregates.length) aggregates[aggregates.length-1].proportion=Math.max(0,aggregates[aggregates.length-1].proportion+(100-total)); }
+        function constraintsFeasible(){ const locked=sourceConstraints.reduce((s,c,i)=>s+(c?.locked?(Number(aggregates[i].proportion)||0):0),0); const minFree=sourceConstraints.reduce((s,c,i)=>s+(c?.locked?0:Number(c?.min)||0),0); const maxFree=sourceConstraints.reduce((s,c,i)=>s+(c?.locked?0:Number(c?.max??100)),0); return locked<=100.0001 && minFree<=100-locked+0.0001 && maxFree>=100-locked-0.0001; }
+        function constrainedRandomWeights(){
+            const n=aggregates.length; let w=aggregates.map(a=>(Number(a.proportion)||0)/100);
+            const fixed=[]; let lockedSum=0;
+            sourceConstraints.forEach((c,i)=>{if(c?.locked){w[i]=Math.max(c.min,Math.min(c.max,w[i]*100))/100; fixed.push(i); lockedSum+=w[i];}});
+            const free=Array.from({length:n},(_,i)=>i).filter(i=>!fixed.includes(i));
+            const remaining=Math.max(0,1-lockedSum); if(free.length===0) return w;
+            let rand=free.map(()=>Math.random()); const raw=rand.reduce((a,b)=>a+b,0)||1; rand=rand.map(v=>v/raw);
+            // Iteratively enforce min/max on free sources.
+            let assigned=free.map((idx,j)=>({idx,v:rand[j]*remaining}));
+            for(let k=0;k<20;k++){
+                let changed=false; let fixedLocal=0; const movable=[];
+                for(const item of assigned){ const c=sourceConstraints[item.idx]||{min:0,max:100}; const lo=c.min/100, hi=c.max/100; if(item.v<lo){item.v=lo; fixedLocal+=item.v; changed=true;} else if(item.v>hi){item.v=hi; fixedLocal+=item.v; changed=true;} else movable.push(item); }
+                const rem=remaining-fixedLocal; const ms=movable.reduce((s,x)=>s+x.v,0); if(ms>0 && movable.length){movable.forEach(x=>x.v*=rem/ms);} if(!changed) break;
+            }
+            assigned.forEach(x=>w[x.idx]=x.v); return w;
+        }
+        function optimizationCost(weights){
+            const comb=currentSieves.map((s,si)=>aggregates.reduce((sum,a,i)=>sum+weights[i]*(Number(a.passing?.[si])||0),0));
+            const mode=document.getElementById('optimization-mode').value; let cost=0;
+            currentSieves.forEach((s,si)=>{ const y=comb[si], lo=s.lower, hi=s.upper; if(y<lo) cost+=(lo-y)**2*5000; if(y>hi) cost+=(y-hi)**2*5000; const target=(targetCurve[si]??(lo+hi)/2); if(mode==='target'||mode==='balanced') cost+=(y-target)**2; });
+            if(mode==='fines'){ const fi=currentSieves.findIndex(s=>Math.abs(s.size-0.075)<0.001); if(fi>=0) cost+=comb[fi]*100; }
+            if(mode==='cost') cost+=weights.reduce((sum,w,i)=>sum+w*(Number(aggregates[i].cost)||0),0)*100;
+            return cost;
+        }
+        function autoOptimizeMix(){
+            const validation=validateGradationData(); if(!validation.valid){showToast(validation.issues[0],'warning'); return;}
+            if(sourceConstraints.some(c=>c.min>c.max)||!constraintsFeasible()){showToast('Aggregate min/max or locked constraints are infeasible','warning'); return;}
+            let best=constrainedRandomWeights(), bestCost=optimizationCost(best); const trials=25000;
+            for(let i=0;i<trials;i++){const cand=constrainedRandomWeights(); const c=optimizationCost(cand); if(c<bestCost){best=cand;bestCost=c;}}
+            // Local pairwise refinement for better practical convergence.
+            let step=0.02; for(let iter=0;iter<120;iter++){let improved=false; for(let i=0;i<aggregates.length;i++){if(sourceConstraints[i]?.locked)continue; for(let j=0;j<aggregates.length;j++){if(i===j||sourceConstraints[j]?.locked)continue; const wi=best[i],wj=best[j]; if(wi<step)continue; const cands=[]; const a=sourceConstraints[i]||{min:0,max:100},b=sourceConstraints[j]||{min:0,max:100}; const nw=[...best]; nw[i]-=step; nw[j]+=step; if(nw[i]>=a.min/100-1e-9&&nw[i]<=a.max/100+1e-9&&nw[j]>=b.min/100-1e-9&&nw[j]<=b.max/100+1e-9)cands.push(nw); for(const nw2 of cands){const c=optimizationCost(nw2); if(c<bestCost){best=nw2;bestCost=c;improved=true;}}}} if(!improved)step/=2; if(step<0.001)break;}
+            applyOptimizationWeights(best); optimizationResult={cost:bestCost,mode:document.getElementById('optimization-mode').value}; renderAll(); const passed=calculateCombinedBlend().every(r=>r.passing>=r.lower-1e-9&&r.passing<=r.upper+1e-9); showToast(passed?'Feasible blend found inside envelope':'Best constrained blend found; review failing sieves',passed?'success':'warning');
+        }
+
+        function updateChart(){ if(!gradationChart)return; const datasets=[]; const showIndividual=document.getElementById('toggle-individual-lines').checked; const primaryColor=getComputedStyle(document.documentElement).getPropertyValue('--ifm-color-primary').trim()||'#166534';
+            datasets.push({label:'Lower Limit',data:currentSieves.map(s=>({x:s.size,y:s.lower})),borderColor:'#ef4444',borderWidth:2,borderDash:[5,5],pointRadius:3,fill:false,tension:.1});
+            datasets.push({label:'Upper Limit',data:currentSieves.map(s=>({x:s.size,y:s.upper})),borderColor:'#ef4444',borderWidth:2,borderDash:[5,5],pointRadius:3,fill:false,tension:.1});
+            if(document.getElementById('use-target-curve')?.checked){ datasets.push({label:'Target Curve',data:currentSieves.map((s,i)=>({x:s.size,y:targetCurve[i]??((s.lower+s.upper)/2)})),borderColor:'#f59e0b',borderWidth:2,pointRadius:3,fill:false,tension:.1}); }
+            const combined=calculateCombinedBlend(); datasets.push({label:'Combined Job Mix Blend',data:combined.map(s=>({x:s.size,y:s.passing})),borderColor:primaryColor,backgroundColor:primaryColor,borderWidth:3.5,pointRadius:5,pointHoverRadius:7,fill:false,tension:.2});
+            if(showIndividual){aggregates.forEach(a=>datasets.push({label:`${a.name} (${a.proportion.toFixed(1)}%)`,data:currentSieves.map((s,i)=>({x:s.size,y:Number(a.passing?.[i])||0})),borderColor:a.color,borderWidth:1.5,borderDash:[2,2],pointRadius:2.5,fill:false,tension:.15}));}
+            gradationChart.data.datasets=datasets; gradationChart.update(); }
+
+        function renderGradationTable(){
+            const tbody=document.getElementById('gradation-tbody'); const headerAnchor=document.getElementById('aggregates-header-anchor'); document.querySelectorAll('.dynamic-agg-header').forEach(el=>el.remove()); aggregates.forEach((agg,idx)=>{const th=document.createElement('th'); th.className='dynamic-agg-header py-3 px-2 text-center min-w-[90px] text-heading font-semibold'; th.innerHTML=`<div class="flex items-center justify-center space-x-1"><span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color:${agg.color}"></span><span class="truncate max-w-[80px]" title="${agg.name}">${agg.name}</span></div>`; headerAnchor.parentNode.insertBefore(th,headerAnchor);});
+            tbody.innerHTML=''; let overallPass=true; const combined=calculateCombinedBlend(); const showMargins=document.getElementById('show-margins')?.checked;
+            currentSieves.forEach((sieve,sIdx)=>{const y=combined[sIdx].passing, pass=y>=sieve.lower-1e-9&&y<=sieve.upper+1e-9; if(!pass)overallPass=false; const lm=y-sieve.lower, um=sieve.upper-y; const target=targetCurve[sIdx]??((sieve.lower+sieve.upper)/2); const marginHtml=showMargins?`<div class="text-[9px] text-secondary mt-1">Margin: ${lm.toFixed(1)} / ${um.toFixed(1)} pp${document.getElementById('use-target-curve')?.checked?` • Target ${target.toFixed(1)}%`:''}</div>`:''; let rowHTML=`<td class="py-2.5 px-3"><input type="number" step="any" value="${sieve.size}" onchange="updateSieveSize(${sIdx},parseFloat(this.value)||0)" class="w-20 font-bold text-heading bg-transparent border-b border-dashed border-theme focus:border-emerald-500 focus:outline-none"></td><td class="py-2.5 px-2 text-center bg-slate-50/60 dark:bg-zinc-800/40"><input type="number" step="0.1" value="${sieve.lower}" onchange="updateSieveLimit(${sIdx},'lower',parseFloat(this.value)||0)" class="w-14 text-center font-medium text-secondary bg-white dark:bg-zinc-900 border border-theme rounded py-0.5 text-xs"></td><td class="py-2.5 px-2 text-center bg-slate-50/60 dark:bg-zinc-800/40"><input type="number" step="0.1" value="${sieve.upper}" onchange="updateSieveLimit(${sIdx},'upper',parseFloat(this.value)||0)" class="w-14 text-center font-medium text-secondary bg-white dark:bg-zinc-900 border border-theme rounded py-0.5 text-xs"></td>`; aggregates.forEach((agg,aIdx)=>{const val=Number(agg.passing?.[sIdx])||0; rowHTML+=`<td class="py-2.5 px-2 text-center"><input type="number" min="0" max="100" step="0.1" value="${val}" onchange="updatePassingValue(${aIdx},${sIdx},parseFloat(this.value)||0)" class="w-16 text-center font-semibold text-heading bg-white dark:bg-zinc-900 border border-theme rounded py-1 text-xs"></td>`;}); const status=pass?`<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"><i class="fa-solid fa-check mr-1"></i> OK</span>`:`<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"><i class="fa-solid fa-xmark mr-1"></i> ${y<sieve.lower?'Low':'High'}</span>`; rowHTML+=`<td class="py-2.5 px-3 text-center" style="background-color:rgba(245,158,11,.05);"><input type="number" min="0" max="100" step="0.1" value="${Number(target).toFixed(1)}" onchange="targetCurve[${sIdx}]=Math.max(0,Math.min(100,parseFloat(this.value)||0));updateChart();" class="w-16 text-center font-semibold text-heading bg-white dark:bg-zinc-900 border border-theme rounded py-1 text-xs"></td><td class="py-2.5 px-3 text-center font-bold text-heading text-sm" style="background-color:rgba(22,101,52,.08);">${y.toFixed(1)}%${marginHtml}</td><td class="py-2.5 px-3 text-center">${status}</td><td class="py-2.5 px-2 text-center">${currentSieves.length>3?`<button onclick="removeSieveRow(${sIdx})" class="text-secondary hover:text-rose-500"><i class="fa-solid fa-xmark"></i></button>`:''}</td>`; const tr=document.createElement('tr'); tr.className='hover:bg-slate-50/80 dark:hover:bg-zinc-800/40 transition-colors'; tr.innerHTML=rowHTML; tbody.appendChild(tr);}); const badge=document.getElementById('spec-status-badge'); badge.className=`px-2.5 py-0.5 text-xs font-bold rounded-full ${overallPass?'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300':'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'}`; badge.innerHTML=overallPass?'<i class="fa-solid fa-check-circle mr-1"></i> Meets Specification':'<i class="fa-solid fa-circle-exclamation mr-1"></i> Out of Envelope'; }
+
+        function updateCostSummary(){ const total=aggregates.reduce((s,a)=>s+(Number(a.proportion)||0)/100*(Number(a.cost)||0),0); let el=document.getElementById('cost-summary'); if(!el){el=document.createElement('div'); el.id='cost-summary'; el.className='mt-2 text-[10px] text-secondary'; const c=document.getElementById('batch-quantities')?.parentElement; if(c)c.appendChild(el);} el.innerHTML=`Blend material cost: <b>${total>0?'₹ '+total.toFixed(2)+'/t':'Not entered'}</b>`; }
+        function updateMoistureTable(){ const el=document.getElementById('moisture-table'); if(!el)return; const qty=Math.max(0,parseFloat(document.getElementById('batch-qty')?.value)||0); el.innerHTML=aggregates.map((a,i)=>{const dry=qty*(Number(a.proportion)||0)/100;const m=Number(a.moisture||0);const wet=dry*(1+m/100);const free=(m-Number(a.absorption||0))*dry/100;return `<div class="grid grid-cols-5 gap-1 items-center"><span class="text-heading whitespace-normal break-words">${a.name}</span><input type="number" min="0" step="0.1" value="${m}" onchange="aggregates[${i}].moisture=Math.max(0,parseFloat(this.value)||0);updateMoistureTable()" class="bg-slate-50 dark:bg-zinc-900 border border-theme rounded px-1.5 py-1" title="Moisture %"><input type="number" min="0" step="0.1" value="${Number(a.absorption||0)}" onchange="aggregates[${i}].absorption=Math.max(0,parseFloat(this.value)||0);updateMoistureTable()" class="bg-slate-50 dark:bg-zinc-900 border border-theme rounded px-1.5 py-1" title="Absorption %"><span class="font-mono text-right">${wet.toFixed(2)} t</span><span class="font-mono text-right">${free.toFixed(2)} t</span></div>`;}).join('')+'<div class="grid grid-cols-5 gap-1 text-[9px] text-secondary mt-1"><span>Source</span><span class="text-center">Moist.%</span><span class="text-center">Absorp.%</span><span class="text-right">Wet mass</span><span class="text-right">Free water</span></div>'; }
+        function updateSGTable(){ const el=document.getElementById('sg-table'); if(!el)return; el.innerHTML=aggregates.map((a,i)=>`<div class="grid grid-cols-3 gap-2 items-center"><span class="text-heading whitespace-normal break-words">${a.name}</span><input type="number" min="1" max="4" step="0.01" value="${Number(a.gsb||2.65)}" onchange="aggregates[${i}].gsb=Math.max(1,parseFloat(this.value)||2.65);updateSGTable()" class="bg-slate-50 dark:bg-zinc-900 border border-theme rounded px-1.5 py-1"><span class="font-mono text-right">${(Number(a.proportion||0)).toFixed(1)}%</span></div>`).join(''); const denom=aggregates.reduce((s,a)=>s+(Number(a.proportion)||0)/Math.max(Number(a.gsb)||2.65,0.0001),0); document.getElementById('combined-gsb').innerText=denom>0?(1/denom*100).toFixed(3):'N/A'; document.getElementById('blend-dry-mass').innerText=(Number(document.getElementById('batch-qty')?.value)||0).toFixed(2)+' t'; }
+        function runSensitivityAnalysis(){ const base=aggregates.map(a=>a.proportion); const results=[]; aggregates.forEach((a,i)=>{ if(sourceConstraints[i]?.locked){results.push({name:a.name,impact:'Locked'});return;} const variants=[-5,5]; let worst=0; variants.forEach(delta=>{ let total=100; const target=Math.max(0,base[i]+delta); const diff=target-base[i]; const others=aggregates.map((_,j)=>j!==i?j:-1).filter(j=>j>=0&&!sourceConstraints[j]?.locked); const sumOthers=others.reduce((s,j)=>s+base[j],0); const w=base.slice(); w[i]=target; others.forEach(j=>w[j]=sumOthers>0?base[j]-diff*(base[j]/sumOthers):base[j]); const comb=currentSieves.map((s,si)=>w.reduce((sum,p,j)=>sum+(p/100)*(Number(aggregates[j].passing?.[si])||0),0)); const fails=comb.filter((v,si)=>v<currentSieves[si].lower||v>currentSieves[si].upper).length; worst=Math.max(worst,fails); }); results.push({name:a.name,impact:worst===0?'Low':worst<=1?'Moderate':'High'}); }); document.getElementById('sensitivity-results').innerHTML=results.map(r=>`<div class="flex justify-between p-2 rounded-lg border border-theme"><span>${r.name}</span><b class="${r.impact==='High'?'text-rose-600':r.impact==='Moderate'?'text-amber-600':'text-emerald-600'}">${r.impact}</b></div>`).join(''); }
+        function generateAlternatives(){ const saved=aggregates.map(a=>a.proportion); const modes=['balanced','target','fines']; const alts=[]; for(const mode of modes){document.getElementById('optimization-mode').value=mode; const bestCandidates=[]; for(let k=0;k<2500;k++){bestCandidates.push(constrainedRandomWeights());} let best=bestCandidates[0],score=optimizationCost(best); for(const cand of bestCandidates.slice(1)){const c=optimizationCost(cand);if(c<score){score=c;best=cand;}} const comb=currentSieves.map((s,si)=>best.reduce((sum,w,j)=>sum+w*(Number(aggregates[j].passing?.[si])||0),0)); const feasible=comb.every((v,i)=>v>=currentSieves[i].lower&&v<=currentSieves[i].upper); alts.push({mode,weights:best,score,feasible}); } document.getElementById('optimization-mode').value='balanced'; aggregates.forEach((a,i)=>a.proportion=saved[i]); document.getElementById('alternatives-results').innerHTML=alts.map((a,i)=>`<div class="p-2 rounded-lg border border-theme"><div class="flex justify-between"><b>Alternative ${i+1} • ${a.mode}</b><span class="${a.feasible?'text-emerald-600':'text-amber-600'}">${a.feasible?'Feasible':'Review'}</span></div><div class="mt-1 text-[10px]">${a.weights.map((w,j)=>`${aggregates[j].name}: ${(w*100).toFixed(1)}%`).join(' • ')}</div></div>`).join(''); }
+        function openProfessionalReport(){ const margins=computeMargins(); const v=validateGradationData(); const project=document.getElementById('project-name')?.value||'Aggregate Blend / JMF'; const by=document.getElementById('prepared-by')?.value||'—'; const qty=parseFloat(document.getElementById('batch-qty')?.value)||0; const spec=document.getElementById('spec-preset').options[document.getElementById('spec-preset').selectedIndex]?.text||'Custom'; const comb=calculateCombinedBlend(); const rows=comb.map((r,i)=>`<tr><td>${r.size}</td><td>${r.lower}</td><td>${r.upper}</td>${aggregates.map(a=>`<td>${Number(a.passing?.[i]||0).toFixed(1)}</td>`).join('')}<td>${r.passing.toFixed(1)}</td><td>${r.passing>=r.lower&&r.passing<=r.upper?'PASS':'FAIL'}</td></tr>`).join(''); document.getElementById('report-content').innerHTML=`<div class="text-sm"><div class="grid grid-cols-2 gap-3 mb-4"><div><b>Project:</b> ${project}</div><div><b>Date:</b> ${new Date().toLocaleDateString('en-IN')}</div><div><b>Prepared by:</b> ${by}</div><div><b>Specification:</b> ${spec}</div></div><div class="p-3 rounded-xl border border-theme mb-4 ${v.valid?'bg-emerald-50 dark:bg-emerald-950/20':'bg-rose-50 dark:bg-rose-950/20'}"><b>Data quality:</b> ${v.valid?'Ready':'Needs correction'}<br><span class="text-xs">${v.valid?'All validation checks passed.':v.issues.slice(0,5).join(' • ')}</span></div><h4 class="font-bold mb-2">Blend proportions</h4><table class="w-full text-xs mb-4"><thead><tr>${['Aggregate','Proportion','Min','Max','Locked','Batch Qty'].map(h=>`<th class="border-b p-2 text-left">${h}</th>`).join('')}</tr></thead><tbody>${aggregates.map((a,i)=>`<tr><td class="p-2">${a.name}</td><td class="p-2">${a.proportion.toFixed(1)}%</td><td class="p-2">${sourceConstraints[i]?.min??0}%</td><td class="p-2">${sourceConstraints[i]?.max??100}%</td><td class="p-2">${sourceConstraints[i]?.locked?'Yes':'No'}</td><td class="p-2">${(qty*a.proportion/100).toFixed(2)} t</td></tr>`).join('')}</tbody></table><h4 class="font-bold mb-2">Gradation compliance</h4><div class="overflow-x-auto"><table class="w-full text-[10px] border-collapse"><thead><tr><th class="border-b p-1">Sieve</th><th class="border-b p-1">Low</th><th class="border-b p-1">High</th>${aggregates.map(a=>`<th class="border-b p-1">${a.name}</th>`).join('')}<th class="border-b p-1">Blend</th><th class="border-b p-1">Status</th></tr></thead><tbody>${rows}</tbody></table></div><div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4"><div class="p-3 border rounded-xl"><b>FM</b><div>${document.getElementById('metric-fm').innerText}</div></div><div class="p-3 border rounded-xl"><b>D10/D30/D60</b><div>${document.getElementById('metric-dsizes').innerText}</div></div><div class="p-3 border rounded-xl"><b>Cu/Cc</b><div>${document.getElementById('metric-cu-cc').innerText}</div></div><div class="p-3 border rounded-xl"><b>Critical sieve</b><div>${document.getElementById('critical-sieve').innerText} (${document.getElementById('critical-margin').innerText})</div></div></div></div>`; document.getElementById('report-modal').classList.remove('hidden'); document.getElementById('report-modal').classList.add('flex'); }
+
+        function saveProject(){ const data={version:'AggBlend-Pro-2.0',project:{name:document.getElementById('project-name').value,preparedBy:document.getElementById('prepared-by').value,batchQty:document.getElementById('batch-qty').value,optimizationMode:document.getElementById('optimization-mode').value},specKey:document.getElementById('spec-preset').value,sieves:currentSieves,aggregates,sourceConstraints,targetCurve,generated:new Date().toISOString()}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`agblend_${Date.now()}.json`; a.click(); URL.revokeObjectURL(a.href); showToast('Project saved','success'); }
+        function loadProjectFile(file){if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const d=JSON.parse(e.target.result);document.getElementById('project-name').value=d.project?.name||'';document.getElementById('prepared-by').value=d.project?.preparedBy||'';document.getElementById('batch-qty').value=d.project?.batchQty||100;document.getElementById('optimization-mode').value=d.project?.optimizationMode||'balanced';currentSieves=d.sieves||[];aggregates=d.aggregates||[];sourceConstraints=d.sourceConstraints||aggregates.map(()=>({min:0,max:100,locked:false}));targetCurve=d.targetCurve||currentSieves.map(s=>(s.lower+s.upper)/2);renderAll();showToast('Project loaded','success');}catch(err){showToast('Unable to load project file','warning');}};reader.readAsText(file);}
+
+
+        // Initialize Logarithmic Particle Size Chart
+        function initChart() {
+            const ctx = document.getElementById('gradationChart').getContext('2d');
+            
+            // Register custom Chart.js Plugin to shade specification band envelope
+            const specEnvelopePlugin = {
+                id: 'specEnvelopePlugin',
+                beforeDraw(chart) {
+                    const { ctx, chartArea: { left, top, width, height }, scales: { x, y } } = chart;
+                    if (!currentSieves || currentSieves.length === 0) return;
+
+                    ctx.save();
+                    ctx.beginPath();
+                    
+                    // Trace Upper Limit Points
+                    currentSieves.forEach((sieve, idx) => {
+                        const xPos = x.getPixelForValue(sieve.size);
+                        const yPos = y.getPixelForValue(sieve.upper);
+                        if (idx === 0) ctx.moveTo(xPos, yPos);
+                        else ctx.lineTo(xPos, yPos);
+                    });
+
+                    // Trace Lower Limit Points in Reverse
+                    for (let i = currentSieves.length - 1; i >= 0; i--) {
+                        const sieve = currentSieves[i];
+                        const xPos = x.getPixelForValue(sieve.size);
+                        const yPos = y.getPixelForValue(sieve.lower);
+                        ctx.lineTo(xPos, yPos);
+                    }
+
+                    ctx.closePath();
+                    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                    ctx.fillStyle = isDark ? 'rgba(37, 194, 160, 0.12)' : 'rgba(22, 101, 52, 0.08)';
+                    ctx.fill();
+                    ctx.restore();
+                }
+            };
+
+            Chart.register(specEnvelopePlugin);
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const gridColor = isDark ? '#2e2e32' : '#e5e7eb';
+            const textColor = isDark ? '#9ca3af' : '#475569';
+
+            gradationChart = new Chart(ctx, {
+                type: 'line',
+                data: { datasets: [] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        x: {
+                            type: 'logarithmic',
+                            title: {
+                                display: true,
+                                text: 'Sieve Size (mm) - [Logarithmic Scale]',
+                                font: { weight: 'bold', size: 12 },
+                                color: textColor
+                            },
+                            ticks: {
+                                color: textColor,
+                                callback: function(value) {
+                                    if ([100, 75, 53, 37.5, 26.5, 19, 13.2, 9.5, 4.75, 2.36, 1.18, 0.6, 0.3, 0.15, 0.075].includes(value)) {
+                                        return value;
+                                    }
+                                    if ([100, 10, 1, 0.1, 0.01].includes(value)) return value;
+                                    return null;
+                                }
+                            },
+                            grid: { color: gridColor }
+                        },
+                        y: {
+                            min: 0,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: '% Passing Cumulative',
+                                font: { weight: 'bold', size: 12 },
+                                color: textColor
+                            },
+                            ticks: {
+                                stepSize: 10,
+                                color: textColor
+                            },
+                            grid: { color: gridColor }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                color: textColor,
+                                font: { size: 11, family: 'Inter' },
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? '#1b1b1d' : '#0f172a',
+                            titleColor: isDark ? '#ffffff' : '#ffffff',
+                            bodyColor: isDark ? '#e5e7eb' : '#ffffff',
+                            titleFont: { family: 'Inter', size: 12, weight: 'bold' },
+                            bodyFont: { family: 'Inter', size: 12 },
+                            padding: 10,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}%`;
+                                },
+                                title: function(items) {
+                                    return `Sieve Size: ${items[0].parsed.x} mm`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Dynamic Chart Color Theme Sync
+        function updateChartTheme() {
+            if (!gradationChart) return;
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const gridColor = isDark ? '#2e2e32' : '#e5e7eb';
+            const textColor = isDark ? '#9ca3af' : '#475569';
+
+            gradationChart.options.scales.x.title.color = textColor;
+            gradationChart.options.scales.x.ticks.color = textColor;
+            gradationChart.options.scales.x.grid.color = gridColor;
+
+            gradationChart.options.scales.y.title.color = textColor;
+            gradationChart.options.scales.y.ticks.color = textColor;
+            gradationChart.options.scales.y.grid.color = gridColor;
+
+            gradationChart.options.plugins.legend.labels.color = textColor;
+            gradationChart.options.plugins.tooltip.backgroundColor = isDark ? '#1b1b1d' : '#0f172a';
+
+            updateChart();
+        }
+
+        // Update Chart Data Layers
+
+
+
+        // CSV Export Functionality
+        function exportToCSV() {
+            const specName = document.getElementById('spec-preset').options[document.getElementById('spec-preset').selectedIndex]?.text || 'Custom';
+            const project = document.getElementById('project-name')?.value || '';
+            let csvContent = "data:text/csv;charset=utf-8,";
+            const add = row => { csvContent += row.map(v => `"${String(v??'').replace(/"/g,'""')}"`).join(',') + "\n"; };
+            add(['Aggregate Blending & JMF Report']); add(['Project',project]); add(['Specification',specName]); add(['Generated',new Date().toLocaleString('en-IN')]); add([]);
+            add(['Aggregate Source','Proportion (%)','Min (%)','Max (%)','Locked','Cost (₹/t)','Moisture (%)','Absorption (%)','Gsb']);
+            aggregates.forEach((a,i)=>add([a.name,a.proportion.toFixed(2),sourceConstraints[i]?.min??0,sourceConstraints[i]?.max??100,sourceConstraints[i]?.locked?'Yes':'No',Number(a.cost||0).toFixed(2),Number(a.moisture||0).toFixed(2),Number(a.absorption||0).toFixed(2),Number(a.gsb||2.65).toFixed(3)]));
+            add([]); add(['Sieve Size (mm)','Lower Limit (%)','Upper Limit (%)','Target (%)',...aggregates.map(a=>`${a.name} % Pass`),'Combined Blend (%)','Lower Margin (pp)','Upper Margin (pp)','Status']);
+            const combined=calculateCombinedBlend();
+            currentSieves.forEach((s,i)=>{const y=combined[i].passing; add([s.size,s.lower,s.upper,targetCurve[i]??((s.lower+s.upper)/2),...aggregates.map(a=>Number(a.passing?.[i]||0).toFixed(2)),y.toFixed(2),(y-s.lower).toFixed(2),(s.upper-y).toFixed(2),y>=s.lower&&y<=s.upper?'PASS':'FAIL']);});
+            add([]); add(['FM',document.getElementById('metric-fm').innerText]); add(['Fines <0.075 mm',document.getElementById('metric-fines').innerText]); add(['D10 / D30 / D60 (mm)',document.getElementById('metric-dsizes').innerText]); add(['Cu / Cc',document.getElementById('metric-cu-cc').innerText]); add(['Critical sieve',document.getElementById('critical-sieve').innerText]); add(['Critical margin (pp)',document.getElementById('critical-margin').innerText]);
+            const link=document.createElement('a'); link.href=encodeURI(csvContent); link.download=`aggregate_blend_${Date.now()}.csv`; document.body.appendChild(link); link.click(); link.remove(); showToast('Enhanced CSV report exported','success');
+        }
+
+        // Custom Non-blocking Toast Notification
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let bgClass = 'bg-slate-900 text-white';
+            let icon = 'fa-circle-info text-sky-400';
+            
+            if (type === 'success') {
+                bgClass = 'bg-emerald-900 text-emerald-100 border border-emerald-700';
+                icon = 'fa-circle-check text-emerald-400';
+            } else if (type === 'warning') {
+                bgClass = 'bg-amber-900 text-amber-100 border border-amber-700';
+                icon = 'fa-triangle-exclamation text-amber-400';
+            }
+
+            toast.className = `${bgClass} px-4 py-3 rounded-xl shadow-xl flex items-center space-x-3 text-xs font-semibold transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-base"></i><span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Final startup synchronization for extended workflow
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => { try { renderConstraints(); updateBatchQuantities(); validateAndShow(); } catch(e) {} }, 50);
+        });
+    </script>
+</body>
+</html>

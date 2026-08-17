@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>By Ankit | Transportation Engineering Laboratory Practical Suite</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --ifm-color-primary: #166534;
+            --ifm-color-primary-dark: #14532d;
+            --ifm-color-primary-darker: #134e2b;
+            --ifm-color-primary-darkest: #0f3d22;
+            --ifm-color-primary-light: #15803d;
+            --ifm-color-primary-lighter: #16a34a;
+            --ifm-color-primary-lightest: #22c55e;
+
+            --ifm-background-color: #fcfcfb;
+            --ifm-background-surface-color: #ffffff;
+
+            /* Typography */
+            --ifm-font-color-base: #374151;
+            --ifm-font-color-secondary: #6b7280;
+            --ifm-heading-color: #1f2937;
+
+            --ifm-code-font-size: 95%;
+            --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+            --border-color: #e5e7eb;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme='dark'] {
+            --ifm-color-primary: #25c2a0;
+            --ifm-color-primary-dark: #21af90;
+            --ifm-color-primary-darker: #1fa588;
+            --ifm-color-primary-darkest: #1a8870;
+            --ifm-color-primary-light: #29d5b0;
+            --ifm-color-primary-lighter: #32d8b4;
+            --ifm-color-primary-lightest: #4fddbf;
+
+            --ifm-background-color: #121212;
+            --ifm-background-surface-color: #1b1b1d;  
+
+            /* Typography */
+            --ifm-font-color-base: #e5e7eb;
+            --ifm-font-color-secondary: #9ca3af;
+            --ifm-heading-color: #ffffff;
+
+            --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+
+            --border-color: #2d2d30;
+            --card-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            background-color: var(--ifm-background-color);
+            color: var(--ifm-font-color-base);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .surface-card {
+            background-color: var(--ifm-background-surface-color);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+        }
+
+        .heading-text {
+            color: var(--ifm-heading-color);
+        }
+
+        .secondary-text {
+            color: var(--ifm-font-color-secondary);
+        }
+
+        .btn-primary {
+            background-color: var(--ifm-color-primary);
+            color: #ffffff;
+            transition: all 0.2s ease;
+        }
+
+        [data-theme='dark'] .btn-primary {
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--ifm-color-primary-dark);
+        }
+
+        .input-custom {
+            background-color: var(--ifm-background-surface-color);
+            color: var(--ifm-font-color-base);
+            border: 1px solid var(--border-color);
+        }
+
+        .input-custom:focus {
+            outline: 2px solid var(--ifm-color-primary);
+            border-color: transparent;
+        }
+
+        .nav-item {
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item.active {
+            border-left-color: var(--ifm-color-primary);
+            background-color: rgba(22, 101, 52, 0.08);
+            font-weight: 600;
+        }
+
+        [data-theme='dark'] .nav-item.active {
+            background-color: rgba(37, 194, 160, 0.12);
+        }
+
+        .section-header {
+            border-bottom: 2px solid var(--ifm-color-primary);
+            padding-bottom: 0.35rem;
+            margin-bottom: 1rem;
+        }
+
+        .svg-diagram-container {
+            background: var(--ifm-background-surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Native HTML MathML — no KaTeX/MathJax dependency */
+        .equation {
+            display: block;
+            margin: 0.9rem auto;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.25rem 0.1rem;
+            text-align: center;
+            font-size: 1.05em;
+        }
+        math {
+            font-size: 1.08em;
+        }
+        math[display="block"] {
+            margin: 0.75rem auto;
+        }
+        @media print {
+            .equation { overflow: visible; }
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background-color: white !important;
+                color: black !important;
+            }
+            .surface-card {
+                border: none !important;
+                box-shadow: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="surface-card border-b sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2.5 rounded-lg text-white" style="background-color: var(--ifm-color-primary);">
+                    <i class="fa-solid fa-road text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold heading-text tracking-tight">Transportation Engineering Laboratory Practical Suite</h1>
+                    <p class="text-xs secondary-text">Kurukshetra University (NEP 2020) &amp; AICTE Practical Course Curriculum</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3 no-print">
+                <button onclick="toggleTheme()" class="p-2 rounded-lg input-custom hover:opacity-80 transition-opacity" title="Toggle Light/Dark Theme">
+                    <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
+                </button>
+                <button onclick="window.print()" class="px-3 py-1.5 text-xs rounded-lg input-custom hover:border-gray-400 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-print"></i> Print Manual Page
+                </button>
+                <button onclick="exportCurrentRecord()" class="px-3 py-1.5 text-xs rounded-lg input-custom hover:border-gray-400 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-file-arrow-down"></i> Export Record
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 mb-12 flex-grow w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Sidebar Navigation -->
+        <aside class="lg:col-span-3 surface-card rounded-xl p-4 h-fit no-print lab-nav-tools">
+            <div class="mb-3 px-2">
+                <div class="flex items-center justify-between gap-2">
+                    <h2 class="text-xs font-bold uppercase tracking-wider secondary-text">Laboratory Experiments</h2>
+                    <span id="completion-count" class="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">0/0</span>
+                </div>
+            </div>
+            <div class="space-y-2 mb-3">
+                <input id="experiment-search" type="search" placeholder="Search experiment..." class="input-custom w-full rounded-lg px-3 py-2 text-xs" oninput="renderNavMenu()">
+                <select id="experiment-category" class="input-custom w-full rounded-lg px-3 py-2 text-xs" onchange="renderNavMenu()">
+                    <option value="all">All categories</option>
+                </select>
+            </div>
+            <div class="h-1.5 bg-gray-100 dark:bg-neutral-800 rounded-full overflow-hidden mb-3">
+                <div id="completion-progress" class="h-full bg-emerald-600 transition-all" style="width:0%"></div>
+            </div>
+            <nav class="space-y-1 text-sm max-h-[65vh] overflow-y-auto pr-1" id="experiments-nav">
+                <!-- Links injected by JS -->
+            </nav>
+        </aside>
+
+        <!-- Main Experiment Render Area -->
+        <main class="lg:col-span-9 space-y-6" id="experiment-content">
+            <!-- Active experiment detailed view -->
+        </main>
+
+    </div>
+
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Application Engine -->
+    <script>
+        const EXPERIMENTS_DATA = [
+            {
+                id: "exp-aiv",
+                code: "EXP-01",
+                title: "Aggregate Impact Value Test",
+                standard: "IS: 2386 (Part IV) - 1963 / IS: 383",
+                category: "Transportation Engineering",
+                whatIs: "The Aggregate Impact Value (AIV) test provides a relative measure of the resistance of coarse aggregate particles to sudden shock or dynamic impact loading. It measures how readily an aggregate breaks down under repeated dynamic impact forces.",
+                apparatus: "1. <strong>Impact Testing Machine:</strong> Metal frame with heavy base (>= 22 kg), guide columns, and a cylindrical hammer weighing 13.75 ± 0.25 kg falling freely through 380 ± 5 mm.<br>2. <strong>Cylindrical Steel Cup:</strong> Internal diameter 102 mm, depth 50 mm.<br>3. <strong>Tamping Rod:</strong> Straight steel rod 10 mm diameter, 230 mm length with rounded ends.<br>4. <strong>IS Sieves:</strong> 12.5 mm, 10 mm, and 2.36 mm sieves.<br>5. <strong>Balance &amp; Oven:</strong> Weighing balance accurate to 0.1 g and thermostatically controlled oven (105-110°C).",
+                diagramSvg: `
+                <svg viewBox="0 0 300 240" class="w-full max-w-sm h-auto">
+                    <!-- Base Plate -->
+                    <rect x="50" y="200" width="200" height="20" rx="3" fill="#4b5563" />
+                    <!-- Cup -->
+                    <rect x="110" y="160" width="80" height="40" fill="#9ca3af" stroke="#374151" stroke-width="2"/>
+                    <rect x="115" y="165" width="70" height="35" fill="#6b7280" />
+                    <!-- Guide Rods -->
+                    <rect x="75" y="30" width="10" height="170" fill="#d1d5db" stroke="#4b5563" />
+                    <rect x="215" y="30" width="10" height="170" fill="#d1d5db" stroke="#4b5563" />
+                    <!-- Hammer -->
+                    <rect x="95" y="70" width="110" height="40" rx="2" fill="#15803d" stroke="#14532d" stroke-width="2" />
+                    <text x="150" y="94" font-size="10" text-anchor="middle" fill="#ffffff" font-weight="bold">Hammer 13.75 kg</text>
+                    <!-- Fall Height Indicator -->
+                    <line x1="240" y1="40" x2="240" y2="160" stroke="#ef4444" stroke-width="2" stroke-dasharray="4,4"/>
+                    <text x="245" y="105" font-size="10" fill="#ef4444" font-weight="bold">380 mm Fall</text>
+                </svg>`,
+                theory: "Aggregate toughness is defined as the resistance of aggregates to failure or degradation under dynamic impact or repeated shock loads. Vehicle tires transmit dynamic force pulses to pavement layers, especially at surface irregularities.<br><br>The mathematical formula for Aggregate Impact Value is:<br>$$\\text{AIV (\\%)} = \\left( \\frac{W_2}{W_1} \\right) \\times 100$$<br>Where:<br>$W_1$ = Total weight of oven-dry aggregate sample passing 12.5 mm and retained on 10 mm IS sieve.<br>$W_2$ = Weight of crushed fines passing 2.36 mm IS sieve after 15 blows of the impact hammer.",
+                needForStudy: "Aggregate particles must withstand severe impact forces during compaction (pneumatic/vibratory rollers) and operational service life. If aggregates crush under impact, the grain interlocking breaks, leading to loss of stability, severe rutting, and surface raveling.",
+                fieldImportance: "Critical parameter for selecting aggregate stockpiles for heavy traffic expressways, runway pavements, industrial floors, and wearing surface courses. Allows engineers to verify whether aggregates meet MoRTH specifications for Base, Sub-base, and Wearing courses.",
+                procedure: [
+                    "Sieve dry coarse aggregate sample through 12.5 mm sieve and collect aggregate retained on 10 mm IS sieve.",
+                    "Oven-dry the sample at 105–110°C for 4 hours and cool to room temperature.",
+                    "Fill the cylindrical steel cup in 3 equal layers, tamping each layer with 25 strokes of the tamping rod.",
+                    "Level the top surface using a straight edge and weigh the aggregate sample to determine $W_1$.",
+                    "Place the cup securely on the base plate of the impact testing machine.",
+                    "Raise the 13.75 kg hammer to a height of 380 mm and drop it freely onto the aggregate sample 15 times at intervals of not less than 1 second.",
+                    "Remove the crushed sample from the cup and sieve it through a 2.36 mm IS sieve.",
+                    "Weigh the fine fraction passing the 2.36 mm sieve to determine $W_2$."
+                ],
+                obsFields: [
+                    { id: 'w1', label: 'Weight of dry aggregate sample passing 12.5mm & retained on 10mm ($W_1$)', unit: 'g', default: 350 },
+                    { id: 'w2', label: 'Weight of crushed fraction passing 2.36mm sieve ($W_2$)', unit: 'g', default: 62 }
+                ],
+                calcFormula: "AIV = (W_2 / W_1) * 100",
+                compute: function(vals) {
+                    const w1 = vals.w1 || 1;
+                    const w2 = vals.w2 || 0;
+                    const aiv = (w2 / w1) * 100;
+                    return {
+                        resText: `${aiv.toFixed(2)} %`,
+                        resVal: aiv,
+                        breakdown: `$$\\text{AIV} = \\left( \\frac{${w2}}{${w1}} \\right) \\times 100 = ${aiv.toFixed(2)}\\%$$`
+                    };
+                },
+                specLimits: "<ul><li><strong>Bituminous Wearing Course (BC / SD):</strong> Maximum 24% (MoRTH Table 500-17)</li><li><strong>Wet Mix Macadam (WMM) Base:</strong> Maximum 30% (MoRTH Table 400-11)</li><li><strong>Granular Sub-Base (GSB):</strong> Maximum 40% (MoRTH Table 400-1)</li></ul>",
+                getInference: function(resVal) {
+                    if (resVal <= 24) return "The tested aggregate specimen exhibits superior toughness (AIV <= 24%). It fully complies with MoRTH specifications for heavy-duty wearing surface courses, WMM, and GSB layers.";
+                    if (resVal <= 30) return "The aggregate meets requirements for WMM Base and GSB Sub-base layers (AIV <= 30%), but is UNACCEPTABLE for top wearing surface courses.";
+                    return "The aggregate exhibits low impact resistance (AIV > 30%). It is rejected for base and wearing course paving application.";
+                },
+                precautions: [
+                    "Ensure aggregate sample is completely surface-dry before testing.",
+                    "The hammer must drop freely from 380 ± 5 mm height without any rail friction.",
+                    "The tamping rod must be applied in 25 uniform strokes per layer without striking the bottom plate forcefully.",
+                    "Carefully brush out all fine dust particles from the cylindrical cup before weighing."
+                ]
+            },
+            {
+                id: "exp-acv",
+                code: "EXP-02",
+                title: "Aggregate Crushing Value Test",
+                standard: "IS: 2386 (Part IV) - 1963",
+                category: "Transportation Engineering",
+                whatIs: "The Aggregate Crushing Value (ACV) test measures the relative resistance of coarse aggregates to crushing under a gradually applied compressive load.",
+                apparatus: "1. <strong>Steel Cylinder:</strong> 150 mm internal diameter open-ended steel cylinder with plunger and base plate.<br>2. <strong>Compression Testing Machine (CTM):</strong> Capable of applying up to 40 Tonnes (400 kN) load at a uniform rate of 4 Tonnes/min.<br>3. <strong>Tamping Rod:</strong> 16 mm diameter, 450–600 mm length.<br>4. <strong>IS Sieves:</strong> 12.5 mm, 10 mm, and 2.36 mm.<br>5. <strong>Balance:</strong> Sensitive to 1 g.",
+                diagramSvg: `
+                <svg viewBox="0 0 300 240" class="w-full max-w-sm h-auto">
+                    <!-- CTM Top Platen -->
+                    <rect x="60" y="20" width="180" height="25" fill="#374151" rx="2"/>
+                    <path d="M 150 45 L 150 70" stroke="#ef4444" stroke-width="4" marker-end="url(#arrow)"/>
+                    <!-- Plunger -->
+                    <rect x="110" y="70" width="80" height="25" fill="#9ca3af" stroke="#374151" stroke-width="2"/>
+                    <!-- Cylinder -->
+                    <rect x="95" y="95" width="110" height="90" fill="none" stroke="#15803d" stroke-width="4"/>
+                    <!-- Aggregates inside -->
+                    <rect x="99" y="115" width="102" height="70" fill="#6b7280"/>
+                    <!-- Base Plate -->
+                    <rect x="60" y="185" width="180" height="25" fill="#374151" rx="2"/>
+                    <text x="150" y="150" font-size="11" text-anchor="middle" fill="#ffffff" font-weight="bold">Aggregate Sample</text>
+                    <text x="150" y="37" font-size="10" text-anchor="middle" fill="#ffffff">40 Tonnes Load</text>
+                </svg>`,
+                theory: "Aggregate crushing strength indicates the structural capacity of coarse aggregate particles to resist crushing under high static compressive loads exerted by heavy roller compaction and stationary wheel traffic.<br><br>The Aggregate Crushing Value is calculated using:<br>$$\\text{ACV (\\%)} = \\left( \\frac{W_2}{W_1} \\right) \\times 100$$<br>Where:<br>$W_1$ = Oven-dry weight of aggregate passing 12.5 mm and retained on 10 mm sieve.<br>$W_2$ = Weight of crushed fines passing 2.36 mm IS sieve after subjecting to 40 Tonnes compression load.",
+                needForStudy: "Aggregates are subjected to extreme compressive stresses during pavement construction rolling and operational heavy vehicle loading. Weak aggregates crush easily, reducing inter-particle friction, causing volume reduction, structural depression, and surface cracking.",
+                fieldImportance: "Essential test for designing high-strength concrete mixes for rigid pavements, cement-treated base courses (CTB), and heavy-duty asphalt binder layers (DBM).",
+                procedure: [
+                    "Sieve clean dry aggregate passing 12.5 mm sieve and retained on 10 mm IS sieve.",
+                    "Fill the 150 mm steel cylinder in 3 equal layers, applying 25 strokes of the tamping rod for each layer.",
+                    "Level the surface of aggregate and insert the plunger horizontally.",
+                    "Weigh the total assembly and record the sample weight $W_1$.",
+                    "Place the cylinder assembly centrally on the compression testing machine (CTM).",
+                    "Apply a total load of 40 Tonnes (400 kN) smoothly at a rate of 4 Tonnes per minute (total time 10 minutes).",
+                    "Release load, remove crushed aggregate, and sieve through 2.36 mm IS sieve.",
+                    "Weigh the crushed fraction passing 2.36 mm sieve to obtain $W_2$."
+                ],
+                obsFields: [
+                    { id: 'w1', label: 'Total weight of surface-dry aggregate sample ($W_1$)', unit: 'g', default: 3000 },
+                    { id: 'w2', label: 'Weight of crushed fines passing 2.36mm sieve ($W_2$)', unit: 'g', default: 690 }
+                ],
+                calcFormula: "ACV = (W_2 / W_1) * 100",
+                compute: function(vals) {
+                    const w1 = vals.w1 || 1;
+                    const w2 = vals.w2 || 0;
+                    const acv = (w2 / w1) * 100;
+                    return {
+                        resText: `${acv.toFixed(2)} %`,
+                        resVal: acv,
+                        breakdown: `$$\\text{ACV} = \\left( \\frac{${w2}}{${w1}} \\right) \\times 100 = ${acv.toFixed(2)}\\%$$`
+                    };
+                },
+                specLimits: "<ul><li><strong>Surface Wearing Course (Flexible/Rigid):</strong> Maximum 30% (IS: 383 / IRC: 37)</li><li><strong>Base / Sub-Base Layers (WMM/GSB):</strong> Maximum 45%</li></ul>",
+                getInference: function(resVal) {
+                    if (resVal <= 30) return "The aggregate sample demonstrates high compressive resistance (ACV <= 30%). Complies with IRC specifications for both surface wearing layers and base courses.";
+                    return "The aggregate exhibits high crushing susceptibility (ACV > 30%). It is unfit for pavement surface wearing courses.";
+                },
+                precautions: [
+                    "Ensure load application rate is kept constant at 4 Tonnes/min.",
+                    "Place cylinder strictly at the center of CTM platens to prevent eccentric loading.",
+                    "Carefully collect all fines stuck inside cylinder walls using a stiff brush."
+                ]
+            },
+            {
+                id: "exp-laa",
+                code: "EXP-03",
+                title: "Los Angeles Abrasion Value Test",
+                standard: "IS: 2386 (Part IV) - 1963 / ASTM C131",
+                category: "Transportation Engineering",
+                whatIs: "The Los Angeles Abrasion test measures aggregate resistance to surface wear, degradation, friction, and attrition caused by rubbing action of traffic and steel charges.",
+                apparatus: "1. <strong>Los Angeles Machine:</strong> Hollow steel cylinder (711 mm internal dia, 508 mm length) mounted horizontally, rotating at 30–33 RPM.<br>2. <strong>Abrasive Charge:</strong> Cast iron or steel spheres (approx 48 mm dia, 390-445 g weight each).<br>3. <strong>IS Sieves:</strong> 1.70 mm IS sieve and standard grading sieve set.<br>4. <strong>Oven &amp; Balance:</strong> Sensitive to 1 g.",
+                diagramSvg: `
+                <svg viewBox="0 0 300 240" class="w-full max-w-sm h-auto">
+                    <!-- Rotating Drum -->
+                    <circle cx="150" cy="120" r="80" fill="#f3f4f6" stroke="#15803d" stroke-width="5"/>
+                    <circle cx="150" cy="120" r="72" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="6,4"/>
+                    <!-- Steel Shelf Inside -->
+                    <rect x="70" y="115" width="30" height="10" fill="#374151"/>
+                    <!-- Steel Balls -->
+                    <circle cx="140" cy="160" r="10" fill="#4b5563"/>
+                    <circle cx="165" cy="155" r="10" fill="#4b5563"/>
+                    <circle cx="152" cy="172" r="10" fill="#4b5563"/>
+                    <!-- Rotation Arrow -->
+                    <path d="M 210 70 A 90 90 0 0 1 240 120" fill="none" stroke="#ef4444" stroke-width="3" marker-end="url(#arrow)"/>
+                    <text x="150" y="110" font-size="10" text-anchor="middle" fill="#1f2937" font-weight="bold">Drum 30-33 RPM</text>
+                    <text x="150" y="130" font-size="9" text-anchor="middle" fill="#6b7280">Steel Charges + Sample</text>
+                </svg>`,
+                theory: "Tires of high-speed heavy vehicles generate severe frictional forces on pavement surfaces. Aggregates undergo combined impact (from free fall inside the drum) and surface abrasion (rubbing against steel balls).<br><br>Los Angeles Abrasion Value formula:<br>$$\\text{LAA (\\%)} = \\left( \\frac{W_1 - W_2}{W_1} \\right) \\times 100$$<br>Where:<br>$W_1$ = Original weight of clean, oven-dry aggregate sample.<br>$W_2$ = Weight of aggregate sample retained on 1.70 mm IS sieve after test.",
+                needForStudy: "Aggregates with poor abrasion resistance wear out rapidly under heavy wheel traffic, causing polished surfaces, slipperiness, loss of skid resistance, structural rutting, and dust generation.",
+                fieldImportance: "Critical safety test for selecting aggregates for high-speed highways, expressways, airport runways, and wearing courses where high macro-texture and frictional resistance are mandatory.",
+                procedure: [
+                    "Select aggregate grading (A, B, C, or D) depending on particle size distribution.",
+                    "Wash aggregate sample, oven-dry at 105–110°C, and weigh specified quantity (e.g., 5000 g for Grading A) to find $W_1$.",
+                    "Place sample along with specified number of steel balls (e.g., 12 balls for Grading A) inside LA drum.",
+                    "Set machine to rotate at 30 to 33 RPM for 500 revolutions (1000 rev for coarse gradings).",
+                    "After rotation, discharge material onto a tray and sieve through 1.70 mm IS sieve.",
+                    "Wash material retained on 1.70 mm sieve thoroughly to remove adhering dust.",
+                    "Oven-dry retained fraction at 105–110°C and weigh accurately to find $W_2$."
+                ],
+                obsFields: [
+                    { id: 'w1', label: 'Original dry sample weight ($W_1$)', unit: 'g', default: 5000 },
+                    { id: 'w2', label: 'Weight retained on 1.70mm sieve after test ($W_2$)', unit: 'g', default: 3600 }
+                ],
+                calcFormula: "LAA = ((W_1 - W_2) / W_1) * 100",
+                compute: function(vals) {
+                    const w1 = vals.w1 || 1;
+                    const w2 = vals.w2 || 0;
+                    const laa = ((w1 - w2) / w1) * 100;
+                    return {
+                        resText: `${laa.toFixed(2)} %`,
+                        resVal: laa,
+                        breakdown: `$$\\text{LAA} = \\left( \\frac{${w1} - ${w2}}{${w1}} \\right) \\times 100 = ${laa.toFixed(2)}\\%$$`
+                    };
+                },
+                specLimits: "<ul><li><strong>Bituminous Concrete (BC) Wearing Course:</strong> Maximum 30% (MoRTH Table 500-17)</li><li><strong>Dense Bituminous Macadam (DBM):</strong> Maximum 35%</li><li><strong>WMM Base / GSB Sub-Base:</strong> Maximum 40%</li></ul>",
+                getInference: function(resVal) {
+                    if (resVal <= 30) return "Excellent abrasion resistance (LAA <= 30%). Aggregate satisfies MoRTH criteria for high-speed wearing surface layers.";
+                    if (resVal <= 40) return "Moderate abrasion resistance. Approved for WMM Base and GSB layers, but REJECTED for wearing courses.";
+                    return "Excessive abrasion wear (LAA > 40%). Material is unfit for pavement construction.";
+                },
+                precautions: [
+                    "Ensure exact number and weight of abrasive steel spheres matching chosen grading.",
+                    "Maintain exact machine speed of 30 to 33 RPM.",
+                    "Wash sample retained on 1.70 mm sieve thoroughly before final oven-drying."
+                ]
+            },
+            {
+                id: "exp-shape",
+                code: "EXP-04",
+                title: "Flakiness & Elongation Index Test",
+                standard: "IS: 2386 (Part I) - 1963 / IRC: 111",
+                category: "Transportation Engineering",
+                whatIs: "Evaluates aggregate shape characteristics by determining the mass percentage of flaky (thin) and elongated (long) particles in a coarse aggregate sample.",
+                apparatus: "1. <strong>Thickness Gauge:</strong> Metal gauge with standard slotted openings for determining Flakiness Index.<br>2. <strong>Length Gauge:</strong> Metal gauge with standard pins for determining Elongation Index.<br>3. <strong>IS Sieves:</strong> 63mm, 50mm, 40mm, 31.5mm, 25mm, 20mm, 16mm, 12.5mm, 10mm, and 6.3mm.<br>4. <strong>Weighing Balance:</strong> Accuracy 0.1 g.",
+                diagramSvg: `
+                <svg viewBox="0 0 300 200" class="w-full max-w-sm h-auto">
+                    <!-- Thickness Gauge -->
+                    <rect x="30" y="40" width="110" height="120" rx="4" fill="#f3f4f6" stroke="#15803d" stroke-width="2"/>
+                    <rect x="50" y="60" width="70" height="8" fill="#374151"/>
+                    <rect x="50" y="85" width="70" height="12" fill="#374151"/>
+                    <rect x="50" y="115" width="70" height="16" fill="#374151"/>
+                    <text x="85" y="155" font-size="9" text-anchor="middle" font-weight="bold">Thickness Gauge</text>
+                    
+                    <!-- Length Gauge -->
+                    <rect x="160" y="40" width="110" height="120" rx="4" fill="#f3f4f6" stroke="#15803d" stroke-width="2"/>
+                    <line x1="180" y1="70" x2="250" y2="70" stroke="#374151" stroke-width="4"/>
+                    <line x1="180" y1="110" x2="250" y2="110" stroke="#374151" stroke-width="4"/>
+                    <circle cx="180" cy="70" r="4" fill="#ef4444"/> <circle cx="250" cy="70" r="4" fill="#ef4444"/>
+                    <text x="215" y="155" font-size="9" text-anchor="middle" font-weight="bold">Length Gauge</text>
+                </svg>`,
+                theory: "Particle shape significantly influences workability, shear strength, and void ratio of aggregate mixes.<br><br><strong>Flaky Particle:</strong> Thickness is less than 0.6 times its mean sieve dimension.<br><strong>Elongated Particle:</strong> Length is greater than 1.8 times its mean sieve dimension.<br><br>$$\\text{FI (\\%)} = \\left( \\frac{w_1}{W} \\right) \\times 100, \\quad \\text{EI (\\%)} = \\left( \\frac{w_2}{W} \\right) \\times 100$$",
+                needForStudy: "Flaky and elongated particles fracture easily under heavy compaction rollers, create high void content, demand extra bitumen binder, and cause severe mechanical instability.",
+                fieldImportance: "MoRTH limits combined Flakiness and Elongation Index to 35% for all bituminous surface courses (BC, DBM, SMA) and WMM layers to ensure dense packing and particle interlocking.",
+                procedure: [
+                    "Take a minimum 2000 g representative coarse aggregate sample passing 63 mm and retained on 6.3 mm IS sieves.",
+                    "Sieve sample into individual fraction size groups (e.g., 50-40mm, 40-25mm, 20-16mm, etc.).",
+                    "Weigh each fraction size group and record total sample weight $W$.",
+                    "Pass particles of each size fraction through specified slot openings of the Thickness Gauge. Weigh passing particles ($w_1$).",
+                    "Take particles retained on thickness slots and gauge them along length pins of the Length Gauge. Weigh retained particles ($w_2$).",
+                    "Calculate Flakiness Index, Elongation Index, and Combined Shape Index."
+                ],
+                obsFields: [
+                    { id: 'w', label: 'Total sample weight tested ($W$)', unit: 'g', default: 1500 },
+                    { id: 'w1', label: 'Weight passing thickness gauge slots ($w_1$)', unit: 'g', default: 180 },
+                    { id: 'w2', label: 'Weight retained on length gauge pins ($w_2$)', unit: 'g', default: 210 }
+                ],
+                calcFormula: "FI = (w_1 / W)*100, EI = (w_2 / W)*100, Combined = FI + EI",
+                compute: function(vals) {
+                    const w = vals.w || 1;
+                    const w1 = vals.w1 || 0;
+                    const w2 = vals.w2 || 0;
+                    const fi = (w1 / w) * 100;
+                    const ei = (w2 / w) * 100;
+                    const comb = fi + ei;
+                    return {
+                        resText: `FI: ${fi.toFixed(2)}%, EI: ${ei.toFixed(2)}%, Combined: ${comb.toFixed(2)}%`,
+                        resVal: comb,
+                        breakdown: `$$\\text{FI} = \\left( \\frac{${w1}}{${w}} \\right) \\times 100 = ${fi.toFixed(2)}\\%, \\quad \\text{EI} = \\left( \\frac{${w2}}{${w}} \\right) \\times 100 = ${ei.toFixed(2)}\\%$$<br>$$\\text{Combined Shape Index (FI + EI)} = ${comb.toFixed(2)}\\%$$`
+                    };
+                },
+                specLimits: "<ul><li><strong>Combined Flakiness &amp; Elongation Index (MoRTH 5th Rev):</strong> Maximum 35% for Bituminous Mixes and WMM</li></ul>",
+                getInference: function(resVal) {
+                    if (resVal <= 35) return "Aggregate shape satisfies MoRTH requirements (Combined FI + EI <= 35%). Particle cubicity is adequate for stable compaction.";
+                    return "Excessive presence of flat/elongated particles (Combined > 35%). Aggregates require re-crushing in a vertical shaft impactor (VSI).";
+                },
+                precautions: [
+                    "Perform gauge testing individually particle by particle.",
+                    "Exclude aggregate fraction smaller than 6.3 mm as per IS: 2386 specifications."
+                ]
+            },
+            {
+                id: "exp-grad",
+                code: "EXP-05",
+                title: "Aggregate Gradation & Job Mix Formula Blending",
+                standard: "IS: 2386 (Part I) / MoRTH 5th Rev",
+                category: "Transportation Engineering",
+                whatIs: "Determines aggregate grain size distribution (Sieve Analysis) and calculates blending proportions of coarse/fine stockpiles to satisfy MoRTH specification envelopes.",
+                apparatus: "1. <strong>IS Sieve Set:</strong> 75mm, 53mm, 26.5mm, 19mm, 9.5mm, 4.75mm, 2.36mm, 0.425mm, 0.075mm.<br>2. <strong>Mechanical Sieve Shaker:</strong> Motorized shaker with timer.<br>3. <strong>Balance &amp; Oven:</strong> Electronic balance accurate to 0.1 g.",
+                diagramSvg: `
+                <svg viewBox="0 0 300 200" class="w-full max-w-sm h-auto">
+                    <!-- Sieve Stack -->
+                    <rect x="100" y="20" width="100" height="15" fill="#9ca3af" stroke="#374151"/>
+                    <rect x="100" y="38" width="100" height="15" fill="#9ca3af" stroke="#374151"/>
+                    <rect x="100" y="56" width="100" height="15" fill="#9ca3af" stroke="#374151"/>
+                    <rect x="100" y="74" width="100" height="15" fill="#9ca3af" stroke="#374151"/>
+                    <rect x="100" y="92" width="100" height="15" fill="#9ca3af" stroke="#374151"/>
+                    <rect x="100" y="110" width="100" height="20" fill="#4b5563" stroke="#374151"/>
+                    <text x="150" y="124" font-size="9" fill="#ffffff" text-anchor="middle">PAN</text>
+                    <!-- Shaker Motor base -->
+                    <rect x="70" y="135" width="160" height="35" rx="3" fill="#15803d"/>
+                    <text x="150" y="156" font-size="10" fill="#ffffff" text-anchor="middle" font-weight="bold">Sieve Shaker</text>
+                </svg>`,
+                theory: "Gradation governs density, void ratio, stability, and permeability of pavement layers.<br><br>$$\\text{Fineness Modulus (FM)} = \\frac{\\sum \\text{Cumulative \\% Retained}}{100}$$",
+                needForStudy: "Ensures aggregate mix achieves maximum dry density and structural stability without gap-grading or segregation in road layers.",
+                fieldImportance: "Directly used to prepare Job Mix Formula (JMF) for GSB, WMM, DLC, DBM, and Bituminous Concrete layers on road projects.",
+                procedure: [
+                    "Oven-dry aggregate sample at 105–110°C to constant weight.",
+                    "Assemble sieves in order of decreasing mesh size from top to bottom.",
+                    "Place dry sample on top sieve and mount stack on mechanical shaker for 10–15 minutes.",
+                    "Weigh fraction retained on each sieve and calculate percentage passing.",
+                    "Compute blended JMF percentages and plot logarithmic distribution curve against MoRTH envelopes."
+                ],
+                obsFields: [
+                    { id: 'w_total', label: 'Total Dry Weight of Aggregate Sample', unit: 'g', default: 5000 },
+                    { id: 'w_pass_0075', label: 'Weight passing 0.075mm (Fines)', unit: 'g', default: 180 }
+                ],
+                calcFormula: "FM = Sum(Cum Retained %)/100, Fines % = (Fines Wt / Total Wt)*100",
+                compute: function(vals) {
+                    const wt = vals.w_total || 1;
+                    const wf = vals.w_pass_0075 || 0;
+                    const finesPct = (wf / wt) * 100;
+                    return {
+                        resText: `Fines (<0.075mm): ${finesPct.toFixed(2)}%`,
+                        resVal: finesPct,
+                        breakdown: `$$\\text{Fines Percent (< 0.075mm)} = \\left( \\frac{${wf}}{${wt}} \\right) \\times 100 = ${finesPct.toFixed(2)}\\%$$`
+                    };
+                },
+                specLimits: "<ul><li><strong>GSB Grade I Fines Limit:</strong> Less than 5.0% passing 0.075mm sieve.</li></ul>",
+                getInference: function(resVal) {
+                    return "Interactive chart plots blended JMF against upper and lower MoRTH specification limits.";
+                },
+                precautions: [
+                    "Sieve shaking must be performed for at least 10-15 minutes on a mechanical shaker.",
+                    "Avoid overloading individual sieves to prevent clogging."
+                ]
+            },
+            {
+                id: "exp-pen",
+                code: "EXP-06",
+                title: "Penetration Test on Bitumen",
+                standard: "IS: 1203 - 1978 / ASTM D5",
+                category: "Transportation Engineering",
+                whatIs: "Measures bitumen hardness or consistency by determining the depth in tenths of a millimeter to which a standard needle penetrates vertically in 5 seconds under 100 g load at 25°C.",
+                apparatus: "1. <strong>Penetrometer:</strong> Stand with release mechanism and dial gauge calibrated in 0.1 mm.<br>2. <strong>Needle:</strong> Stainless steel needle (100 g total weight assembly).<br>3. <strong>Water Bath:</strong> Constant temperature bath controlled at 25 ± 0.1°C.<br>4. <strong>Container:</strong> Metal dish (55 mm dia, 35 mm depth).",
+                diagramSvg: `
+                <svg viewBox="0 0 300 200" class="w-full max-w-sm h-auto">
+                    <!-- Dial Gauge -->
+                    <circle cx="150" cy="50" r="30" fill="#ffffff" stroke="#15803d" stroke-width="3"/>
+                    <line x1="150" y1="50" x2="165" y2="40" stroke="#ef4444" stroke-width="2"/>
+                    <!-- Rod -->
+                    <rect x="148" y="80" width="4" height="50" fill="#374151"/>
+                    <!-- Needle -->
+                    <polygon points="150,138 147,130 153,130" fill="#000000"/>
+                    <!-- Bitumen Sample Container -->
+                    <rect x="110" y="138" width="80" height="40" fill="#9ca3af" stroke="#374151" stroke-width="2"/>
+                    <rect x="114" y="142" width="72" height="32" fill="#1f2937"/>
+                    <text x="150" y="162" font-size="9" fill="#ffffff" text-anchor="middle">Bitumen 25°C</text>
+                </svg>`,
+                theory: "Bitumen is a temperature-sensitive binder. Penetration value reflects binder stiffness.<br><br>$$\\text{Penetration Grade} = \\text{Depth in } \\frac{1}{10}\\text{th mm}$$",
+                needForStudy: "Selection of proper bitumen grade prevents pavement rutting in summer and cracking in winter.",
+                fieldImportance: "Standard method for paving bitumen viscosity grading: VG-10, VG-30, and VG-40.",
+                procedure: [
+                    "Heat bitumen sample to 90°C above softening point and pour into sample container.",
+                    "Cool in air for 60 minutes and place in 25°C water bath for 60 minutes.",
+                    "Mount needle assembly (100 g) and zero dial gauge.",
+                    "Release needle for exactly 5 seconds and record penetration depth."
+                ],
+                obsFields: [
+                    { id: 'p1', label: 'Trial 1 Penetration Reading', unit: '1/10th mm', default: 63 },
+                    { id: 'p2', label: 'Trial 2 Penetration Reading', unit: '1/10th mm', default: 67 },
+                    { id: 'p3', label: 'Trial 3 Penetration Reading', unit: '1/10th mm', default: 65 }
+                ],
+                calcFormula: "Mean Penetration = (P1 + P2 + P3) / 3",
+                compute: function(vals) {
+                    const p1 = vals.p1 || 0;
+                    const p2 = vals.p2 || 0;
+                    const p3 = vals.p3 || 0;
+                    const mean = (p1 + p2 + p3) / 3;
+                    return {
+                        resText: `${mean.toFixed(1)} (1/10th mm)`,
+                        resVal: mean,
+                        breakdown: `$$\\text{Mean Penetration} = \\frac{${p1} + ${p2} + ${p3}}{3} = ${mean.toFixed(1)} \\text{ (1/10th mm)}$$`
+                    };
+                },
+                specLimits: "<ul><li><strong>VG-30 Bitumen:</strong> 50 to 70 (1/10th mm)</li><li><strong>VG-10 Bitumen:</strong> 80 to 100 (1/10th mm)</li></ul>",
+                getInference: function(resVal) {
+                    if (resVal >= 50 && resVal <= 70) return "Sample conforms to VG-30 Paving Grade Bitumen (60/70). Suitable for general highway paving.";
+                    return "Bitumen falls outside standard VG-30 limits.";
+                },
+                precautions: [
+                    "Maintain water bath temperature strictly at 25 ± 0.1°C.",
+                    "Clean needle with solvent before each test."
+                ]
+            },
+            {
+                id: "exp-soft",
+                code: "EXP-07",
+                title: "Softening Point Test (Ring and Ball Apparatus)",
+                standard: "IS: 1205 - 1978 / ASTM D36",
+                category: "Transportation Engineering",
+                whatIs: "Determines the temperature at which bitumen reaches a specified state of fluidity under test conditions.",
+                apparatus: "1. <strong>Ring &amp; Ball Apparatus:</strong> Steel balls (9.5mm dia, 3.5g) and brass rings.<br>2. <strong>Water Bath:</strong> Glass vessel with stirrer and electric heater.<br>3. <strong>Thermometer:</strong> Range -2°C to +80°C.",
+                diagramSvg: `
+                <svg viewBox="0 0 300 200" class="w-full max-w-sm h-auto">
+                    <!-- Glass Beaker -->
+                    <rect x="80" y="40" width="140" height="130" fill="none" stroke="#15803d" stroke-width="3" rx="4"/>
+                    <!-- Brass Ring Holder -->
+                    <rect x="100" y="90" width="100" height="8" fill="#d97706"/>
+                    <!-- Bitumen sample in Ring -->
+                    <rect x="120" y="90" width="20" height="8" fill="#1f2937"/>
+                    <rect x="160" y="90" width="20" height="8" fill="#1f2937"/>
+                    <!-- Steel Balls -->
+                    <circle cx="130" cy="85" r="5" fill="#4b5563"/>
+                    <circle cx="170" cy="85" r="5" fill="#4b5563"/>
+                    <!-- Thermometer -->
+                    <rect x="148" y="20" width="4" height="120" fill="#ef4444"/>
+                </svg>`,
+                theory: "Softening point indicates the temperature at which bitumen softeners under gravity load of a steel ball.<br><br>$$\\text{Softening Point (°C)} = \\frac{T_1 + T_2}{2}$$",
+                needForStudy: "High pavement surface temperatures during summer can cause binder bleeding and rutting if softening point is low.",
+                fieldImportance: "Helps select bitumen capable of withstanding maximum service temperatures.",
+                procedure: [
+                    "Fill brass rings with melted bitumen and trim surface flush.",
+                    "Assemble apparatus in water bath at 5°C.",
+                    "Place steel balls on bitumen surface.",
+                    "Heat water bath at constant rate of 5°C/min and record temperature when balls touch bottom plate."
+                ],
+                obsFields: [
+                    { id: 't1', label: 'Ball 1 Softening Temp ($T_1$)', unit: '°C', default: 48.5 },
+                    { id: 't2', label: 'Ball 2 Softening Temp ($T_2$)', unit: '°C', default: 49.5 }
+                ],
+                calcFormula: "Softening Point = (T1 + T2) / 2",
+                compute: function(vals) {
+                    const t1 = vals.t1 || 0;
+                    const t2 = vals.t2 || 0;
+                    const mean = (t1 + t2) / 2;
+                    return {
+                        resText: `${mean.toFixed(2)} °C`,
+                        resVal: mean,
+                        breakdown: `$$\\text{Softening Point} = \\frac{${t1} + ${t2}}{2} = ${mean.toFixed(2)}^\\circ\\text{C}$$`
+                    };
+                },
+                specLimits: "<ul><li><strong>VG-30 Bitumen:</strong> Minimum 47°C (IS: 73)</li></ul>",
+                getInference: function(resVal) {
+                    if (resVal >= 47) return "Softening point complies with IS: 73 specification for VG-30 paving bitumen (>= 47°C).";
+                    return "Softening point is below specification threshold (< 47°C).";
+                },
+                precautions: [
+                    "Heat water bath strictly at 5°C/min rate.",
+                    "Stir bath continuously during heating."
+                ]
+            },
+            {
+                id: "exp-duc",
+                code: "EXP-08",
+                title: "Ductility Test of Bitumen",
+                standard: "IS: 1208 - 1978 / ASTM D113",
+                category: "Transportation Engineering",
+                whatIs: "Measures tensile distance in centimeters to which a standard briquette specimen of bitumen can be stretched before breaking when pulled at 50 mm/min at 27°C.",
+                apparatus: "Ductility testing machine with 50 mm/min pulling motor and 27°C water bath.",
+                diagramSvg: `
+                <svg viewBox="0 0 300 150" class="w-full max-w-sm h-auto">
+                    <!-- Water Bath Tank -->
+                    <rect x="30" y="30" width="240" height="90" fill="none" stroke="#15803d" stroke-width="3"/>
+                    <!-- Fixed End -->
+                    <rect x="40" y="60" width="20" height="30" fill="#374151"/>
+                    <!-- Bitumen Thread -->
+                    <path d="M 60 75 Q 150 78 220 75" fill="none" stroke="#1f2937" stroke-width="4"/>
+                    <!-- Pulling Carriage -->
+                    <rect x="220" y="60" width="20" height="30" fill="#374151"/>
+                    <!-- Pull Arrow -->
+                    <line x1="240" y1="75" x2="265" y2="75" stroke="#ef4444" stroke-width="3" marker-end="url(#arrow)"/>
+                    <text x="150" y="110" font-size="9" text-anchor="middle" font-weight="bold">50 mm/min Pulling Rate</text>
+                </svg>`,
+                theory: "Ductility reflects adhesive and cohesive characteristics of bitumen binder.<br><br>$$\\text{Ductility (cm)} = \\text{Elongation at rupture}$$",
+                needForStudy: "Non-ductile bitumen breaks under traffic bending stress, causing cracking.",
+                fieldImportance: "Assures bitumen binder flexibility and fatigue cracking resistance.",
+                procedure: [
+                    "Pour melted bitumen into standard briquette mold and cool.",
+                    "Mount briquette in ductility machine filled with 27°C water.",
+                    "Start motor pulling at 50 mm/min speed.",
+                    "Record elongation distance in cm at point of thread break."
+                ],
+                obsFields: [
+                    { id: 'd1', label: 'Briquette 1 Break Distance', unit: 'cm', default: 78 },
+                    { id: 'd2', label: 'Briquette 2 Break Distance', unit: 'cm', default: 74 },
+                    { id: 'd3', label: 'Briquette 3 Break Distance', unit: 'cm', default: 76 }
+                ],
+                calcFormula: "Mean Ductility = (D1 + D2 + D3) / 3",
+                compute: function(vals) {
+                    const d1 = vals.d1 || 0;
+                    const d2 = vals.d2 || 0;
+                    const d3 = vals.d3 || 0;
+                    const mean = (d1 + d2 + d3) / 3;
+                    return {
+                        resText: `${mean.toFixed(1)} cm`,
+                        resVal: mean,
+                        breakdown: `$$\\text{Mean Ductility} = \\frac{${d1} + ${d2} + ${d3}}{3} = ${mean.toFixed(1)} \\text{ cm}$$`
+                    };
+                },
+                specLimits: "<ul><li><strong>Paving Bitumen (VG-30):</strong> Minimum 40 cm (IS: 73)</li></ul>",
+                getInference: function(resVal) {
+                    if (resVal >= 40) return "Ductility complies with IS: 73 requirements (>= 40 cm).";
+                    return "Ductility fails minimum requirement (< 40 cm).";
+                },
+                precautions: [
+                    "Calibrate pull speed strictly to 50 mm/min.",
+                    "Maintain water bath temperature at 27 ± 0.5°C."
+                ]
+            },
+            {
+                id: "exp-spg",
+                code: "EXP-09",
+                title: "Specific Gravity of Bitumen Test",
+                standard: "IS: 1202 - 1978 / ASTM D70",
+                category: "Transportation Engineering",
+                whatIs: "Determines the specific gravity of bituminous binder using Pycnometer bottle method at 27°C.",
+                apparatus: "Pycnometer bottle (25ml/50ml), 27°C water bath, and balance.",
+                diagramSvg: `
+                <svg viewBox="0 0 300 180" class="w-full max-w-sm h-auto">
+                    <!-- Pycnometer Bottle -->
+                    <path d="M 120 140 L 120 70 L 140 50 L 140 30 L 160 30 L 160 50 L 180 70 L 180 140 Z" fill="#f3f4f6" stroke="#15803d" stroke-width="3"/>
+                    <!-- Bitumen level -->
+                    <rect x="124" y="90" width="52" height="48" fill="#1f2937"/>
+                    <text x="150" y="118" font-size="8" fill="#ffffff" text-anchor="middle">Bitumen</text>
+                    <text x="150" y="165" font-size="10" font-weight="bold" text-anchor="middle">Pycnometer Bottle</text>
+                </svg>`,
+                theory: "$$G_b = \\frac{(c - a)}{(b - a) - (d - c)}$$",
+                needForStudy: "Required for Marshall volumetric computations (VMA, VFA, Air Voids).",
+                fieldImportance: "Check binder purity and mix design volumetrics.",
+                procedure: [
+                    "Weigh empty dry pycnometer ($a$).",
+                    "Fill with water at 27°C and weigh ($b$).",
+                    "Half fill pycnometer with warm bitumen and weigh ($c$).",
+                    "Fill remainder with water and weigh ($d$)."
+                ],
+                obsFields: [
+                    { id: 'a', label: 'Weight of empty pycnometer ($a$)', unit: 'g', default: 34.120 },
+                    { id: 'b', label: 'Weight of pycnometer + water ($b$)', unit: 'g', default: 84.450 },
+                    { id: 'c', label: 'Weight of pycnometer + bitumen ($c$)', unit: 'g', default: 58.700 },
+                    { id: 'd', label: 'Weight of pycnometer + bitumen + water ($d$)', unit: 'g', default: 84.980 }
+                ],
+                calcFormula: "G_b = (c - a) / [ (b - a) - (d - c) ]",
+                compute: function(vals) {
+                    const a = vals.a || 0;
+                    const b = vals.b || 0;
+                    const c = vals.c || 0;
+                    const d = vals.d || 0;
+                    const num = c - a;
+                    const den = (b - a) - (d - c);
+                    const gb = den !== 0 ? num / den : 0;
+                    return {
+                        resText: `${gb.toFixed(3)}`,
+                        resVal: gb,
+                        breakdown: `$$G_b = \\frac{(${c} - ${a})}{(${b} - ${a}) - (${d} - ${c})} = ${gb.toFixed(3)}$$`
+                    };
+                },
+                specLimits: "<ul><li><strong>Pure Bitumen:</strong> 0.97 to 1.03</li></ul>",
+                getInference: function(resVal) {
+                    if (resVal >= 0.97 && resVal <= 1.03) return "Specific gravity falls within the range stated in this manual.";
+                    return "Specific gravity deviates from standard.";
+                },
+                precautions: [
+                    "Prevent air bubbles inside bottle during filling."
+                ]
+            },
+            {
+                id: "exp-marsh",
+                code: "EXP-10",
+                title: "Marshall Stability & Flow — Specimen Analysis",
+                standard: "ASTM D6927 / MS-2 Asphalt Institute",
+                category: "Transportation Engineering",
+                whatIs: "Evaluates Marshall stability, flow value, and selected volumetric parameters for an asphalt pavement specimen. Multiple binder contents are required to determine OBC.",
+                apparatus: "Marshall compaction hammer (4.53 kg, 457 mm drop), breaking head, load ring frame, 60°C water bath.",
+                diagramSvg: `
+                <svg viewBox="0 0 300 200" class="w-full max-w-sm h-auto">
+                    <!-- Loading Frame -->
+                    <rect x="70" y="20" width="160" height="15" fill="#374151"/>
+                    <!-- Proving Ring -->
+                    <circle cx="150" cy="60" r="22" fill="none" stroke="#ef4444" stroke-width="4"/>
+                    <!-- Breaking Head Split Cylinders -->
+                    <path d="M 110 110 A 40 40 0 0 1 190 110" fill="none" stroke="#15803d" stroke-width="6"/>
+                    <path d="M 110 150 A 40 40 0 0 0 190 150" fill="none" stroke="#15803d" stroke-width="6"/>
+                    <!-- Specimen Inside -->
+                    <circle cx="150" cy="130" r="32" fill="#6b7280"/>
+                    <text x="150" y="134" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="bold">Specimen 60°C</text>
+                </svg>`,
+                theory: "$$V_a (\\%) = \\left( \\frac{G_{mm} - G_{mb}}{G_{mm}} \\right) \\times 100$$",
+                needForStudy: "Ensures asphalt mix balances stability against traffic deformation.",
+                fieldImportance: "Universal mix design for DBM and BC highway surfaces.",
+                procedure: [
+                    "Prepare asphalt mix specimens with varying bitumen percentages.",
+                    "Compact with 75 blows on each face using Marshall hammer.",
+                    "Condition in 60°C water bath for 30-40 minutes.",
+                    "Apply load at 50.8 mm/min deformation rate and record maximum load (stability) and deformation (flow)."
+                ],
+                obsFields: [
+                    { id: 'bit_pct', label: 'Bitumen Content', unit: '%', default: 5.5 },
+                    { id: 'load_kg', label: 'Marshall Load Reading', unit: 'kg', default: 1180 },
+                    { id: 'flow_mm', label: 'Flow Value', unit: 'mm', default: 3.2 },
+                    { id: 'gmb', label: 'Bulk Specific Gravity ($G_{mb}$)', unit: '-', default: 2.345 },
+                    { id: 'gmm', label: 'Theoretical Max Sp. Gravity ($G_{mm}$)', unit: '-', default: 2.440 }
+                ],
+                calcFormula: "Stability (kN) = Load (kg)*9.80665/1000, Air Voids VA (%) = [(Gmm - Gmb)/Gmm]*100",
+                compute: function(vals) {
+                    const l = vals.load_kg || 0;
+                    const f = vals.flow_mm || 0;
+                    const gmb = vals.gmb || 1;
+                    const gmm = vals.gmm || 1;
+                    const stab = (l * 9.80665) / 1000;
+                    const va = ((gmm - gmb) / gmm) * 100;
+                    return {
+                        resText: `Stability: ${stab.toFixed(2)} kN, Flow: ${f.toFixed(1)} mm, Air Voids: ${va.toFixed(2)}%`,
+                        resVal: stab,
+                        breakdown: `$$\\text{Marshall Stability} = \\frac{${l} \\times 9.80665}{1000} = ${stab.toFixed(2)} \\text{ kN}$$<br>$$\\text{Air Voids } (V_a) = \\left( \\frac{${gmm} - ${gmb}}{${gmm}} \\right) \\times 100 = ${va.toFixed(2)}\\%$$`
+                    };
+                },
+                specLimits: "<ul><li><strong>Marshall Stability:</strong> Minimum 9.0 kN (MoRTH)</li><li><strong>Flow Value:</strong> 2.0 to 4.0 mm</li></ul>",
+                getInference: function(resVal) {
+                    if (resVal >= 9.0) return "Mix satisfies MoRTH stability criteria (>= 9.0 kN).";
+                    return "Marshall stability below 9.0 kN threshold.";
+                },
+                precautions: [
+                    "Maintain water bath strictly at 60 ± 1°C.",
+                    "Complete test within 30 seconds of removing specimen from water bath."
+                ]
+            }
+        ];
+
+        let activeExpId = "exp-aiv";
+        let completionState = JSON.parse(localStorage.getItem('byankit_transport_lab_completed') || '{}');
+        let labMeta = JSON.parse(localStorage.getItem('byankit_transport_lab_meta') || '{}');
+
+        window.onload = function () {
+            populateCategoryFilter();
+            renderNavMenu();
+            loadExperiment(activeExpId);
+        };
+
+        function populateCategoryFilter() {
+            const sel = document.getElementById('experiment-category');
+            if (!sel) return;
+            const cats = [...new Set(EXPERIMENTS_DATA.map(e => e.category))].sort();
+            sel.innerHTML = '<option value="all">All categories</option>' + cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+        }
+
+        /* ============================================================
+           Native MathML renderer
+           Converts the small TeX-like notation used in the experiment
+           data into browser-native MathML. No external math library is
+           required, so equations continue to render in a standalone HTML
+           file embedded in Docusaurus, GitHub Pages, or an iframe.
+           ============================================================ */
+        function escMathText(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function matchingBrace(src, start) {
+            let depth = 0;
+            for (let i = start; i < src.length; i++) {
+                if (src[i] === '{') depth++;
+                else if (src[i] === '}') {
+                    depth--;
+                    if (depth === 0) return i;
+                }
+            }
+            return -1;
+        }
+
+        function readGroup(src, start) {
+            if (src[start] !== '{') return { text: src[start] || '', next: start + 1 };
+            const end = matchingBrace(src, start);
+            if (end === -1) return { text: src.slice(start + 1), next: src.length };
+            return { text: src.slice(start + 1, end), next: end + 1 };
+        }
+
+        function mathToken(token, kind='mi') {
+            return `<m${kind}>${escMathText(token)}</m${kind}>`;
+        }
+
+        function texSequence(src) {
+            let out = '';
+            let i = 0;
+            while (i < src.length) {
+                const ch = src[i];
+
+                if (/\s/.test(ch)) { i++; continue; }
+
+                if (ch === '{') {
+                    const g = readGroup(src, i);
+                    out += `<mrow>${texSequence(g.text)}</mrow>`;
+                    i = g.next;
+                    continue;
+                }
+
+                if (ch === '\\') {
+                    let j = i + 1;
+                    while (j < src.length && /[A-Za-z]/.test(src[j])) j++;
+                    const cmd = src.slice(i + 1, j);
+
+                    if (cmd === 'frac') {
+                        const a = readGroup(src, j);
+                        const b = readGroup(src, a.next);
+                        out += `<mfrac><mrow>${texSequence(a.text)}</mrow><mrow>${texSequence(b.text)}</mrow></mfrac>`;
+                        i = b.next;
+                        continue;
+                    }
+                    if (cmd === 'text' || cmd === 'mathrm' || cmd === 'operatorname') {
+                        const g = readGroup(src, j);
+                        let txt = g.text.replace(/\\%/g, '%').replace(/\\_/g, '_');
+                        out += `<mtext>${escMathText(txt)}</mtext>`;
+                        i = g.next;
+                        continue;
+                    }
+                    if (cmd === 'left' || cmd === 'right') {
+                        i = j;
+                        continue;
+                    }
+                    const symbols = {
+                        times: '×',
+                        cdot: '·',
+                        pm: '±',
+                        le: '≤',
+                        ge: '≥',
+                        neq: '≠',
+                        approx: '≈',
+                        sum: '∑',
+                        alpha: 'α', beta: 'β', gamma: 'γ',
+                        mu: 'μ', epsilon: 'ε',
+                        Delta: 'Δ',
+                        degree: '°',
+                        circ: '°',
+                        quad: ' ',
+                        space: ' ',
+                        percent: '%'
+                    };
+                    if (cmd in symbols) {
+                        const sym = symbols[cmd];
+                        out += cmd === 'sum' ? `<mo>${sym}</mo>` : (cmd === 'quad' || cmd === 'space' ? `<mspace width="1em"></mspace>` : `<mo>${sym}</mo>`);
+                        i = j;
+                        continue;
+                    }
+                    // Unknown command: render its name as text instead of leaving raw TeX visible.
+                    out += `<mi>${escMathText(cmd)}</mi>`;
+                    i = j;
+                    continue;
+                }
+
+                if (ch === '^' || ch === '_') {
+                    // This branch is handled by converting the immediately previous atom below;
+                    // if reached directly, treat it as a plain symbol to avoid data loss.
+                    i++;
+                    continue;
+                }
+
+                if (ch === '%') { out += '<mo>%</mo>'; i++; continue; }
+                if ('=+-×·/<>()[],:;'.includes(ch)) { out += `<mo>${escMathText(ch)}</mo>`; i++; continue; }
+                if (/[0-9.]/.test(ch)) {
+                    let j=i+1;
+                    while (j<src.length && /[0-9.]/.test(src[j])) j++;
+                    out += `<mn>${escMathText(src.slice(i,j))}</mn>`;
+                    i=j; continue;
+                }
+                if (/[A-Za-z]/.test(ch)) {
+                    // Multi-letter bare words are treated as identifiers only when separated;
+                    // otherwise keep individual math italics as MathML normally does.
+                    out += `<mi>${escMathText(ch)}</mi>`;
+                    i++; continue;
+                }
+                out += `<mo>${escMathText(ch)}</mo>`;
+                i++;
+            }
+            return out;
+        }
+
+        function texToMathML(tex, display=true) {
+            // Normalize common TeX wrappers used in the source.
+            let src = String(tex)
+                .replace(/\\left/g, '')
+                .replace(/\\right/g, '')
+                .replace(/\\!/g, '')
+                .replace(/\\,/g, ' ')
+                .trim();
+
+            // Small post-parser for super/subscripts. It tokenizes the top-level sequence
+            // around ^ and _, allowing expressions such as W_1, x^{2}, or °C.
+            function parseEnhanced(input) {
+                const parts=[];
+                let i=0;
+                while(i<input.length){
+                    if(input[i]==='^'||input[i]==='_') { i++; continue; }
+                    let atom='';
+                    if(input[i]==='{') {
+                        const g=readGroup(input,i); atom=`{${g.text}}`; i=g.next;
+                    } else if(input[i]==='\\') {
+                        let j=i+1; while(j<input.length && /[A-Za-z]/.test(input[j])) j++;
+                        const cmd=input.slice(i,j);
+                        if(cmd==='\\text' || cmd==='\\mathrm' || cmd==='\\operatorname' || cmd==='\\frac') {
+                            if(cmd==='\\frac'){ const a=readGroup(input,j); const b=readGroup(input,a.next); atom=cmd+'{'+a.text+'}{'+b.text+'}'; i=b.next; }
+                            else { const g=readGroup(input,j); atom=cmd+'{'+g.text+'}'; i=g.next; }
+                        } else { atom=cmd; i=j; }
+                    } else { atom=input[i]; i++; }
+
+                    let sup=null, sub=null;
+                    while(i<input.length && (input[i]==='^'||input[i]==='_')) {
+                        const type=input[i++];
+                        let val='';
+                        if(input[i]==='{'){ const g=readGroup(input,i); val=g.text; i=g.next; }
+                        else { val=input[i]||''; i++; }
+                        if(type==='^') sup=val; else sub=val;
+                    }
+                    parts.push({atom,sup,sub});
+                }
+                return parts;
+            }
+
+            function atomMath(atom) {
+                if(atom.startsWith('\\frac')) {
+                    const rest=atom.slice(5); const a=readGroup(rest,0); const b=readGroup(rest,a.next);
+                    return `<mfrac><mrow>${texSequence(a.text)}</mrow><mrow>${texSequence(b.text)}</mrow></mfrac>`;
+                }
+                if(atom.startsWith('\\text') || atom.startsWith('\\mathrm') || atom.startsWith('\\operatorname')) {
+                    const pos=atom.indexOf('{'); const g=readGroup(atom,pos);
+                    return `<mtext>${escMathText(g.text.replace(/\\%/g,'%'))}</mtext>`;
+                }
+                return texSequence(atom);
+            }
+
+            let body='';
+            for(const p of parseEnhanced(src)) {
+                let base=atomMath(p.atom);
+                if(p.sup !== null) base=`<msup>${base}<mrow>${texSequence(p.sup)}</mrow></msup>`;
+                if(p.sub !== null) base=`<msub>${base}<mrow>${texSequence(p.sub)}</mrow></msub>`;
+                if(p.sup !== null && p.sub !== null) base=`<msubsup>${atomMath(p.atom)}<mrow>${texSequence(p.sub)}</mrow><mrow>${texSequence(p.sup)}</mrow></msubsup>`;
+                body+=base;
+            }
+            const disp=display ? ' display="block"' : '';
+            return `<math xmlns="http://www.w3.org/1998/Math/MathML" class="equation"${disp} aria-label="Mathematical equation"><mrow>${body}</mrow></math>`;
+        }
+
+        function renderMathTextNode(text) {
+            const source = String(text);
+            const fragment = document.createDocumentFragment();
+            const pattern = /\$\$([\s\S]*?)\$\$|\$([^$\n]+?)\$/g;
+            let last = 0;
+            let match;
+
+            while ((match = pattern.exec(source)) !== null) {
+                if (match.index > last) {
+                    fragment.appendChild(document.createTextNode(source.slice(last, match.index)));
+                }
+                const eq = match[1] !== undefined ? match[1] : match[2];
+                const display = match[1] !== undefined;
+                const holder = document.createElement('span');
+                holder.innerHTML = texToMathML(eq, display);
+                while (holder.firstChild) fragment.appendChild(holder.firstChild);
+                last = pattern.lastIndex;
+            }
+
+            if (last < source.length) {
+                fragment.appendChild(document.createTextNode(source.slice(last)));
+            }
+            return fragment;
+        }
+
+        function renderAllMath(container) {
+            if (!container) return;
+            const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+                acceptNode(node) {
+                    const parent = node.parentElement;
+                    if (!parent || parent.closest('math,script,style,textarea,option')) return NodeFilter.FILTER_REJECT;
+                    return /\$/.test(node.nodeValue || '') ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+                }
+            });
+            const nodes = [];
+            let node;
+            while ((node = walker.nextNode())) nodes.push(node);
+            nodes.forEach(textNode => {
+                const fragment = renderMathTextNode(textNode.nodeValue);
+                textNode.parentNode.replaceChild(fragment, textNode);
+            });
+        }
+
+        function renderNavMenu() {
+            const nav = document.getElementById('experiments-nav');
+            if (!nav) return;
+            const q = (document.getElementById('experiment-search')?.value || '').trim().toLowerCase();
+            const cat = document.getElementById('experiment-category')?.value || 'all';
+            nav.innerHTML = '';
+            const filtered = EXPERIMENTS_DATA.filter(exp => {
+                const matchesText = !q || `${exp.code} ${exp.title} ${exp.category} ${exp.standard}`.toLowerCase().includes(q);
+                const matchesCat = cat === 'all' || exp.category === cat;
+                return matchesText && matchesCat;
+            });
+            if (!filtered.length) {
+                nav.innerHTML = '<div class="px-3 py-4 text-xs secondary-text text-center">No matching experiment.</div>';
+            }
+            filtered.forEach(exp => {
+                const done = !!completionState[exp.id];
+                const btn = document.createElement('button');
+                btn.className = `nav-item w-full text-left px-3 py-2.5 rounded-r-lg text-xs flex flex-col gap-0.5 ${exp.id === activeExpId ? 'active' : 'secondary-text hover:bg-gray-100 dark:hover:bg-neutral-800'}`;
+                btn.onclick = () => loadExperiment(exp.id);
+                btn.innerHTML = `
+                    <div class="flex items-start justify-between w-full gap-2">\n                        <span class="font-bold text-[10px] opacity-75">${escapeHtml(exp.code)}</span>\n                        <span class="text-[9px] px-1.5 py-0.5 rounded border border-gray-200 dark:border-neutral-700 wrap-anywhere">${escapeHtml(exp.category)}</span>\n                    </div>\n                    <span class="heading-text font-medium nav-title">${done ? '<i class="fa-solid fa-circle-check completed-check mr-1"></i>' : ''}${escapeHtml(exp.title)}</span>\n                `;
+                nav.appendChild(btn);
+            });
+            const total = EXPERIMENTS_DATA.length;
+            const completed = Object.values(completionState).filter(Boolean).length;
+            document.getElementById('completion-count').innerText = `${completed}/${total}`;
+            document.getElementById('completion-progress').style.width = `${total ? Math.round(completed / total * 100) : 0}%`;
+        }
+
+        function escapeHtml(v) {
+            return String(v ?? '').replace(/[&<>'\"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[ch]));
+        }
+
+        function loadExperiment(id) {
+            activeExpId = id;
+            renderNavMenu();
+
+            const exp = EXPERIMENTS_DATA.find(e => e.id === id);
+            const container = document.getElementById('experiment-content');
+
+            let obsInputsHtml = '';
+            exp.obsFields.forEach(f => {
+                obsInputsHtml += `
+                    <div>
+                        <label class="block text-xs font-semibold secondary-text mb-1">${f.label}</label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="input-${f.id}" value="${f.default}" step="any" oninput="runCalculation()" class="w-full px-3 py-1.5 rounded input-custom text-sm font-bold">
+                            <span class="text-xs secondary-text w-12 font-medium">${f.unit}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            let procedureHtml = '';
+            if (exp.procedure) {
+                procedureHtml = `<ol class="list-decimal list-inside text-sm secondary-text space-y-2">
+                    ${exp.procedure.map(step => `<li>${step}</li>`).join('')}
+                </ol>`;
+            }
+
+            container.innerHTML = `
+                <!-- Header Card -->
+                <div class="surface-card rounded-xl p-6 border-l-4" style="border-left-color: var(--ifm-color-primary);">
+                    <div class="flex flex-wrap justify-between items-center gap-2 mb-2">
+                        <span class="text-xs font-bold px-2.5 py-1 rounded text-white" style="background-color: var(--ifm-color-primary);">${exp.code}</span>
+                        <span class="text-xs font-bold secondary-text wrap-anywhere"><i class="fa-solid fa-bookmark text-emerald-600"></i> ${escapeHtml(exp.standard)}</span>
+                    </div>
+                    <h2 class="text-2xl font-bold heading-text wrap-anywhere">${escapeHtml(exp.title)}</h2>
+                    <p class="text-xs secondary-text mt-1 wrap-anywhere"><strong>Category:</strong> ${escapeHtml(exp.category)}</p>
+                    <div class="flex flex-wrap gap-2 mt-4">
+                        <button onclick="resetObservations()" class="px-3 py-1.5 text-xs rounded-lg input-custom"><i class="fa-solid fa-rotate-left mr-1"></i> Reset Observations</button>
+                        <button onclick="toggleCompleted()" id="complete-btn" class="px-3 py-1.5 text-xs rounded-lg input-custom"><i class="fa-solid fa-check-circle mr-1"></i> ${completionState[exp.id] ? 'Completed' : 'Mark Complete'}</button>
+                    </div>
+                    <div class="quick-jump mt-4 overflow-x-auto">
+                        <div class="flex gap-1.5 text-[10px] whitespace-nowrap pb-1">
+                            ${[['aim','Aim'],['apparatus','Apparatus'],['theory','Theory'],['procedure','Procedure'],['observation','Observation'],['calculation','Calculation'],['spec','Specifications'],['inference','Inference'],['viva','Viva'],['precautions','Precautions']].map(([id,label]) => `<a href="#sec-${id}" class="px-2 py-1 rounded-full bg-gray-100 dark:bg-neutral-800 secondary-text hover:text-heading">${label}</a>`).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technical Apparatus Diagram -->
+                <div class="surface-card rounded-xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-wider heading-text section-header"><i class="fa-solid fa-image mr-2"></i> Technical Apparatus Diagram</h3>
+                    <div class="svg-diagram-container">
+                        ${exp.diagramSvg}
+                    </div>
+                </div>
+
+                <!-- 1. What is Experiment -->
+                <div id="sec-aim" class="surface-card rounded-xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-wider heading-text section-header"><i class="fa-solid fa-bullseye mr-2"></i> 1. Aim &amp; Description</h3>
+                    <p class="text-sm leading-relaxed secondary-text">${exp.whatIs}</p>
+                </div>
+
+                <!-- 2. Apparatus Required -->
+                <div id="sec-apparatus" class="surface-card rounded-xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-wider heading-text section-header"><i class="fa-solid fa-screwdrivers-all mr-2"></i> 2. Apparatus &amp; Specifications</h3>
+                    <div class="text-sm leading-relaxed secondary-text">${exp.apparatus}</div>
+                </div>
+
+                <!-- 3. Theory & Formulas -->
+                <div id="sec-theory" class="surface-card rounded-xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-wider heading-text section-header"><i class="fa-solid fa-square-root-variable mr-2"></i> 3. Theory &amp; Governing Equations</h3>
+                    <div class="text-sm leading-relaxed secondary-text">${exp.theory}</div>
+                </div>
+
+                <!-- 4. Step by Step Procedure -->
+                <div id="sec-procedure" class="surface-card rounded-xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-wider heading-text section-header"><i class="fa-solid fa-list-ol mr-2"></i> 4. Step-by-Step Practical Procedure</h3>
+                    ${procedureHtml}
+                </div>
+
+                <!-- 5. Need for Study -->
+                <div class="surface-card rounded-xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-wider heading-text section-header"><i class="fa-solid fa-circle-question mr-2"></i> 5. Need for Study</h3>
+                    <p class="text-sm leading-relaxed secondary-text">${exp.needForStudy}</p>
+                </div>
+
+                <!-- 6. Field Importance -->
+                <div class="surface-card rounded-xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-wider heading-text section-header"><i class="fa-solid fa-road-bridge mr-2"></i> 6. Field Importance &amp; Pavement Application</h3>
+                    <p class="text-sm leading-relaxed secondary-text">${exp.fieldImportance}</p>
+                </div>
+
+                <!-- 7. Observation Table & Interactive Calculations -->
+                <div id="sec-observation" class="surface-card rounded-xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-wider heading-text section-header"><i class="fa-solid fa-table mr-2"></i> 7. Observation Table &amp; Practical Simulation</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        ${obsInputsHtml}
+                    </div>
+
+                    <div id="observation-validation" class="hidden mb-3 p-3 rounded-lg bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 text-xs text-rose-700 dark:text-rose-300"></div>
+                    <div class="p-4 rounded-lg bg-emerald-50/40 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 result-panel">
+                        <span class="text-xs font-bold secondary-text uppercase block mb-1">Calculated Output Result:</span>
+                        <div id="calc-result-display" class="text-2xl font-extrabold heading-text wrap-anywhere"></div>
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            <button onclick="saveObservationRecord()" class="px-3 py-1.5 rounded-lg text-xs btn-primary"><i class="fa-solid fa-bookmark mr-1"></i> Save Observation</button>
+                            <button onclick="copyCalculation()" class="px-3 py-1.5 rounded-lg text-xs input-custom"><i class="fa-solid fa-copy mr-1"></i> Copy Result</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. Step-by-Step Mathematical Calculation -->
+                <div id="sec-calculation" class="surface-card rounded-xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-wider heading-text section-header"><i class="fa-solid fa-calculator mr-2"></i> 8. Step-by-Step Calculation Breakdown</h3>
+                    <div id="step-by-step-calc" class="text-sm secondary-text"></div>
+                </div>
+
+                <!-- 9. Interpretation of Results & Specifications -->
+                <div id="sec-spec" class="surface-card rounded-xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-wider heading-text section-header"><i class="fa-solid fa-list-check mr-2"></i> 9. Standard Specifications (IS / MoRTH / IRC)</h3>
+                    <div class="text-sm secondary-text">${exp.specLimits}</div>
+                </div>
+
+                <!-- 10. Inference from Results -->
+                <div id="sec-inference" class="surface-card rounded-xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-wider heading-text section-header"><i class="fa-solid fa-clipboard-check mr-2"></i> 10. Inference from Results</h3>
+                    <div id="inference-display" class="p-3 rounded-lg text-sm font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/30"></div>
+                </div>
+
+                <!-- Viva / Quick Revision -->
+                <div id="sec-viva" class="surface-card rounded-xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-wider heading-text section-header"><i class="fa-solid fa-graduation-cap mr-2"></i> 11. Viva &amp; Quick Revision</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <details class="border border-gray-200 dark:border-neutral-700 rounded-lg p-3"><summary class="font-semibold cursor-pointer">What is the purpose of this experiment?</summary><p class="secondary-text mt-2 leading-relaxed wrap-anywhere">${exp.whatIs}</p></details>
+                        <details class="border border-gray-200 dark:border-neutral-700 rounded-lg p-3"><summary class="font-semibold cursor-pointer">Which standard governs the experiment?</summary><p class="secondary-text mt-2 leading-relaxed wrap-anywhere">${escapeHtml(exp.standard)}</p></details>
+                        <details class="border border-gray-200 dark:border-neutral-700 rounded-lg p-3"><summary class="font-semibold cursor-pointer">What is the governing equation / calculation?</summary><p class="secondary-text mt-2 leading-relaxed wrap-anywhere">${exp.calcFormula}</p></details>
+                        <details class="border border-gray-200 dark:border-neutral-700 rounded-lg p-3"><summary class="font-semibold cursor-pointer">State one important precaution.</summary><p class="secondary-text mt-2 leading-relaxed wrap-anywhere">${exp.precautions[0] || 'Follow the prescribed laboratory procedure carefully.'}</p></details>
+                    </div>
+                </div>
+
+                <!-- 12. Precautions -->
+                <div id="sec-precautions" class="surface-card rounded-xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-wider heading-text section-header"><i class="fa-solid fa-triangle-exclamation mr-2"></i> 12. Precautions</h3>
+                    <ul class="list-disc list-inside text-sm secondary-text space-y-1">
+                        ${exp.precautions.map(p => `<li class="wrap-anywhere">${p}</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="flex flex-wrap justify-between gap-2 no-print">
+                    <button onclick="navigateExperiment(-1)" class="px-4 py-2 rounded-lg input-custom text-xs font-semibold"><i class="fa-solid fa-arrow-left mr-1"></i> Previous Experiment</button>
+                    <button onclick="navigateExperiment(1)" class="px-4 py-2 rounded-lg btn-primary text-xs font-semibold">Next Experiment <i class="fa-solid fa-arrow-right ml-1"></i></button>
+                </div>
+            `;
+
+            renderAllMath(document.getElementById('experiment-content'));
+
+            runCalculation();
+        }
+
+        function runCalculation() {
+            const exp = EXPERIMENTS_DATA.find(e => e.id === activeExpId);
+            if (!exp) return;
+            const vals = {};
+            const errors = [];
+            exp.obsFields.forEach(f => {
+                const inputEl = document.getElementById(`input-${f.id}`);
+                if (!inputEl) return;
+                inputEl.classList.remove('validation-error');
+                const raw = inputEl.value.trim();
+                const value = parseFloat(raw);
+                if (raw === '' || !Number.isFinite(value)) {
+                    inputEl.classList.add('validation-error');
+                    errors.push(`${f.label} must contain a valid number.`);
+                    vals[f.id] = NaN;
+                    return;
+                }
+                if (value < 0) {
+                    inputEl.classList.add('validation-error');
+                    errors.push(`${f.label} cannot be negative.`);
+                }
+                vals[f.id] = value;
+            });
+
+            const validationBox = document.getElementById('observation-validation');
+            if (validationBox) {
+                if (errors.length) {
+                    validationBox.classList.remove('hidden');
+                    validationBox.innerHTML = '<strong>Check observations:</strong><ul class="list-disc ml-5 mt-1">' + errors.map(e=>`<li>${escapeHtml(e)}</li>`).join('') + '</ul>';
+                } else {
+                    validationBox.classList.add('hidden');
+                    validationBox.innerHTML = '';
+                }
+            }
+            if (errors.length) {
+                const resDisplay = document.getElementById('calc-result-display');
+                if (resDisplay) resDisplay.innerText = 'Waiting for valid observations…';
+                return;
+            }
+
+            const output = exp.compute(vals);
+            const resDisplay = document.getElementById('calc-result-display');
+            const stepDisplay = document.getElementById('step-by-step-calc');
+            const infDisplay = document.getElementById('inference-display');
+
+            if (resDisplay) resDisplay.innerText = output.resText;
+            if (stepDisplay) {
+                stepDisplay.innerHTML = output.breakdown || 'Calculation breakdown is not available for this experiment.';
+                renderAllMath(stepDisplay);
+            }
+            if (infDisplay) {
+                const inference = typeof exp.getInference === 'function' ? exp.getInference(output.resVal) : '';
+                infDisplay.innerHTML = inference ? escapeHtml(inference) : 'Inference is not available for this experiment.';
+            }
+            window.currentOutput = { expId: exp.id, vals, output, calculatedAt: new Date().toISOString() };
+        }
+
+        function resetObservations() {
+            const exp = EXPERIMENTS_DATA.find(e => e.id === activeExpId);
+            exp.obsFields.forEach(f => {
+                const el = document.getElementById(`input-${f.id}`);
+                if (el) el.value = f.default;
+            });
+            runCalculation();
+            showToast('Observation fields reset.', 'info');
+        }
+
+        function toggleCompleted() {
+            completionState[activeExpId] = !completionState[activeExpId];
+            localStorage.setItem('byankit_transport_lab_completed', JSON.stringify(completionState));
+            renderNavMenu();
+            const b = document.getElementById('complete-btn');
+            if (b) b.innerHTML = `<i class="fa-solid fa-check-circle mr-1"></i> ${completionState[activeExpId] ? 'Completed' : 'Mark Complete'}`;
+        }
+
+        function navigateExperiment(direction) {
+            const idx = EXPERIMENTS_DATA.findIndex(e => e.id === activeExpId);
+            if (idx < 0) return;
+            const next = (idx + direction + EXPERIMENTS_DATA.length) % EXPERIMENTS_DATA.length;
+            loadExperiment(EXPERIMENTS_DATA[next].id);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function saveObservationRecord() {
+            if (!window.currentOutput) { showToast('Enter valid observations first.', 'warning'); return; }
+            const key = 'byankit_transport_lab_records';
+            const records = JSON.parse(localStorage.getItem(key) || '[]');
+            records.unshift({ ...window.currentOutput });
+            localStorage.setItem(key, JSON.stringify(records.slice(0, 50)));
+            showToast('Observation saved to this browser.', 'success');
+        }
+
+        function copyCalculation() {
+            if (!window.currentOutput) { showToast('Calculate a result first.', 'warning'); return; }
+            const el = document.getElementById('step-by-step-calc');
+            const text = `${EXPERIMENTS_DATA.find(e=>e.id===activeExpId)?.title || ''}\nResult: ${window.currentOutput.output.resText}\n${el?.innerText || ''}`;
+            navigator.clipboard?.writeText(text).then(() => showToast('Calculation copied.', 'success')).catch(() => showToast('Copy not available in this browser context.', 'warning'));
+        }
+
+        function exportCurrentRecord() {
+            if (!window.currentOutput) { showToast('Calculate a result first.', 'warning'); return; }
+            const exp = EXPERIMENTS_DATA.find(e => e.id === activeExpId);
+            const payload = {
+                application: 'Transportation Engineering Laboratory Manual & Practical Suite',
+                experiment: { code: exp.code, title: exp.title, standard: exp.standard, category: exp.category },
+                record: { ...window.currentOutput },
+                exportedAt: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `${exp.code}_${exp.title.toLowerCase().replace(/[^a-z0-9]+/g,'-')}_record.json`;
+            document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+
+            const themeIcon = document.getElementById('theme-icon');
+            themeIcon.className = newTheme === 'dark' ? 'fa-solid fa-sun text-amber-400 text-lg' : 'fa-solid fa-moon text-lg';
+        }
+    
+        function showToast(message, type='info') {
+            const host = document.getElementById('toast-container');
+            if (!host) return alert(message);
+            const el = document.createElement('div');
+            const color = type==='success' ? 'bg-emerald-600' : type==='warning' ? 'bg-amber-600' : 'bg-slate-800';
+            el.className = `${color} text-white text-xs px-3 py-2 rounded-lg shadow-lg max-w-xs`;
+            el.innerText = message;
+            host.appendChild(el);
+            setTimeout(()=>el.remove(),2600);
+        }
+</script>
+
+    <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 text-center text-[10px] secondary-text">
+        <p>Interactive educational tool. Verify laboratory procedures and applicable standards against the latest approved laboratory manual and governing standard before official reporting.</p>
+    </footer>
+</body>
+</html>

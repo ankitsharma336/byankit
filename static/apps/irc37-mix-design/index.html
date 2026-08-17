@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRC 37:2018 Flexible Pavement Design Suite</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- KaTeX for LaTeX Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: ['class', '[data-theme="dark"]'],
+            theme: {
+                extend: {
+                    colors: {
+                        theme: {
+                            bg: 'var(--ifm-background-color)',
+                            surface: 'var(--ifm-background-surface-color)',
+                            primary: 'var(--ifm-color-primary)',
+                            'primary-dark': 'var(--ifm-color-primary-dark)',
+                            'primary-darker': 'var(--ifm-color-primary-darker)',
+                            'primary-darkest': 'var(--ifm-color-primary-darkest)',
+                            'primary-light': 'var(--ifm-color-primary-light)',
+                            'primary-lighter': 'var(--ifm-color-primary-lighter)',
+                            'primary-lightest': 'var(--ifm-color-primary-lightest)',
+                            base: 'var(--ifm-font-color-base)',
+                            secondary: 'var(--ifm-font-color-secondary)',
+                            heading: 'var(--ifm-heading-color)'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+        :root {
+            --ifm-color-primary: #166534;
+            --ifm-color-primary-dark: #14532d;
+            --ifm-color-primary-darker: #134e2b;
+            --ifm-color-primary-darkest: #0f3d22;
+            --ifm-color-primary-light: #15803d;
+            --ifm-color-primary-lighter: #16a34a;
+            --ifm-color-primary-lightest: #22c55e;
+
+            --ifm-background-color: #fcfcfb;
+            --ifm-background-surface-color: #ffffff;
+
+            /* Typography */
+            --ifm-font-color-base: #374151;
+            --ifm-font-color-secondary: #6b7280;
+            --ifm-heading-color: #1f2937;
+
+            --ifm-code-font-size: 95%;
+            --border-color: #e5e7eb;
+            --card-border: #e2e8f0;
+            --input-bg: #f3f4f6;
+            --input-border: #d1d5db;
+        }
+
+        [data-theme='dark'] {
+            --ifm-color-primary: #25c2a0;
+            --ifm-color-primary-dark: #21af90;
+            --ifm-color-primary-darker: #1fa588;
+            --ifm-color-primary-darkest: #1a8870;
+            --ifm-color-primary-light: #29d5b0;
+            --ifm-color-primary-lighter: #32d8b4;
+            --ifm-color-primary-lightest: #4fddbf;
+
+            --ifm-background-color: #121212;
+            --ifm-background-surface-color: #1b1b1d;  
+
+            /* Typography */
+            --ifm-font-color-base: #e5e7eb;
+            --ifm-font-color-secondary: #9ca3af;
+            --ifm-heading-color: #ffffff;
+
+            --border-color: #2e2e32;
+            --card-border: #2a2a2e;
+            --input-bg: #121212;
+            --input-border: #374151;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif;
+            background-color: var(--ifm-background-color);
+            color: var(--ifm-font-color-base);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .text-heading { color: var(--ifm-heading-color); }
+        .text-secondary-custom { color: var(--ifm-font-color-secondary); }
+        .text-primary-custom { color: var(--ifm-color-primary); }
+        .bg-surface { background-color: var(--ifm-background-surface-color); }
+        .border-custom { border-color: var(--border-color); }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--ifm-background-color); }
+        ::-webkit-scrollbar-thumb { background: var(--ifm-color-primary-dark); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--ifm-color-primary); }
+
+        .print-header { display: none; }
+
+        /* IRC 37 References Toggle */
+        .irc-ref { 
+            display: none; 
+            font-size: 0.65rem; 
+            color: var(--ifm-color-primary-light); 
+            margin-top: 4px;
+            font-weight: 600;
+        }
+        .show-refs .irc-ref { 
+            display: block; 
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-2px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* PRINT STYLESHEET OVERRIDES FOR COMPLETE REPORT */
+        @media print {
+            .no-print { display: none !important; }
+            .print-header { 
+                display: block !important; 
+                border-bottom: 2px solid #166534;
+                padding-bottom: 8px;
+                margin-bottom: 16px;
+            }
+            body { 
+                background: #ffffff !important; 
+                color: #000000 !important; 
+                font-size: 10pt;
+            }
+            
+            /* Unhide all tab contents so full design scope prints */
+            .tab-content { 
+                display: block !important; 
+                visibility: visible !important;
+                opacity: 1 !important;
+                margin-bottom: 1rem !important;
+                padding-top: 0.5rem !important;
+            }
+
+            .bg-surface { 
+                background: #ffffff !important; 
+                color: #000000 !important; 
+                border: 1px solid #d1d5db !important; 
+                box-shadow: none !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .text-heading, .text-secondary-custom, .text-primary-custom {
+                color: #000000 !important;
+            }
+
+            main {
+                display: block !important;
+                width: 100% !important;
+                max-width: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            section {
+                width: 100% !important;
+                margin-bottom: 1.5rem !important;
+            }
+
+            /* Clean layout formatting for inputs in print */
+            input, select {
+                border: none !important;
+                background: transparent !important;
+                font-weight: bold !important;
+                padding: 0 !important;
+                color: #000000 !important;
+                appearance: none !important;
+                -webkit-appearance: none !important;
+            }
+            input[type="range"] {
+                display: none !important;
+            }
+
+            svg, canvas {
+                max-width: 100% !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .print-card { 
+                border: 1px solid #ccc !important; 
+                background: white !important; 
+                color: black !important; 
+                box-shadow: none !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col min-h-screen">
+    
+    <header class="bg-surface border-b border-custom sticky top-0 z-40 shadow-sm transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg transition-transform hover:scale-105" style="background: linear-gradient(135deg, var(--ifm-color-primary), var(--ifm-color-primary-darker));">
+                    <i class="fa-solid fa-road text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-heading">
+                        IRC 37:2018 Flexible Pavement Designer
+                    </h1>
+                    <p class="text-xs font-medium text-primary-custom">Browser-Based IRC:37-2018 Preliminary Design Tool</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <!-- Theme Switcher Button -->
+                <button onclick="toggleTheme()" id="theme-toggle-btn" class="no-print p-2 rounded-lg border border-custom bg-surface hover:bg-slate-100 dark:hover:bg-slate-800 text-heading transition flex items-center justify-center" title="Toggle Theme">
+                    <i id="theme-icon" class="fa-solid fa-moon text-sm"></i>
+                </button>
+
+                <!-- IRC References Toggle -->
+                <label class="no-print flex items-center gap-1.5 cursor-pointer bg-surface border border-custom px-3 py-2 rounded-lg text-xs text-heading transition hover:bg-slate-100 dark:hover:bg-slate-800" title="Toggle IRC 37:2018 References">
+                    <input type="checkbox" id="ref-toggle" onchange="toggleReferences()" class="accent-emerald-600 w-3.5 h-3.5 cursor-pointer">
+                    <span class="font-semibold"><i class="fa-solid fa-book-bookmark text-primary-custom mr-1"></i> Refs</span>
+                </label>
+
+                <select id="preset-selector" onchange="loadPreset(this.value)" class="no-print bg-surface border border-custom text-xs text-heading rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+                    <option value="" disabled selected>-- Load IRC Catalog Preset --</option>
+                    <option value="p5">5 MSA Standard Highway</option>
+                    <option value="p20">20 MSA Medium Arterial</option>
+                    <option value="p50">50 MSA Heavy Highway</option>
+                    <option value="p100">100 MSA High Density Corridor</option>
+                    <option value="p150">150 MSA Express Highway</option>
+                    <option value="p300">300 MSA Perpetual Pavement</option>
+                </select>
+                <button onclick="prepareAndPrint()" class="no-print bg-surface border border-custom hover:bg-slate-100 dark:hover:bg-slate-800 text-heading text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-print"></i> Print Full Report
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="print-header max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-bold text-slate-900">IRC 37:2018 Flexible Pavement Design Report</h1>
+                <p class="text-xs text-slate-600">Mechanistic-Empirical Design & Structural Adequacy Verification</p>
+            </div>
+            <div class="text-right text-xs text-slate-600">
+                <p><span class="font-bold">Standard:</span> IRC 37:2018</p>
+                <p><span class="font-bold">Generated:</span> <span id="print-date"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left Sidebar: Inputs & Controls (5 Cols) -->
+        <section class="lg:col-span-5 space-y-6">
+            
+            <!-- Tab Navigation for Inputs -->
+            <div class="bg-surface border border-custom rounded-2xl p-4 shadow-md transition-colors print-card">
+                <div class="no-print flex border-b border-custom pb-3 gap-2 overflow-x-auto whitespace-nowrap">
+                    <button onclick="switchTab('traffic')" id="tab-btn-traffic" class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-white transition flex items-center gap-1.5" style="background-color: var(--ifm-color-primary);">
+                        <i class="fa-solid fa-truck-moving"></i> Traffic
+                    </button>
+                    <button onclick="switchTab('subgrade')" id="tab-btn-subgrade" class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-secondary-custom hover:text-heading transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-mound"></i> Subgrade
+                    </button>
+                    <button onclick="switchTab('layers')" id="tab-btn-layers" class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-secondary-custom hover:text-heading transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-cubes"></i> Layers
+                    </button>
+                    <button onclick="switchTab('checks')" id="tab-btn-checks" class="tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-secondary-custom hover:text-heading transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-shield-halved"></i> IRC Checks
+                    </button>
+                </div>
+
+                <!-- Tab 1: Traffic Parameters -->
+                <div id="tab-traffic" class="tab-content pt-4 space-y-4">
+                    <h3 class="text-sm font-bold text-heading flex items-center gap-2 border-b border-custom pb-2">
+                        <i class="fa-solid fa-calculator text-primary-custom"></i> 1. Traffic Estimation Parameters
+                    </h3>
+
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div>
+                            <label class="block text-secondary-custom mb-1">Initial CVPD ($P$)</label>
+                            <div class="relative">
+                                <input type="number" id="inp-p" value="2500" min="100" class="w-full bg-surface border border-custom rounded-lg px-3 py-2 text-heading focus:border-emerald-500 outline-none" oninput="calculateAll()">
+                            </div>
+                            <div class="irc-ref">Ref: Clause 4.2</div>
+                        </div>
+
+                        <div>
+                            <label class="block text-secondary-custom mb-1">Growth Rate % ($r$)</label>
+                            <div class="relative">
+                                <input type="number" id="inp-r" value="5" step="0.5" min="1" max="15" class="w-full bg-surface border border-custom rounded-lg px-3 py-2 text-heading focus:border-emerald-500 outline-none" oninput="calculateAll()">
+                            </div>
+                            <div class="irc-ref">Ref: Clause 4.3</div>
+                        </div>
+
+                        <div>
+                            <label class="block text-secondary-custom mb-1">Const. Period ($y$)</label>
+                            <div class="relative">
+                                <input type="number" id="inp-y" value="2" min="0" max="10" class="w-full bg-surface border border-custom rounded-lg px-3 py-2 text-heading focus:border-emerald-500 outline-none" oninput="calculateAll()">
+                            </div>
+                            <div class="irc-ref">Ref: Clause 4.4 / Table 4.1</div>
+                        </div>
+
+                        <div>
+                            <label class="block text-secondary-custom mb-1">Design Life ($x$)</label>
+                            <div class="relative">
+                                <input type="number" id="inp-x" value="20" min="5" max="30" class="w-full bg-surface border border-custom rounded-lg px-3 py-2 text-heading focus:border-emerald-500 outline-none" oninput="calculateAll()">
+                            </div>
+                            <div class="irc-ref">Ref: Clause 4.4 / Table 4.1</div>
+                        </div>
+
+                        <div>
+                            <label class="block text-secondary-custom mb-1">Vehicle Damage Factor</label>
+                            <input type="number" id="inp-vdf" value="4.5" step="0.1" min="1" max="10" class="w-full bg-surface border border-custom rounded-lg px-3 py-2 text-heading focus:border-emerald-500 outline-none" oninput="calculateAll()">
+                            <div class="irc-ref">Ref: Clause 4.5 / Table 4.2</div>
+                        </div>
+
+                        <div>
+                            <label class="block text-secondary-custom mb-1">Lane Dist. Factor ($D$)</label>
+                            <select id="inp-d" class="w-full bg-surface border border-custom rounded-lg px-2.5 py-2 text-heading focus:border-emerald-500 outline-none" onchange="calculateAll()">
+                                <option value="0.75" selected>0.75 (2-Lane Single Carriageway)</option>
+                                <option value="0.45">0.45 (4-Lane Dual Carriageway)</option>
+                                <option value="0.35">0.35 (6-Lane Dual Carriageway)</option>
+                                <option value="1.00">1.00 (Single Lane Highway)</option>
+                            </select>
+                            <div class="irc-ref">Ref: Clause 4.6</div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-custom">
+                        <label class="block text-secondary-custom text-xs mb-1">Design Reliability Level</label>
+                        <select id="inp-reliability" class="w-full bg-surface border border-custom rounded-lg px-2.5 py-2 text-heading focus:border-emerald-500 outline-none text-xs" onchange="calculateAll()">
+                            <option value="auto" selected>Auto — IRC recommendation</option>
+                            <option value="90">90% Reliability</option>
+                            <option value="80">80% Reliability</option>
+                        </select>
+                        <p class="text-[10px] text-secondary-custom mt-1">Auto uses 90% for design traffic ≥ 20 MSA and 80% below 20 MSA for general roads.</p>
+                        <div class="irc-ref">Ref: Clause 3.7 — 20 MSA threshold</div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Subgrade Properties -->
+                <div id="tab-subgrade" class="tab-content hidden pt-4 space-y-4">
+                    <h3 class="text-sm font-bold text-heading flex items-center gap-2 border-b border-custom pb-2">
+                        <i class="fa-solid fa-mound text-amber-500"></i> 2. Subgrade Characterization
+                    </h3>
+
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <label class="text-secondary-custom">Soaked Subgrade CBR (%)</label>
+                                <span id="cbr-val-display" class="font-bold text-primary-custom">6.0 %</span>
+                            </div>
+                            <input type="range" id="inp-cbr" min="1.0" max="20.0" step="0.5" value="6.0" class="w-full accent-emerald-600" oninput="calculateAll()">
+                            <p class="text-[11px] text-secondary-custom mt-1">IRC 37 recommends 90th percentile 4-day soaked CBR.</p>
+                            <div class="irc-ref">Ref: Clause 6.2.1 (90th Percentile)</div>
+                        </div>
+
+                        <div class="p-3 bg-surface rounded-xl border border-custom space-y-2">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-secondary-custom">Resilient Modulus ($M_R$):</span>
+                                <span id="subgrade-mr-display" class="font-bold text-amber-500 font-mono">57.1 MPa</span>
+                            </div>
+                            <div class="text-[11px] text-secondary-custom">
+                                Model: <span id="mr-formula-desc">For CBR &gt; 5%: $M_R = 17.6 \times CBR^{0.64}$</span>
+                            </div>
+                            <div class="irc-ref">Ref: Clause 6.3, Eq. 6.1 & 6.2</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Pavement Layer Thickness & Modulus -->
+                <div id="tab-layers" class="tab-content hidden pt-4 space-y-4">
+                    <h3 class="text-sm font-bold text-heading flex items-center gap-2 border-b border-custom pb-2">
+                        <i class="fa-solid fa-bars-staggered text-primary-custom"></i> 3. Layer Thicknesses & Material Specs
+                    </h3>
+
+                    <div class="space-y-3 text-xs">
+                        
+                        <!-- Layer 1: Bituminous Concrete (BC) -->
+                        <div class="p-3 bg-surface border border-custom rounded-xl">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-heading flex items-center gap-1.5">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-slate-700 dark:bg-slate-300 inline-block"></span> Surface Course (BC/SMA)
+                                </span>
+                                <span id="disp-th-bc" class="font-mono text-primary-custom font-bold">40 mm</span>
+                            </div>
+                            <div>
+                                <label class="text-secondary-custom text-[11px]">Thickness (mm)</label>
+                                <input type="number" id="inp-th-bc" value="40" min="30" max="100" step="5" class="w-full bg-surface border border-custom rounded px-2 py-1 text-heading outline-none" oninput="calculateAll()">
+                            </div>
+                            <p class="text-[10px] text-secondary-custom mt-2">Surface course is shown separately for construction reporting. For IRC structural analysis, all bituminous layers use the bottom DBM mix properties.</p>
+                            <div class="irc-ref">Ref: Clause 9.1 / 9.2</div>
+                        </div>
+
+                        <!-- Layer 2: Dense Bituminous Macadam (DBM) -->
+                        <div class="p-3 bg-surface border border-custom rounded-xl">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-heading flex items-center gap-1.5">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-slate-500 inline-block"></span> Binder Course (DBM)
+                                </span>
+                                <span id="disp-th-dbm" class="font-mono text-primary-custom font-bold">110 mm</span>
+                            </div>
+                            <div>
+                                <label class="text-secondary-custom text-[11px]">Thickness (mm)</label>
+                                <input type="number" id="inp-th-dbm" value="110" min="50" max="250" step="5" class="w-full bg-surface border border-custom rounded px-2 py-1 text-heading outline-none" oninput="calculateAll()">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 mt-2">
+                                <div>
+                                    <label class="text-secondary-custom text-[11px]">Bottom DBM Binder</label>
+                                    <select id="inp-bit-grade" class="w-full bg-surface border border-custom rounded px-1.5 py-1 text-heading outline-none" onchange="calculateAll()">
+                                        <option value="2000">VG-30 — 2000 MPa max.</option>
+                                        <option value="3000" selected>VG-40 — 3000 MPa max.</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-secondary-custom text-[11px]">Modulus source</label>
+                                    <select id="inp-bit-modulus-source" class="w-full bg-surface border border-custom rounded px-1.5 py-1 text-heading outline-none" onchange="toggleCustomBitModulus(); calculateAll()">
+                                        <option value="irc" selected>IRC indicative max.</option>
+                                        <option value="custom">Tested / custom</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="custom-bit-modulus-wrap" class="hidden mt-2">
+                                <label class="text-secondary-custom text-[11px]">Tested Resilient Modulus at 35°C (MPa)</label>
+                                <input type="number" id="inp-bit-custom-mr" value="3000" min="100" max="5000" step="50" class="w-full bg-surface border border-custom rounded px-2 py-1 text-heading outline-none" oninput="calculateAll()">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 mt-2">
+                                <div>
+                                    <label class="text-secondary-custom text-[11px]">Bottom DBM Air Voids, $V_a$ (%)</label>
+                                    <input type="number" id="inp-va" value="3.5" min="1" max="8" step="0.1" class="w-full bg-surface border border-custom rounded px-2 py-1 text-heading outline-none" oninput="calculateAll()">
+                                </div>
+                                <div>
+                                    <label class="text-secondary-custom text-[11px]">Effective Binder, $V_{be}$ (%)</label>
+                                    <input type="number" id="inp-vbe" value="11.5" min="5" max="18" step="0.1" class="w-full bg-surface border border-custom rounded px-2 py-1 text-heading outline-none" oninput="calculateAll()">
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-secondary-custom mt-2">For analysis, IRC:37-2018 treats all bituminous layers as one layer and assigns the properties of the bottom DBM mix.</p>
+                            <div class="irc-ref">Ref: Clause 9.2, Table 9.2; Eq. 3.3/3.4; Table 11.1</div>
+                        </div>
+
+                        <!-- Layer 3: Granular Base (WMM) / CTB -->
+                        <div class="p-3 bg-surface border border-custom rounded-xl">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-heading flex items-center gap-1.5">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-amber-600 inline-block"></span> Base Course
+                                </span>
+                                <span id="disp-th-base" class="font-mono text-primary-custom font-bold">250 mm</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-secondary-custom text-[11px]">Thickness (mm)</label>
+                                    <input type="number" id="inp-th-base" value="250" min="100" max="350" step="10" class="w-full bg-surface border border-custom rounded px-2 py-1 text-heading outline-none" oninput="calculateAll()">
+                                </div>
+                                <div>
+                                    <label class="text-secondary-custom text-[11px]">Type</label>
+                                    <select id="inp-base-type" class="w-full bg-surface border border-custom rounded px-1 py-1 text-heading outline-none" onchange="toggleCTBInputs(); calculateAll()">
+                                        <option value="wmm" selected>WMM / Unbound</option>
+                                        <option value="ctb">CTB</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="ctb-inputs" class="hidden mt-2 p-2 rounded-lg bg-amber-500/5 border border-amber-500/20">
+                                <label class="text-secondary-custom text-[11px]">CTB Elastic Modulus (MPa)</label>
+                                <input type="number" id="inp-ctb-mr" value="5000" min="2000" max="6000" step="100" class="w-full bg-surface border border-custom rounded px-2 py-1 text-heading outline-none" oninput="calculateAll()">
+                                <p class="text-[10px] text-secondary-custom mt-1">IRC indicative value: 5000 MPa for CTB with 7/28-day UCS of 4.5–7 MPa.</p>
+                            </div>
+                            <div class="irc-ref">Ref: Clause 8.1 (unbound base) / Clause 8.2 (CTB)</div>
+                        </div>
+
+                        <!-- Layer 4: Granular Sub-Base (GSB) -->
+                        <div class="p-3 bg-surface border border-custom rounded-xl">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-heading flex items-center gap-1.5">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-yellow-600 inline-block"></span> Sub-Base Course (GSB)
+                                </span>
+                                <span id="disp-th-gsb" class="font-mono text-primary-custom font-bold">200 mm</span>
+                            </div>
+                            <div>
+                                <label class="text-secondary-custom text-[11px]">Thickness (mm)</label>
+                                <input type="number" id="inp-th-gsb" value="200" min="150" max="300" step="10" class="w-full bg-surface border border-custom rounded px-2 py-1 text-heading outline-none" oninput="calculateAll()">
+                            </div>
+                            <div class="irc-ref">Ref: Clause 7.2.2 / 7.2.3</div>
+                        </div>
+
+                        <!-- Auto Optimize Button -->
+                        <button onclick="autoOptimizeDesign()" class="no-print w-full text-white font-bold py-2.5 px-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2 hover:opacity-90" style="background: linear-gradient(135deg, var(--ifm-color-primary), var(--ifm-color-primary-dark));">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Optimize Layers
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tab 4: Checks & Diagnostics -->
+                <div id="tab-checks" class="tab-content hidden pt-4 space-y-4 h-full">
+                    <h3 class="text-sm font-bold text-heading flex items-center gap-2 border-b border-custom pb-2">
+                        <i class="fa-solid fa-clipboard-check text-primary-custom"></i> 4. IRC 37 Diagnostics
+                    </h3>
+                    
+                    <p class="text-[11px] text-secondary-custom mb-2">The following criteria are evaluated in real-time. Follow the suggestions to correct any failed parameters.</p>
+                    
+                    <div class="space-y-3 overflow-y-auto pr-1" id="comprehensive-checks-list" style="max-height: 480px;">
+                        <!-- Comprehensive diagnostics populated dynamically via JS -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Calculated Traffic & Resilient Moduli Summary Card -->
+            <div class="bg-surface border border-custom rounded-2xl p-4 shadow-md space-y-3 transition-colors print-card">
+                <h3 class="text-xs font-bold text-secondary-custom uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-primary-custom"></i> Analysis Summary
+                </h3>
+
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div class="bg-surface p-2.5 rounded-xl border border-custom">
+                        <span class="text-secondary-custom text-[11px] block">Opening Traffic ($A$)</span>
+                        <span id="res-cvpd" class="text-lg font-bold font-mono text-heading">2,756</span> <span class="text-secondary-custom text-[10px]">CVPD</span>
+                    </div>
+
+                    <div class="bg-surface p-2.5 rounded-xl border border-custom">
+                        <span class="text-secondary-custom text-[11px] block">Design Traffic ($N$)</span>
+                        <span id="res-msa" class="text-lg font-bold font-mono text-primary-custom">38.45</span> <span class="text-secondary-custom text-[10px]">MSA</span>
+                    </div>
+                </div>
+
+                <div class="bg-surface p-3 rounded-xl border border-custom text-[11px] space-y-1.5">
+                    <div class="flex justify-between">
+                        <span class="text-secondary-custom">Applied Reliability:</span>
+                        <span id="res-reliability" class="font-bold text-primary-custom">90%</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-secondary-custom">Bituminous Layer ($E_1$):</span>
+                        <span id="mod-e1" class="font-mono text-heading">2000.0 MPa</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span id="mod-e2-label" class="text-secondary-custom">Combined Granular Layer ($E_2$):</span>
+                        <span id="mod-e2" class="font-mono text-heading">182.4 MPa</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span id="mod-e3-label" class="text-secondary-custom">Subgrade Modulus ($E_4$):</span>
+                        <span id="mod-e3" class="font-mono text-heading">102.5 MPa</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-secondary-custom">Subgrade Modulus ($M_R$):</span>
+                        <span id="mod-e4" class="font-mono text-heading">57.1 MPa</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Right Side: Results, Dynamic SVG, Charts (7 Cols) -->
+        <section class="lg:col-span-7 space-y-6">
+            
+            <!-- Overall Status Banner -->
+            <div id="status-banner" class="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-2xl flex items-center justify-between shadow-md transition-all print-card">
+                <div class="flex items-center gap-3">
+                    <div id="status-icon" class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-600 flex items-center justify-center text-2xl">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <div>
+                        <h2 id="status-title" class="text-base font-bold text-emerald-700 dark:text-emerald-300">Preliminary Design Check</h2>
+                        <p id="status-desc" class="text-xs text-secondary-custom">Use the browser calculation as a preliminary design check and verify project designs with the prescribed IRC workflow.</p>
+                    </div>
+                </div>
+                <div class="text-right font-mono">
+                    <span id="status-msa-tag" class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-700 border border-emerald-500/30 font-bold">
+                        N = 38.45 MSA
+                    </span>
+                </div>
+            </div>
+
+            <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl px-3 py-2 text-[10px] text-secondary-custom print-card">
+                <strong class="text-amber-700 dark:text-amber-300">Analysis method:</strong> simple browser-based 3-layer screening model. It is <strong>not IITPAVE</strong>. The tool applies IRC:37-2018 material and performance relationships to an estimated critical strain response.
+            </div>
+
+            <!-- Strain & Service Life Evaluation Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
+                <!-- Fatigue Life Card -->
+                <div class="bg-surface border border-custom rounded-2xl p-4 shadow-md space-y-3 transition-colors print-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs font-semibold text-secondary-custom uppercase tracking-wider block">Fatigue — Screening Strain ($\epsilon_t$)</span>
+                            <span id="res-strain-et" class="text-xl font-bold font-mono text-primary-custom">182.4 $\mu\epsilon$</span>
+                        </div>
+                        <span id="badge-fatigue" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-600 border border-emerald-500/30">PASS</span>
+                    </div>
+
+                    <div class="space-y-1.5 text-xs border-t border-custom pt-2">
+                        <div class="flex justify-between">
+                            <span class="text-secondary-custom">IRC Allowable Fatigue Strain:</span>
+                            <span id="res-et-allow" class="font-bold font-mono text-heading">—</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-secondary-custom">Screening comparison:</span>
+                            <span id="res-et-check" class="font-mono text-amber-600">Browser screening comparison</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-secondary-custom">Screening Fatigue Life ($N_f$):</span>
+                            <span id="res-nf" class="font-bold font-mono text-heading">48.20 MSA</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-secondary-custom">Required Design Life ($N$):</span>
+                            <span id="res-nf-req" class="font-mono text-secondary-custom">38.45 MSA</span>
+                        </div>
+                        
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2 overflow-hidden mt-1 no-print">
+                            <div id="bar-fatigue" class="h-2 rounded-full transition-all" style="width: 80%; background-color: var(--ifm-color-primary);"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rutting Life Card -->
+                <div class="bg-surface border border-custom rounded-2xl p-4 shadow-md space-y-3 transition-colors print-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs font-semibold text-secondary-custom uppercase tracking-wider block">Rutting — Screening Strain ($\epsilon_v$)</span>
+                            <span id="res-strain-ev" class="text-xl font-bold font-mono text-amber-500">385.1 $\mu\epsilon$</span>
+                        </div>
+                        <span id="badge-rutting" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-600 border border-emerald-500/30">PASS</span>
+                    </div>
+
+                    <div class="space-y-1.5 text-xs border-t border-custom pt-2">
+                        <div class="flex justify-between">
+                            <span class="text-secondary-custom">IRC Allowable Rutting Strain:</span>
+                            <span id="res-ev-allow" class="font-bold font-mono text-heading">—</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-secondary-custom">Screening comparison:</span>
+                            <span id="res-ev-check" class="font-mono text-amber-600">Browser screening comparison</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-secondary-custom">Screening Rutting Life ($N_r$):</span>
+                            <span id="res-nr" class="font-bold font-mono text-heading">62.15 MSA</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-secondary-custom">Required Design Life ($N$):</span>
+                            <span id="res-nr-req" class="font-mono text-secondary-custom">38.45 MSA</span>
+                        </div>
+                        
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2 overflow-hidden mt-1 no-print">
+                            <div id="bar-rutting" class="bg-amber-500 h-2 rounded-full transition-all" style="width: 62%"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Dynamic SVG Cross-Section & Critical Strains Diagram -->
+            <div class="bg-surface border border-custom rounded-2xl p-5 shadow-md space-y-3 transition-colors print-card">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-bold text-secondary-custom uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group text-primary-custom"></i> Pavement Cross-Section
+                    </h3>
+                    <span id="total-thickness-display" class="text-xs font-mono font-bold text-primary-custom bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-lg">
+                        Total Thickness: 600 mm
+                    </span>
+                </div>
+
+                <div class="bg-slate-100 dark:bg-slate-950 rounded-xl p-4 border border-custom flex justify-center transition-colors">
+                    <svg id="svg-cross-section" viewBox="0 0 600 320" class="w-full h-auto max-h-[320px] rounded"></svg>
+                </div>
+            </div>
+
+            <div class="bg-surface border border-custom rounded-2xl p-4 shadow-md transition-colors print-card">
+                <h4 class="text-xs font-bold text-secondary-custom uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <i class="fa-solid fa-chart-bar text-primary-custom"></i> IRC Life Comparison (MSA)
+                </h4>
+                <div class="h-48 relative">
+                    <canvas id="chart-life"></canvas>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <script>
+        let lifeChart = null;
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            html.setAttribute('data-theme', newTheme);
+            if (newTheme === 'dark') {
+                html.classList.add('dark');
+            } else {
+                html.classList.remove('dark');
+            }
+            
+            updateThemeIcon(newTheme);
+            calculateAll();
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            if (theme === 'dark') {
+                icon.className = 'fa-solid fa-sun text-amber-400 text-sm';
+            } else {
+                icon.className = 'fa-solid fa-moon text-slate-600 text-sm';
+            }
+        }
+
+        function toggleReferences() {
+            const body = document.body;
+            const toggle = document.getElementById('ref-toggle');
+            
+            if (toggle.checked) {
+                body.classList.add('show-refs');
+            } else {
+                body.classList.remove('show-refs');
+            }
+        }
+
+        const PRESETS = {
+            'p5':  { p: 800,  r: 5, y: 1, x: 15, vdf: 3.5, d: 0.75, cbr: 5.0, bc: 30, dbm: 50,  base: 225, gsb: 150, baseType: 'wmm' },
+            'p20': { p: 1800, r: 5, y: 2, x: 15, vdf: 4.0, d: 0.75, cbr: 6.0, bc: 40, dbm: 80,  base: 250, gsb: 175, baseType: 'wmm' },
+            'p50': { p: 2800, r: 5, y: 2, x: 20, vdf: 4.5, d: 0.75, cbr: 7.0, bc: 40, dbm: 110, base: 250, gsb: 200, baseType: 'wmm' },
+            'p100':{ p: 4500, r: 6, y: 2, x: 20, vdf: 4.8, d: 0.75, cbr: 8.0, bc: 50, dbm: 130, base: 250, gsb: 200, baseType: 'wmm' },
+            'p150':{ p: 6000, r: 6, y: 2, x: 20, vdf: 5.0, d: 0.75, cbr: 8.0, bc: 50, dbm: 150, base: 250, gsb: 200, baseType: 'wmm' },
+            'p300':{ p: 9000, r: 7, y: 2, x: 20, vdf: 5.2, d: 0.45, cbr: 10.0, bc: 50, dbm: 170, base: 250, gsb: 200, baseType: 'wmm' }
+        };
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.style.backgroundColor = 'transparent';
+                el.classList.remove('text-white');
+                el.classList.add('text-secondary-custom');
+            });
+
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            const activeBtn = document.getElementById('tab-btn-' + tabName);
+            activeBtn.style.backgroundColor = 'var(--ifm-color-primary)';
+            activeBtn.classList.add('text-white');
+            activeBtn.classList.remove('text-secondary-custom');
+        }
+
+        function loadPreset(key) {
+            if (!PRESETS[key]) return;
+            const p = PRESETS[key];
+            document.getElementById('inp-p').value = p.p;
+            document.getElementById('inp-r').value = p.r;
+            document.getElementById('inp-y').value = p.y;
+            document.getElementById('inp-x').value = p.x;
+            document.getElementById('inp-vdf').value = p.vdf;
+            document.getElementById('inp-d').value = p.d;
+            document.getElementById('inp-cbr').value = p.cbr;
+            document.getElementById('inp-th-bc').value = p.bc;
+            document.getElementById('inp-th-dbm').value = p.dbm;
+            document.getElementById('inp-th-base').value = p.base;
+            document.getElementById('inp-th-gsb').value = p.gsb;
+            document.getElementById('inp-base-type').value = p.baseType;
+            
+            calculateAll();
+        }
+
+        function calculateTraffic() {
+            const P = parseFloat(document.getElementById('inp-p').value) || 0;
+            const r = (parseFloat(document.getElementById('inp-r').value) || 0) / 100;
+            const y = parseFloat(document.getElementById('inp-y').value) || 0;
+            const x = parseFloat(document.getElementById('inp-x').value) || 0;
+            const VDF = parseFloat(document.getElementById('inp-vdf').value) || 0;
+            const D = parseFloat(document.getElementById('inp-d').value) || 0;
+
+            const A = P * Math.pow(1 + r, y);
+            let N = 0;
+            if (r > 0) {
+                N = (365 * (Math.pow(1 + r, x) - 1) / r) * A * D * VDF / 1e6;
+            } else {
+                N = (365 * x * A * D * VDF) / 1e6;
+            }
+            return { A: Math.round(A), N: parseFloat(N.toFixed(2)) };
+        }
+
+        function calculateSubgradeModulus(cbr) {
+            let mr;
+            let formula;
+            if (cbr <= 5.0) {
+                mr = 10.0 * cbr;
+                formula = 'For CBR ≤ 5%: $M_R = 10 \\times CBR$';
+            } else {
+                mr = 17.6 * Math.pow(cbr, 0.64);
+                formula = 'For CBR > 5%: $M_R = 17.6 \\times CBR^{0.64}$';
+            }
+            mr = Math.min(mr, 100);
+            return { mr, formula: formula + '; capped at 100 MPa for design.' };
+        }
+
+        function getAppliedReliability(trafficMSA) {
+            const mode = document.getElementById('inp-reliability').value;
+            if (mode === '90') return 90;
+            if (mode === '80') return 80;
+            return trafficMSA >= 20 ? 90 : 80;
+        }
+
+        function toggleCustomBitModulus() {
+            const source = document.getElementById('inp-bit-modulus-source').value;
+            document.getElementById('custom-bit-modulus-wrap').classList.toggle('hidden', source !== 'custom');
+        }
+
+        function toggleCTBInputs() {
+            const isCTB = document.getElementById('inp-base-type').value === 'ctb';
+            document.getElementById('ctb-inputs').classList.toggle('hidden', !isCTB);
+        }
+
+        function getBituminousModulus() {
+            const source = document.getElementById('inp-bit-modulus-source').value;
+            const grade = parseFloat(document.getElementById('inp-bit-grade').value) || 3000;
+            if (source === 'custom') {
+                const custom = parseFloat(document.getElementById('inp-bit-custom-mr').value) || grade;
+                return Math.min(custom, grade);
+            }
+            return grade;
+        }
+
+        function calculateFatigueFactor(va, vbe) {
+            const M = 4.84 * (vbe / (va + vbe) - 0.69);
+            const C = Math.pow(10, M);
+            return { M, C };
+        }
+
+        /*
+         * Preliminary screening strain estimator.
+         * This is NOT IITPAVE and must not be represented as an IITPAVE result.
+         * The layer abstraction follows IRC:37-2018: all bituminous layers are
+         * one analysis layer; WMM + GSB are one combined granular layer.
+         */
+        function estimateCriticalStrains(hBit, hGran, eBit, eGran, eSub) {
+            const safeBit = Math.max(1, hBit);
+            const safeGran = Math.max(1, hGran);
+            const safeSub = Math.max(1, eSub);
+            const strain_t = (280000 /
+                (Math.pow(safeBit, 1.35) * Math.pow(eBit / 1000, 0.45))) *
+                Math.pow(200 / Math.max(1, eGran), 0.25);
+            const totalEquivalentDepth = 0.8 * (
+                safeBit * Math.pow(eBit / safeSub, 1 / 3) +
+                safeGran * Math.pow(eGran / safeSub, 1 / 3)
+            );
+            const strain_v = (1.2e5 / Math.pow(Math.max(1, totalEquivalentDepth), 1.42)) *
+                Math.pow(50 / safeSub, 0.35);
+            return {
+                et: Math.max(25, parseFloat(strain_t.toFixed(1))),
+                ev: Math.max(50, parseFloat(strain_v.toFixed(1)))
+            };
+        }
+
+        function calculateIRCPerformance(et_micro, ev_micro, e_bit, is90Reliability, va, vbe, designMSA) {
+            const fatigueFactor = calculateFatigueFactor(va, vbe);
+            const k_f = is90Reliability ? 0.5161e-4 : 1.6064e-4;
+            const k_r = is90Reliability ? 1.4100e-8 : 4.1656e-8;
+            const designRepetitions = Math.max(designMSA, 0.001) * 1e6;
+
+            // IRC equations return cumulative 80-kN standard axle repetitions.
+            const Nf_repetitions = k_f * fatigueFactor.C *
+                Math.pow(1 / Math.max(et_micro * 1e-6, 1e-12), 3.89) *
+                Math.pow(1 / Math.max(e_bit, 1), 0.854);
+            const Nr_repetitions = k_r *
+                Math.pow(1 / Math.max(ev_micro * 1e-6, 1e-12), 4.5337);
+
+            // Inverse performance equations: allowable critical strains for design traffic.
+            const allowableEt = Math.pow(
+                (k_f * fatigueFactor.C * Math.pow(1 / Math.max(e_bit, 1), 0.854)) / designRepetitions,
+                1 / 3.89
+            ) * 1e6;
+            const allowableEv = Math.pow(k_r / designRepetitions, 1 / 4.5337) * 1e6;
+
+            return {
+                Nf: parseFloat((Nf_repetitions / 1e6).toFixed(2)),
+                Nr: parseFloat((Nr_repetitions / 1e6).toFixed(2)),
+                allowableEt: parseFloat(allowableEt.toFixed(1)),
+                allowableEv: parseFloat(allowableEv.toFixed(1)),
+                M: parseFloat(fatigueFactor.M.toFixed(4)),
+                C: parseFloat(fatigueFactor.C.toFixed(4))
+            };
+        }
+
+        function calculateAll() {
+            const h_bc = parseFloat(document.getElementById('inp-th-bc').value) || 0;
+            const h_dbm = parseFloat(document.getElementById('inp-th-dbm').value) || 0;
+            const h_base = parseFloat(document.getElementById('inp-th-base').value) || 0;
+            const h_gsb = parseFloat(document.getElementById('inp-th-gsb').value) || 0;
+            const h_bit = h_bc + h_dbm;
+            const isCTB = document.getElementById('inp-base-type').value === 'ctb';
+
+            document.getElementById('disp-th-bc').innerText = h_bc + ' mm';
+            document.getElementById('disp-th-dbm').innerText = h_dbm + ' mm';
+            document.getElementById('disp-th-base').innerText = h_base + ' mm';
+            document.getElementById('disp-th-gsb').innerText = h_gsb + ' mm';
+
+            const traffic = calculateTraffic();
+            document.getElementById('res-cvpd').innerText = traffic.A.toLocaleString();
+            document.getElementById('res-msa').innerText = traffic.N.toFixed(2);
+
+            const reliability = getAppliedReliability(traffic.N);
+            const is90Rel = reliability === 90;
+            document.getElementById('res-reliability').innerText = reliability + '%';
+
+            const cbr = parseFloat(document.getElementById('inp-cbr').value) || 6.0;
+            document.getElementById('cbr-val-display').innerText = cbr.toFixed(1) + ' %';
+            const subgradeInfo = calculateSubgradeModulus(cbr);
+            const eSub = subgradeInfo.mr;
+            document.getElementById('subgrade-mr-display').innerText = eSub.toFixed(1) + ' MPa';
+            document.getElementById('mr-formula-desc').innerHTML = subgradeInfo.formula;
+
+            // Simple IRC material model:
+            // - All bituminous layers act as one structural bituminous layer.
+            // - WMM + GSB act as one combined granular layer for the browser model.
+            // - CTB is shown separately but remains a preliminary screen.
+            const eBit = getBituminousModulus();
+            const va = parseFloat(document.getElementById('inp-va').value) || 3.5;
+            const vbe = parseFloat(document.getElementById('inp-vbe').value) || 11.5;
+
+            let eGran = 0;
+            let eCtb = null;
+            let eGsb = null;
+            let hStructuralGran = h_base + h_gsb;
+
+            if (!isCTB) {
+                eGran = 0.2 * Math.pow(Math.max(hStructuralGran, 1), 0.45) * eSub;
+            } else {
+                eCtb = Math.min(parseFloat(document.getElementById('inp-ctb-mr').value) || 5000, 5000);
+                eGsb = 0.2 * Math.pow(Math.max(h_gsb, 1), 0.45) * eSub;
+                hStructuralGran = h_gsb;
+                eGran = eGsb;
+            }
+
+            document.getElementById('mod-e1').innerText = eBit.toFixed(1) + ' MPa';
+            document.getElementById('mod-e2').innerText = (isCTB ? eCtb : eGran).toFixed(1) + ' MPa';
+            document.getElementById('mod-e3').innerText = (isCTB ? eGsb : eSub).toFixed(1) + ' MPa';
+            document.getElementById('mod-e4').innerText = eSub.toFixed(1) + ' MPa';
+            document.getElementById('mod-e2-label').innerText = isCTB ? 'CTB Modulus ($E_2$):' : 'Combined Granular Modulus ($E_2$):';
+            document.getElementById('mod-e3-label').innerText = isCTB ? 'GSB Modulus ($E_3$):' : 'Subgrade Modulus ($E_4$):';
+
+            // Browser-only screening response. This is intentionally simple and transparent.
+            const strains = estimateCriticalStrains(h_bit, hStructuralGran, eBit, eGran, eSub);
+            document.getElementById('res-strain-et').innerHTML = strains.et.toFixed(1) + ' $\\mu\\epsilon$';
+            document.getElementById('res-strain-ev').innerHTML = strains.ev.toFixed(1) + ' $\\mu\\epsilon$';
+
+            const perf = calculateIRCPerformance(strains.et, strains.ev, eBit, is90Rel, va, vbe, traffic.N);
+            document.getElementById('res-nf').innerText = perf.Nf >= 500 ? '> 500 MSA' : perf.Nf.toFixed(2) + ' MSA';
+            document.getElementById('res-nf-req').innerText = traffic.N.toFixed(2) + ' MSA';
+            document.getElementById('res-nr').innerText = perf.Nr >= 500 ? '> 500 MSA' : perf.Nr.toFixed(2) + ' MSA';
+            document.getElementById('res-nr-req').innerText = traffic.N.toFixed(2) + ' MSA';
+            document.getElementById('res-et-allow').innerText = perf.allowableEt.toFixed(1) + ' µε';
+            document.getElementById('res-ev-allow').innerText = perf.allowableEv.toFixed(1) + ' µε';
+
+            const fatiguePass = strains.et <= perf.allowableEt;
+            const ruttingPass = strains.ev <= perf.allowableEv;
+            const minBCReq = traffic.N > 50 ? 50 : 30;
+            const minBCPass = h_bc >= minBCReq;
+            const minDBMReq = traffic.N > 50 ? 100 : 50;
+            const minDBMPass = h_dbm >= minDBMReq;
+            const cbrPass = cbr >= 2.0;
+            const perpetualCheck = traffic.N >= 300 ? strains.et <= 80 && strains.ev <= 200 : true;
+            const allPass = fatiguePass && ruttingPass && minBCPass && minDBMPass && cbrPass && perpetualCheck && !isCTB;
+
+            updateBadge('badge-fatigue', fatiguePass);
+            updateBadge('badge-rutting', ruttingPass);
+            document.getElementById('res-et-check').innerText = fatiguePass ? 'Preliminary PASS' : 'Preliminary FAIL';
+            document.getElementById('res-ev-check').innerText = ruttingPass ? 'Preliminary PASS' : 'Preliminary FAIL';
+            document.getElementById('bar-fatigue').style.width = Math.min(100, (strains.et / Math.max(perf.allowableEt, 0.001)) * 100) + '%';
+            document.getElementById('bar-rutting').style.width = Math.min(100, (strains.ev / Math.max(perf.allowableEv, 0.001)) * 100) + '%';
+
+            const banner = document.getElementById('status-banner');
+            const statusIcon = document.getElementById('status-icon');
+            const statusTitle = document.getElementById('status-title');
+            const statusDesc = document.getElementById('status-desc');
+            const statusTag = document.getElementById('status-msa-tag');
+            statusTag.innerText = `N = ${traffic.N.toFixed(2)} MSA · ${reliability}% reliability`;
+
+            if (allPass) {
+                banner.className = 'bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-2xl flex items-center justify-between shadow-md transition-all print-card';
+                statusIcon.className = 'w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-2xl';
+                statusIcon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+                statusTitle.className = 'text-base font-bold text-emerald-700 dark:text-emerald-300';
+                statusTitle.innerText = 'Preliminary Design Check — PASS';
+                statusDesc.innerText = 'The simple browser screening model satisfies the implemented IRC thickness and strain checks.';
+            } else {
+                banner.className = 'bg-amber-500/10 border border-amber-500/30 p-4 rounded-2xl flex items-center justify-between shadow-md transition-all print-card';
+                statusIcon.className = 'w-12 h-12 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center text-2xl';
+                statusIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                statusTitle.className = 'text-base font-bold text-amber-700 dark:text-amber-300';
+                statusTitle.innerText = isCTB ? 'Preliminary Review — CTB Needs Separate Verification' : 'Preliminary Design Check — Review Required';
+                statusDesc.innerText = isCTB
+                    ? 'CTB cumulative fatigue damage is not evaluated by this simple browser model.'
+                    : 'One or more implemented screening checks are not satisfied. Review the IRC Checks tab.';
+            }
+
+            renderSVG(h_bc, h_dbm, h_base, h_gsb, strains.et, strains.ev);
+            updateChart(traffic.N, perf.Nf, perf.Nr);
+            renderComprehensiveChecklist(cbr, h_bc, h_dbm, minBCReq, minDBMReq, minBCPass, minDBMPass, fatiguePass, ruttingPass, perpetualCheck, traffic.N, isCTB, reliability, va, vbe, perf.C);
+
+            if (window.renderMathInElement) {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
+            }
+        }
+
+        function updateBadge(id, isPass) {
+            const badge = document.getElementById(id);
+            if (isPass) {
+                badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30';
+                badge.innerText = 'PRELIM PASS';
+            } else {
+                badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30';
+                badge.innerText = 'PRELIM FAIL';
+            }
+        }
+
+        function renderComprehensiveChecklist(cbr, bc, dbm, minBCReq, minDBMReq, minBCPass, minDBMPass, fatiguePass, ruttingPass, perpetualCheck, msa, isCTB, reliability, va, vbe, fatigueC) {
+            const container = document.getElementById('comprehensive-checks-list');
+            
+            const checks = [
+                {
+                    title: 'Subgrade Stability',
+                    ref: 'Clause 6.2.1',
+                    status: cbr >= 2.0,
+                    msg_pass: `Subgrade CBR is ${cbr}%. Safe to place sub-base.`,
+                    msg_fail: `Subgrade CBR ${cbr}% is less than 2.0%.`,
+                    suggestion: 'Stabilize subgrade soil or provide a 150mm minimum capping layer with CBR ≥ 10%.'
+                },
+                {
+                    title: `Minimum Wearing Course Thickness`,
+                    ref: 'Table 7.1',
+                    status: minBCPass,
+                    msg_pass: `Provided BC thickness (${bc}mm) ≥ Required (${minBCReq}mm).`,
+                    msg_fail: `Provided BC thickness (${bc}mm) is insufficient.`,
+                    suggestion: `Increase Surface Course (BC/SMA) to at least ${minBCReq}mm for N = ${msa} MSA.`
+                },
+                {
+                    title: `Minimum Binder Course Thickness`,
+                    ref: 'Clause 7.2.2',
+                    status: minDBMPass,
+                    msg_pass: `Provided DBM thickness (${dbm}mm) ≥ Required (${minDBMReq}mm).`,
+                    msg_fail: `Provided DBM thickness (${dbm}mm) is insufficient.`,
+                    suggestion: `Increase Binder Course (DBM) to at least ${minDBMReq}mm for N = ${msa} MSA.`
+                },
+                {
+                    title: 'Fatigue Life Criteria ($N_f \\ge N$)',
+                    ref: 'IRC performance equation',
+                    status: fatiguePass,
+                    msg_pass: 'Browser screening tensile strain is within the IRC allowable limit.',
+                    msg_fail: 'Browser screening tensile strain exceeds the IRC allowable value.',
+                    suggestion: 'Increase the bituminous thickness or improve the selected bituminous modulus, then recalculate the preliminary browser screen.'
+                },
+                {
+                    title: 'Rutting Life Criteria ($N_r \\ge N$)',
+                    ref: 'IRC performance equation',
+                    status: ruttingPass,
+                    msg_pass: 'Browser screening vertical strain is within the IRC allowable limit.',
+                    msg_fail: 'Actual vertical compressive strain has not been computed by a validated layered-elastic solver.',
+                    suggestion: 'Increase the combined granular thickness or improve the subgrade CBR, then recalculate the preliminary browser screen.'
+                }
+            ];
+
+            checks.push({
+                title: 'Reliability Selection',
+                ref: 'Clause 3.7',
+                status: reliability === (msa >= 20 ? 90 : 80),
+                msg_pass: `Applied reliability = ${reliability}% for ${msa.toFixed(2)} MSA.`,
+                msg_fail: 'Reliability setting does not match the automatic IRC recommendation for a general road.',
+                suggestion: 'Use Auto — IRC recommendation unless a project-specific road classification justifies a different choice.'
+            });
+            checks.push({
+                title: 'Bottom DBM Fatigue Mix Inputs',
+                ref: 'Eq. 3.3 / 3.4',
+                status: va > 0 && vbe > 0 && vbe > va,
+                msg_pass: `Va = ${va.toFixed(1)}%, Vbe = ${vbe.toFixed(1)}%, C = ${fatigueC.toFixed(2)}.`,
+                msg_fail: 'Air voids and effective binder volume are not physically valid.',
+                suggestion: 'Enter the actual bottom DBM mix volumetric parameters from the approved mix design.'
+            });
+            if (isCTB) {
+                checks.push({
+                    title: 'CTB Cumulative Fatigue Damage',
+                    ref: 'Clause 3.6 / 11.1.7',
+                    status: false,
+                    msg_pass: 'CTB fatigue damage has been evaluated.',
+                    msg_fail: 'CTB cumulative fatigue damage is not evaluated by this preliminary browser model.',
+                    suggestion: 'Run project-specific axle-load-spectrum CFD analysis before accepting a CTB pavement design.'
+                });
+            }
+
+            if (msa >= 300) {
+                checks.push({
+                    title: 'Long-Life / Perpetual Pavement Check',
+                    ref: 'Clause 10',
+                    status: false,
+                    msg_pass: 'Validated critical strains satisfy the long-life limits.',
+                    msg_fail: 'Actual critical strains require IITPAVE / a validated linear-elastic solver.',
+                    suggestion: 'For ≥300 MSA long-life design, verify εt ≤ 80 µε and εv ≤ 200 µε using a validated layered-elastic solver.'
+                });
+            }
+
+            let html = '';
+            checks.forEach(check => {
+                const bgClass = check.status ? 'bg-surface border-emerald-500/30' : 'bg-rose-50 dark:bg-rose-950/20 border-rose-500/50';
+                const iconClass = check.status ? 'fa-circle-check text-emerald-500' : 'fa-circle-xmark text-rose-500';
+                const textClass = check.status ? 'text-secondary-custom' : 'text-rose-700 dark:text-rose-400';
+                
+                let suggestionHtml = '';
+                if (!check.status) {
+                    suggestionHtml = `
+                        <div class="mt-2 p-2 bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-800 rounded text-[10px] text-heading">
+                            <span class="font-bold text-rose-600 dark:text-rose-400"><i class="fa-solid fa-lightbulb mr-1"></i>Fix:</span> ${check.suggestion}
+                        </div>
+                    `;
+                }
+
+                html += `
+                    <div class="p-3 rounded-xl border ${bgClass} flex items-start gap-3 transition-colors">
+                        <i class="fa-solid ${iconClass} mt-1 text-lg"></i>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-center mb-0.5">
+                                <span class="font-bold text-heading text-xs">${check.title}</span>
+                                <span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-secondary-custom font-mono">Ref: ${check.ref}</span>
+                            </div>
+                            <div class="text-[11px] ${textClass}">${check.status ? check.msg_pass : check.msg_fail}</div>
+                            ${suggestionHtml}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            
+            // Re-render LaTeX in the new tab specifically
+            if (window.renderMathInElement) {
+                renderMathInElement(container, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError : false
+                });
+            }
+        }
+
+        function renderSVG(h_bc, h_dbm, h_base, h_gsb, et, ev) {
+            const svg = document.getElementById('svg-cross-section');
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const totalThickness = h_bc + h_dbm + h_base + h_gsb;
+            document.getElementById('total-thickness-display').innerText = `Total Thickness: ${totalThickness} mm`;
+
+            const startY = 60;
+            const usableH = 210;
+
+            const scale = usableH / totalThickness;
+            const y_bc = h_bc * scale;
+            const y_dbm = h_dbm * scale;
+            const y_base = h_base * scale;
+            const y_gsb = h_gsb * scale;
+
+            const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--ifm-color-primary').trim() || '#166534';
+
+            let html = `
+                <g transform="translate(180, 10)">
+                    <rect x="20" y="10" width="50" height="35" rx="4" fill="${isDark ? '#334155' : '#cbd5e1'}" stroke="${primaryColor}" stroke-width="2"/>
+                    <rect x="110" y="10" width="50" height="35" rx="4" fill="${isDark ? '#334155' : '#cbd5e1'}" stroke="${primaryColor}" stroke-width="2"/>
+                    <text x="90" y="5" fill="${primaryColor}" font-size="11" font-weight="bold" text-anchor="middle">20 kN Dual Wheel Load (0.56 MPa)</text>
+                    <line x1="45" y1="45" x2="45" y2="55" stroke="${primaryColor}" stroke-width="2" />
+                    <line x1="135" y1="45" x2="135" y2="55" stroke="${primaryColor}" stroke-width="2" />
+                </g>
+            `;
+
+            let currY = startY;
+
+            html += `
+                <rect x="40" y="${currY}" width="520" height="${y_bc}" fill="${isDark ? '#1e293b' : '#334155'}" stroke="${isDark ? '#475569' : '#64748b'}" stroke-width="1" />
+                <text x="50" y="${currY + Math.max(12, y_bc/2 + 4)}" fill="#ffffff" font-size="11" font-weight="600">BC / Wearing Course (${h_bc} mm)</text>
+            `;
+            currY += y_bc;
+
+            html += `
+                <rect x="40" y="${currY}" width="520" height="${y_dbm}" fill="${isDark ? '#334155' : '#475569'}" stroke="${isDark ? '#475569' : '#64748b'}" stroke-width="1" />
+                <text x="50" y="${currY + Math.max(12, y_dbm/2 + 4)}" fill="#f1f5f9" font-size="11" font-weight="600">DBM Binder Course (${h_dbm} mm)</text>
+            `;
+
+            const asphaltBottomY = currY + y_dbm;
+            html += `
+                <line x1="40" y1="${asphaltBottomY}" x2="560" y2="${asphaltBottomY}" stroke="${primaryColor}" stroke-width="2" stroke-dasharray="4,4" />
+                <circle x="270" y="${asphaltBottomY}" r="5" fill="${primaryColor}" stroke="#ffffff" stroke-width="2" />
+                <rect x="280" y="${asphaltBottomY - 12}" width="140" height="22" rx="4" fill="${isDark ? '#064e3b' : '#dcfce7'}" stroke="${primaryColor}" stroke-width="1"/>
+                <text x="286" y="${asphaltBottomY + 2}" fill="${isDark ? '#6ee7b7' : '#14532d'}" font-size="10" font-weight="bold">ε_t = ${et.toFixed(1)} µε (Tensile)</text>
+            `;
+            currY += y_dbm;
+
+            html += `
+                <rect x="40" y="${currY}" width="520" height="${y_base}" fill="${isDark ? '#78350f' : '#d97706'}" fill-opacity="${isDark ? '0.6' : '0.3'}" stroke="#b45309" stroke-width="1" />
+                <text x="50" y="${currY + Math.max(12, y_base/2 + 4)}" fill="${isDark ? '#fde68a' : '#78350f'}" font-size="11" font-weight="600">Base Course - WMM/CTB (${h_base} mm)</text>
+            `;
+            currY += y_base;
+
+            html += `
+                <rect x="40" y="${currY}" width="520" height="${y_gsb}" fill="${isDark ? '#b45309' : '#f59e0b'}" fill-opacity="${isDark ? '0.4' : '0.25'}" stroke="#d97706" stroke-width="1" />
+                <text x="50" y="${currY + Math.max(12, y_gsb/2 + 4)}" fill="${isDark ? '#fef3c7' : '#92400e'}" font-size="11" font-weight="600">Sub-Base - GSB (${h_gsb} mm)</text>
+            `;
+            currY += y_gsb;
+
+            html += `
+                <rect x="40" y="${currY}" width="520" height="35" fill="${isDark ? '#064e3b' : '#059669'}" fill-opacity="${isDark ? '0.5' : '0.2'}" stroke="#047857" stroke-width="1" />
+                <text x="50" y="${currY + 22}" fill="${isDark ? '#a7f3d0' : '#064e3b'}" font-size="11" font-weight="700">Subgrade Soil (Compacted Top 500mm)</text>
+                
+                <line x1="40" y1="${currY}" x2="560" y2="${currY}" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4,4" />
+                <circle x="270" y="${currY}" r="5" fill="#d97706" stroke="#ffffff" stroke-width="2" />
+                <rect x="280" y="${currY - 11}" width="140" height="22" rx="4" fill="${isDark ? '#451a03' : '#fef3c7'}" stroke="#f59e0b" stroke-width="1"/>
+                <text x="286" y="${currY + 3}" fill="${isDark ? '#fbbf24' : '#92400e'}" font-size="10" font-weight="bold">ε_v = ${ev.toFixed(1)} µε (Compressive)</text>
+            `;
+
+            svg.innerHTML = html;
+        }
+
+        function updateChart(reqN, Nf, Nr) {
+            const ctx = document.getElementById('chart-life').getContext('2d');
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--ifm-color-primary').trim() || '#166534';
+            
+            const capNf = Math.min(200, Nf);
+            const capNr = Math.min(200, Nr);
+
+            if (lifeChart) {
+                lifeChart.destroy();
+            }
+
+            lifeChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Required (N)', 'Fatigue Life (Nf)', 'Rutting Life (Nr)'],
+                    datasets: [{
+                        label: 'Traffic (MSA)',
+                        data: [reqN, capNf, capNr],
+                        backgroundColor: [
+                            primaryColor,
+                            Nf >= reqN ? (isDark ? 'rgba(34, 197, 94, 0.8)' : 'rgba(22, 163, 74, 0.8)') : 'rgba(244, 63, 94, 0.8)',
+                            Nr >= reqN ? 'rgba(245, 158, 11, 0.8)' : 'rgba(244, 63, 94, 0.8)'
+                        ],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: isDark ? '#27272a' : '#e5e7eb' },
+                            ticks: { color: isDark ? '#9ca3af' : '#4b5563', font: { size: 10 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: isDark ? '#9ca3af' : '#4b5563', font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function autoOptimizeDesign() {
+            const traffic = calculateTraffic();
+            const targetN = traffic.N;
+            const cbr = parseFloat(document.getElementById('inp-cbr').value) || 6.0;
+            const reliability = getAppliedReliability(targetN);
+            const is90Rel = reliability === 90;
+            const eBit = getBituminousModulus();
+            const va = parseFloat(document.getElementById('inp-va').value) || 3.5;
+            const vbe = parseFloat(document.getElementById('inp-vbe').value) || 11.5;
+            let found = false;
+
+            // Screening search only. Every selected section still requires IITPAVE verification.
+            for (let dbm = 50; dbm <= 220; dbm += 5) {
+                for (let base = 150; base <= 350; base += 10) {
+                    const bc = targetN > 50 ? 50 : 40;
+                    const gsb = 200;
+                    const hBit = bc + dbm;
+                    const eSub = calculateSubgradeModulus(cbr).mr;
+                    const eGran = 0.2 * Math.pow(base + gsb, 0.45) * eSub;
+                    const strains = estimateCriticalStrains(hBit, base + gsb, eBit, eGran, eSub);
+                    const perf = calculateIRCPerformance(strains.et, strains.ev, eBit, is90Rel, va, vbe, targetN);
+                    if (perf.Nf >= targetN && perf.Nr >= targetN) {
+                        document.getElementById('inp-th-bc').value = bc;
+                        document.getElementById('inp-th-dbm').value = dbm;
+                        document.getElementById('inp-th-base').value = base;
+                        document.getElementById('inp-th-gsb').value = gsb;
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) break;
+            }
+            calculateAll();
+        }
+
+        function prepareAndPrint() {
+            document.getElementById('print-date').innerText = new Date().toLocaleDateString('en-IN', {
+                year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+            calculateAll();
+            setTimeout(() => {
+                window.print();
+            }, 150);
+        }
+
+        window.onload = function() {
+            updateThemeIcon(document.documentElement.getAttribute('data-theme') || 'light');
+            toggleCustomBitModulus();
+            toggleCTBInputs();
+            calculateAll();
+        };
+    </script>
+</body>
+</html>

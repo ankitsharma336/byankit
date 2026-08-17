@@ -114,10 +114,42 @@ const config: Config = {
           position: 'left',
           label: 'Learn',
         },
-        {to: '/blog',         label: 'Blog',        position: 'left'},
-        {to: '/about',        label: 'About',       position: 'left'},
-        {to: '/mix-design',   label: 'Mix Design',  position: 'left',},
-        {to: '/contact',      label: 'Contact',     position: 'left'},
+        {to: '/blog',                 label: 'Blog',        position: 'left'},
+        {to: '/about',                label: 'About',       position: 'left'},
+      //  {to: '/mix-design',           label: 'Mix Design',  position: 'left'},
+       // {to: '/flexible-mix-design',  label: 'IRC 37 Flexible Pavement Design',  position: 'left'},
+        {to: '/contact',              label: 'Contact',     position: 'left'},
+    {
+      type: 'dropdown',
+      label: '  Design Tools',
+      position: 'left',
+      items: [
+        {
+          label: 'Concrete Mix Design',
+          to: '/mix-design',
+        },
+        {
+          label: 'IRC 37 Flexible Pavement Design ',
+          to: '/flexible-mix-design',
+        },
+        {
+          label: 'Aggregate Dry Mix Design ',
+          to: '/agg-dry-mix',
+        },
+      ],
+    },
+      {
+      type: 'dropdown',
+      label: 'Resources',
+      position: 'left',
+      items: [
+        {
+          label: 'Transportation Engineering Lab',
+          to: '/transportation-engineering-manual',
+        },
+      ],
+    },
+
         {
           href: 'https://github.com/ankitsharma336/byankit',
           label: 'GitHub',

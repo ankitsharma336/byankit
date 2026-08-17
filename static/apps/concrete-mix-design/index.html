@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-50">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,17 +17,7 @@
                         sans: ['Inter', 'sans-serif'],
                         mono: ['JetBrains Mono', 'monospace'],
                     },
-                    colors: {
-                        brand: {
-                            50: '#f0f7ff',
-                            100: '#e0effe',
-                            500: '#2563eb',
-                            600: '#1d4ed8',
-                            700: '#1e40af',
-                            800: '#1e3a8a',
-                            900: '#172554',
-                        }
-                    }
+                    colors: { brand: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#16a34a', 600: '#166534', 700: '#14532d', 800: '#134e2b', 900: '#0f3d22' } }
                 }
             }
         }
@@ -46,6 +36,173 @@
         .print-title h1 { font-size: 18px; margin: 0; font-weight: 800; }
         .print-title p { font-size: 9px; margin: 2px 0; }
         .print-meta { display: flex; justify-content: space-between; font-size: 8px; border-bottom: 1px solid #999; padding-bottom: 2mm; }
+
+
+        :root { --ifm-color-primary:#166534; --ifm-color-primary-dark:#14532d; --ifm-color-primary-darker:#134e2b; --ifm-color-primary-darkest:#0f3d22; --ifm-color-primary-light:#15803d; --ifm-color-primary-lighter:#16a34a; --ifm-color-primary-lightest:#22c55e; --ifm-background-color:#fcfcfb; --ifm-background-surface-color:#ffffff; --ifm-font-color-base:#374151; --ifm-font-color-secondary:#6b7280; --ifm-heading-color:#1f2937; --ifm-code-font-size:95%; --docusaurus-highlighted-code-line-bg:rgba(0,0,0,.1); }
+        [data-theme='dark'] { --ifm-color-primary:#25c2a0; --ifm-color-primary-dark:#21af90; --ifm-color-primary-darker:#1fa588; --ifm-color-primary-darkest:#1a8870; --ifm-color-primary-light:#29d5b0; --ifm-color-primary-lighter:#32d8b4; --ifm-color-primary-lightest:#4fddbf; --ifm-background-color:#121212; --ifm-background-surface-color:#1b1b1d; --ifm-font-color-base:#e5e7eb; --ifm-font-color-secondary:#9ca3af; --ifm-heading-color:#fff; --docusaurus-highlighted-code-line-bg:rgba(0,0,0,.3); }
+        body{background-color:var(--ifm-background-color);color:var(--ifm-font-color-base)} h1,h2,h3,h4,h5,h6{color:var(--ifm-heading-color)}
+        .bg-brand-900{background-color:var(--ifm-color-primary-darkest)!important}.bg-brand-800{background-color:var(--ifm-color-primary-dark)!important}.bg-brand-700{background-color:var(--ifm-color-primary-darker)!important}.bg-brand-600{background-color:var(--ifm-color-primary)!important}.bg-brand-500{background-color:var(--ifm-color-primary-light)!important}.bg-brand-100{background-color:#dcfce7!important}.bg-brand-50{background-color:#f0fdf4!important}
+        .text-brand-900{color:var(--ifm-color-primary-darkest)!important}.text-brand-800{color:var(--ifm-color-primary-dark)!important}.text-brand-700{color:var(--ifm-color-primary-darker)!important}.text-brand-600{color:var(--ifm-color-primary)!important}.text-brand-500{color:var(--ifm-color-primary-light)!important}.border-brand-700{border-color:var(--ifm-color-primary-darker)!important}.border-brand-600{border-color:var(--ifm-color-primary)!important}.border-brand-200{border-color:#bbf7d0!important}.card-box,.bg-white{background-color:var(--ifm-background-surface-color)!important}
+        /* Print high contrast fix */
+
+
+        /* Refined responsive top bar controls */
+        header.bg-brand-900 {
+            background: #ffffff !important;
+            color: #1f2937 !important;
+        }
+        header.bg-brand-900 > div {
+            min-height: 64px;
+            height: auto;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            gap: 12px;
+        }
+        header.bg-brand-900 > div > div:last-child {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .app-header-control {
+            min-height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            border-radius: 9px;
+        }
+        .reference-control {
+            gap: 8px;
+            padding: 0 10px;
+            border: 1px solid #d1d5db;
+            background: #f8fafc;
+            color: #374151 !important;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .reference-control input {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            accent-color: #166534;
+        }
+        .reference-control span {
+            color: #374151 !important;
+        }
+        .print-control {
+            padding: 0 12px !important;
+            background: #166534 !important;
+            color: #ffffff !important;
+            border: 1px solid #166534;
+            min-width: 108px;
+        }
+        .print-control:hover {
+            background: #14532d !important;
+            border-color: #14532d;
+        }
+        .preset-control {
+            min-height: 36px;
+            background: #f8fafc !important;
+            color: #374151 !important;
+            border-color: #d1d5db !important;
+            max-width: 220px;
+        }
+        .howto-control {
+            background: #ffffff !important;
+            color: #166534 !important;
+            border: 1px solid #166534 !important;
+            min-height: 36px;
+        }
+        .howto-control:hover {
+            background: #f0fdf4 !important;
+        }
+
+        @media (max-width: 900px) {
+            header.bg-brand-900 > div {
+                align-items: flex-start;
+            }
+            header.bg-brand-900 > div > div:last-child {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            .preset-control { max-width: none; flex: 1 1 190px; }
+        }
+
+        @media (max-width: 520px) {
+            header.bg-brand-900 > div {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+            header.bg-brand-900 > div > div:first-child {
+                width: 100%;
+            }
+            header.bg-brand-900 > div > div:last-child {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                width: 100%;
+                gap: 7px;
+            }
+            .preset-control,
+            .howto-control {
+                width: 100%;
+                max-width: none;
+                grid-column: 1 / -1;
+            }
+            .reference-control,
+            .print-control {
+                width: 100%;
+            }
+            .print-control {
+                min-width: 0;
+            }
+        }
+
+        @media (max-width: 330px) {
+            header.bg-brand-900 > div > div:last-child {
+                grid-template-columns: 1fr;
+            }
+            .reference-control,
+            .print-control {
+                width: 100%;
+            }
+        }
+
+        @media print {
+            header.bg-brand-900 { display: none !important; }
+        }
+
+        @media print {
+            html, body {
+                background: #ffffff !important;
+                color: #1f2937 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            body, body * {
+                color: #1f2937 !important;
+            }
+            h1, h2, h3, h4, h5, h6,
+            .text-slate-800, .text-slate-700, .text-slate-600, .text-slate-500,
+            .text-slate-400, .text-slate-300,
+            .text-brand-900, .text-brand-800, .text-brand-700, .text-brand-600,
+            .text-brand-500 {
+                color: #1f2937 !important;
+            }
+            .bg-brand-900, .bg-brand-800, .bg-brand-700, .bg-brand-600,
+            .bg-brand-500 {
+                color: #ffffff !important;
+            }
+            table, th, td, p, span, label, div {
+                color: #1f2937 !important;
+            }
+            th {
+                color: #374151 !important;
+                background: #f3f4f6 !important;
+            }
+            .text-white { color: #ffffff !important; }
+        }
 
         @media print {
             /* Normal engineering report print: readable size, natural multi-page flow */
@@ -157,6 +314,34 @@
             margin: 0;
         }
         input[type="number"] { -moz-appearance: textfield; }
+    
+        /* White top navigation bar */
+        header.bg-brand-900 { background-color:#ffffff !important; color:#374151 !important; border-bottom:1px solid #e5e7eb; box-shadow:0 2px 8px rgba(0,0,0,.06) !important; }
+        header.bg-brand-900 .text-white { color:#1f2937 !important; }
+        header.bg-brand-900 .text-brand-100 { color:#6b7280 !important; }
+        header.bg-brand-900 .bg-brand-500 { background-color:#166534 !important; color:#ffffff !important; }
+        header.bg-brand-900 .bg-brand-800 { background-color:#f8fafc !important; color:#374151 !important; border-color:#d1d5db !important; }
+        header.bg-brand-900 .bg-emerald-600 { background-color:#166534 !important; }
+        header.bg-brand-900 .bg-emerald-600:hover { background-color:#14532d !important; }
+        @media print { header.bg-brand-900 { display:none !important; } }
+
+        /* Print Sheet button: preserve high-contrast white foreground on green */
+        header .print-sheet-btn,
+        header .print-sheet-btn.text-white,
+        header .print-sheet-btn svg {
+            color: #ffffff !important;
+        }
+
+        header .print-sheet-btn {
+            background-color: #166534 !important;
+            border-color: #14532d !important;
+        }
+
+        header .print-sheet-btn:hover {
+            background-color: #0f3d22 !important;
+            color: #ffffff !important;
+        }
+
     </style>
 </head>
 <body class="h-full text-slate-800 font-sans antialiased flex flex-col">
@@ -176,18 +361,21 @@
             </div>
             
             <div class="flex items-center space-x-2">
-                <select id="presetSelector" onchange="loadPreset(this.value)" class="bg-brand-800 text-xs text-white border border-brand-700 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                <select id="presetSelector" onchange="loadPreset(this.value)" class="preset-control app-header-control bg-brand-800 text-xs text-white border border-brand-700 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-500">
                     <option value="">-- Load Quick Preset --</option>
                     <option value="M25_PUMP">M25 General Slab (Pumpable)</option>
                     <option value="M30_PUMP">M30 Moderate Exposure (Pumpable)</option>
                     <option value="M40_FLYASH">M40 Severe Exposure + 25% Fly Ash</option>
                     <option value="M50_HIGH">M50 High Strength + Silica Fume</option>
                 </select>
-                <label class="flex items-center gap-2 text-xs font-semibold text-white cursor-pointer select-none">
+                <a href="#how-to-use" class="howto-control app-header-control bg-brand-800 hover:bg-brand-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg border border-brand-700 transition" title="Open the Concrete Mix Design App guide">
+                    How to Use
+                </a>
+                <label class="reference-control app-header-control cursor-pointer select-none">
                     <input id="referenceToggle" type="checkbox" onchange="toggleReferences(this.checked)" class="accent-emerald-500 w-3.5 h-3.5">
                     <span>Show References</span>
                 </label>
-                <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1 transition">
+                <button onclick="window.print()" class="print-sheet-btn bg-[#166534] hover:bg-[#0f3d22] text-white text-sm font-bold px-4 py-2 rounded-lg flex items-center gap-2 transition shadow-sm border border-[#14532d] focus:outline-none focus:ring-2 focus:ring-[#22c55e] focus:ring-offset-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                     Print Sheet
                 </button>
@@ -657,6 +845,49 @@
 
         </div>
     </main>
+
+    <!-- HOW TO USE GUIDE -->
+    <section id="how-to-use" class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pb-10 no-print scroll-mt-20">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <div class="flex items-center justify-between gap-4 mb-5">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-brand-700">Guide</p>
+                    <h2 class="text-xl font-bold text-slate-900 mt-1">How to Use the Concrete Mix Design App</h2>
+                    <p class="text-sm text-slate-500 mt-1">Use this workflow for preliminary mix proportioning and laboratory trial batching.</p>
+                </div>
+                <a href="#" class="text-xs font-semibold text-brand-600 hover:text-brand-800">Back to top ↑</a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="rounded-lg bg-slate-50 border border-slate-200 p-4">
+                    <div class="text-xs font-bold text-brand-700 mb-1">1. Enter Design Parameters</div>
+                    <p class="text-sm text-slate-600">Select concrete grade, exposure, cement, placement method, slump, aggregate size/grading, W/C target, admixture and material specific gravities.</p>
+                </div>
+                <div class="rounded-lg bg-slate-50 border border-slate-200 p-4">
+                    <div class="text-xs font-bold text-brand-700 mb-1">2. Check the Preliminary Mix</div>
+                    <p class="text-sm text-slate-600">Review target mean strength, durability limits, binder content, aggregate proportions and the 1 m³ mix summary on the right.</p>
+                </div>
+                <div class="rounded-lg bg-slate-50 border border-slate-200 p-4">
+                    <div class="text-xs font-bold text-brand-700 mb-1">3. Enter Field Conditions</div>
+                    <p class="text-sm text-slate-600">Enter aggregate absorption and free moisture so the SSD quantities can be converted into practical field batching quantities.</p>
+                </div>
+                <div class="rounded-lg bg-slate-50 border border-slate-200 p-4">
+                    <div class="text-xs font-bold text-brand-700 mb-1">4. Set Trial-Batch Volume</div>
+                    <p class="text-sm text-slate-600">Use the mold estimator or enter a laboratory trial volume directly. Choose Field Corrected or SSD batching basis as appropriate.</p>
+                </div>
+                <div class="rounded-lg bg-slate-50 border border-slate-200 p-4">
+                    <div class="text-xs font-bold text-brand-700 mb-1">5. Review the Audit Log</div>
+                    <p class="text-sm text-slate-600">Open Step 3 to inspect the calculation sequence and assumptions used to produce the mix quantities.</p>
+                </div>
+                <div class="rounded-lg bg-slate-50 border border-slate-200 p-4">
+                    <div class="text-xs font-bold text-brand-700 mb-1">6. Print the Calculation Sheet</div>
+                    <p class="text-sm text-slate-600">Use Print Sheet for a normal multi-page A4 engineering record. Turn on Show References when you want the standards/reference notes included.</p>
+                </div>
+            </div>
+            <div class="mt-5 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800">
+                <strong>Important:</strong> This application supports preliminary mix proportioning and trial-batch preparation. Final proportions should be validated through laboratory trials, material test results and the applicable project specifications/codes before field use.
+            </div>
+        </div>
+    </section>
 
     <script>
         // Global state and Chart Instance
