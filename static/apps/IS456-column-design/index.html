@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>IS 456:2000 RC Column Design &amp; Verification Suite</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        docu: {
+                            primary: '#25c2a0',
+                            primaryDark: '#1fa78a',
+                            primaryDarkest: '#18806a',
+                            bg: '#f8f9fa',
+                            cardBg: '#ffffff',
+                            sidebarBg: '#f6f8fa',
+                            navbar: '#1e1f21',
+                            navbarBorder: '#2d3035',
+                            text: '#1c1e21',
+                            subtext: '#525860',
+                            codeBg: '#f1f3f5',
+                            border: '#e3e8ee'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #f8f9fa;
+            color: #1c1e21;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        math {
+            font-family: 'STIX Two Math', 'Cambria Math', serif;
+            font-size: 1.05em;
+        }
+        math[display="block"] {
+            margin: 0.3em 0;
+            text-align: center;
+        }
+        /* Technical manual only: stable equation rendering and compact reference layout. */
+        .manual-math { font-family: "Cambria Math", "STIX Two Math", "Times New Roman", serif; font-size: 1.08em; }
+        .manual-formula { background: #f1f3f5; border: 1px solid #e3e8ee; border-radius: 0.4rem; padding: 0.5rem 0.65rem; text-align: center; overflow-x: auto; }
+        .manual-formula-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 0.5rem; }
+        .manual-step, .manual-reference { border-left: 2px solid #1fa78a; padding-left: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; }
+        .manual-step h4, .manual-reference h4 { display:flex; justify-content:space-between; align-items:center; gap:0.75rem; font-size:0.75rem; font-weight:700; color:#1c1e21; }
+        .manual-step h4 > span:last-child, .manual-reference h4 > span:last-child { font-family:"JetBrains Mono",monospace; font-size:0.62rem; font-weight:500; color:#1fa78a; white-space:nowrap; }
+        .manual-step p, .manual-reference p { font-size:0.69rem; color:#525860; margin:0; }
+        .manual-step ul, .manual-reference ul { font-size:0.69rem; color:#1c1e21; margin:0; padding-left:1.15rem; }
+        .manual-note { font-size:0.64rem !important; color:#69707a !important; }
+        @media (max-width: 700px) { .manual-formula-grid { grid-template-columns:1fr; } .manual-step h4, .manual-reference h4 { align-items:flex-start; flex-direction:column; gap:0.15rem; } }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f3f5;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1fa78a;
+        }
+        /* Technical manual: native MathML only. Keep the browser's MathML layout engine in control. */
+        .ref-tab-content .manual-formula {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            overflow-x: auto;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: touch;
+            text-align: center;
+            white-space: normal;
+            padding: 0.55rem 0.7rem;
+        }
+        .ref-tab-content .manual-formula math {
+            margin: 0 auto;
+            padding: 0;
+            color: #1c1e21;
+            font-family: "Cambria Math", "STIX Two Math", "Latin Modern Math", "Times New Roman", serif;
+            font-size: 1.12rem;
+            white-space: nowrap;
+        }
+        .ref-tab-content .manual-formula math[display="block"] {
+            margin: 0 auto;
+        }
+        .ref-tab-content .manual-math {
+            font-family: "Cambria Math", "STIX Two Math", "Times New Roman", serif;
+            color: #1c1e21;
+        }
+        .ref-tab-content .manual-formula-grid { align-items: stretch; }
+        .ref-tab-content .overflow-x-auto { scrollbar-width: thin; }
+
+    </style>
+</head>
+<body class="bg-docu-bg text-docu-text min-h-screen flex flex-col antialiased" id="appBody">
+<!-- Header -->
+<header class="bg-docu-navbar text-white border-b border-docu-navbarBorder sticky top-0 z-40">
+<div class="max-w-7xl mx-auto px-4 h-12 flex items-center justify-between text-xs">
+<div class="flex items-center space-x-2.5">
+<i class="w-4 h-4 text-docu-primary" data-lucide="columns"></i>
+<h1 class="font-bold tracking-tight text-slate-100">IS 456:2000 Column Design &amp; Verification Suite</h1>
+<span class="text-slate-500">|</span>
+<span class="text-slate-400">Axial, Uniaxial &amp; Biaxial Compression Engine</span>
+</div>
+<div class="flex items-center space-x-3">
+<button class="flex items-center text-docu-primary hover:text-white px-2.5 py-1 rounded bg-docu-primary/10 border border-docu-primary/30 transition font-medium" onclick="openReferenceModal()">
+<i class="w-3.5 h-3.5 mr-1.5" data-lucide="book-open"></i> Column Theory &amp; Design Manual
+                </button>
+<button class="hidden sm:flex items-center text-slate-300 hover:text-white px-2.5 py-1 rounded bg-slate-800 border border-slate-700 transition" onclick="window.print()">
+<i class="w-3.5 h-3.5 mr-1.5" data-lucide="printer"></i> Print Report
+                </button>
+</div>
+</div>
+</header>
+<!-- Main Workspace Grid -->
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 py-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+<!-- INPUTS PANEL -->
+<section class="lg:col-span-5 xl:col-span-4 bg-docu-cardBg rounded-lg border border-docu-border overflow-hidden flex flex-col shadow-sm">
+<div class="px-3.5 py-2.5 bg-docu-sidebarBg border-b border-docu-border flex items-center justify-between">
+<span class="font-semibold text-docu-text text-xs flex items-center">
+<i class="w-3.5 h-3.5 mr-1.5 text-docu-primaryDark" data-lucide="sliders"></i> Column Inputs
+                </span>
+<button class="text-[11px] text-docu-primaryDark hover:underline font-medium" onclick="resetDefaults()">Reset Defaults</button>
+</div>
+<form class="p-3.5 space-y-3.5 overflow-y-auto flex-1 text-xs" id="designForm">
+<!-- 1. Column Type & Geometry -->
+<div class="space-y-2">
+<div class="flex justify-between items-center border-b border-docu-border pb-1">
+<span class="font-bold text-slate-700 uppercase tracking-wider text-[10px]">1. Geometry &amp; Slenderness</span>
+<span class="text-[10px] text-docu-primaryDark cursor-pointer font-mono hover:underline" onclick="openReferenceModal('theory-classification')">Ref: Cl. 25.1</span>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div>
+<div class="flex justify-between items-center mb-0.5">
+<label class="text-docu-subtext text-[11px]">Column Shape</label>
+<span class="text-[9px] font-mono text-docu-primaryDark cursor-pointer" onclick="openReferenceModal('theory-classification')">Cl. 26.5.3</span>
+</div>
+<select class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono" id="colShape" onchange="toggleShapeInputs()">
+<option selected="" value="rectangular">Rectangular / Square</option>
+<option value="circular">Circular Column</option>
+</select>
+</div>
+<div>
+<div class="flex justify-between items-center mb-0.5">
+<label class="text-docu-subtext text-[11px]">Nominal Cover <math><msub><mi>c</mi><mtext>nom</mtext></msub></math></label>
+<span class="text-[9px] font-mono text-docu-primaryDark cursor-pointer" onclick="openReferenceModal('theory-detailing')">Cl. 26.4.2</span>
+</div>
+<select class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono" id="nominalCover" onchange="performDesign()">
+<option value="25">25 mm (special case: dimension ≤200 mm and main bar ≤12 mm)</option>
+<option selected="" value="40">40 mm (Column minimum)</option>
+<option value="45">45 mm (Severe Exposure)</option>
+<option value="50">50 mm (Very Severe Exposure)</option>
+<option value="75">75 mm (Extreme Exposure)</option>
+</select>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-2" id="dimFieldsGrid">
+<!-- Dynamic dimensions based on shape -->
+</div>
+<div class="grid grid-cols-4 gap-2">
+<div>
+<div class="flex justify-between items-center mb-0.5">
+<label class="text-docu-subtext text-[11px]">Unsupported Length <math><mi>l</mi></math> (m)</label>
+<span class="text-[9px] font-mono text-docu-primaryDark">Cl. 25.4</span>
+</div>
+<input class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono" id="unsupportedLength" oninput="performDesign()" required="" step="0.1" type="number" value="3.0"/>
+</div>
+<div>
+<div class="flex justify-between items-center mb-0.5">
+<label class="text-docu-subtext text-[11px]">End Restraint</label>
+<span class="text-[9px] font-mono text-docu-primaryDark">Cl. 25.3</span>
+</div>
+<select class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono" id="columnRestraint" onchange="performDesign()">
+<option selected="" value="restrained">Both ends restrained</option>
+<option value="cantilever">One end unrestrained (cantilever)</option>
+</select>
+</div>
+<div>
+<div class="flex justify-between items-center mb-0.5">
+<label class="text-docu-subtext text-[11px]">Eff. Length <math><msub><mi>l</mi><mtext>ex</mtext></msub></math> (m)</label>
+<span class="text-[9px] font-mono text-docu-primaryDark cursor-pointer" onclick="openReferenceModal('theory-classification')">Cl. 25.2</span>
+</div>
+<input class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono" id="lex" oninput="performDesign()" required="" step="0.1" type="number" value="3.0"/>
+</div>
+<div>
+<div class="flex justify-between items-center mb-0.5">
+<label class="text-docu-subtext text-[11px]">Eff. Length <math><msub><mi>l</mi><mtext>ey</mtext></msub></math> (m)</label>
+<span class="text-[9px] font-mono text-docu-primaryDark cursor-pointer" onclick="openReferenceModal('theory-classification')">Cl. 25.2</span>
+</div>
+<input class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono" id="ley" oninput="performDesign()" required="" step="0.1" type="number" value="3.0"/>
+</div>
+</div>
+</div>
+<!-- 2. Materials -->
+<div class="space-y-2">
+<div class="flex justify-between items-center border-b border-docu-border pb-1">
+<span class="font-bold text-slate-700 uppercase tracking-wider text-[10px]">2. Material Strengths</span>
+<span class="text-[10px] text-docu-primaryDark cursor-pointer font-mono hover:underline" onclick="openReferenceModal('theory-materials')">Ref: Tables 2 &amp; 3</span>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div>
+<div class="flex justify-between items-center mb-0.5">
+<label class="text-docu-subtext text-[11px]">Concrete <math><msub><mi>f</mi><mtext>ck</mtext></msub></math></label>
+<span class="text-[9px] font-mono text-docu-primaryDark cursor-pointer" onclick="openReferenceModal('theory-materials')">Table 2</span>
+</div>
+<select class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono" id="fck" onchange="performDesign()">
+<option value="20">M20 (20 N/mm²)</option>
+<option selected="" value="25">M25 (25 N/mm²)</option>
+<option value="30">M30 (30 N/mm²)</option>
+<option value="35">M35 (35 N/mm²)</option>
+<option value="40">M40 (40 N/mm²)</option>
+</select>
+</div>
+<div>
+<div class="flex justify-between items-center mb-0.5">
+<label class="text-docu-subtext text-[11px]">Steel <math><msub><mi>f</mi><mi>y</mi></msub></math></label>
+<span class="text-[9px] font-mono text-docu-primaryDark cursor-pointer" onclick="openReferenceModal('theory-materials')">Table 3</span>
+</div>
+<select class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono" id="fy" onchange="performDesign()">
+<option value="415">Fe 415</option>
+<option selected="" value="500">Fe 500</option>
+<option value="550">Fe 550</option>
+</select>
+</div>
+</div>
+</div>
+<!-- 3. Loads & Moments -->
+<div class="space-y-2">
+<div class="flex justify-between items-center border-b border-docu-border pb-1">
+<span class="font-bold text-slate-700 uppercase tracking-wider text-[10px]">3. Factored Loads &amp; Moments</span>
+<span class="text-[10px] text-docu-primaryDark cursor-pointer font-mono hover:underline" onclick="openReferenceModal('theory-axial')">Ref: Cl. 36.4 &amp; 39</span>
+</div>
+<p class="text-[10px] text-docu-subtext bg-docu-sidebarBg border border-docu-border rounded p-2">Enter <strong>factored design actions</strong> from structural analysis. This calculator does not generate load combinations.</p>
+<p class="text-[10px] text-amber-800 bg-amber-50 border border-amber-200 rounded p-2"><strong>Scope:</strong> This engine verifies the implemented IS 456 column checks shown in the audit log. It does not replace structural analysis, P-Δ frame analysis, shear/torsion design, seismic detailing, fire design, or engineer review.</p>
+<div class="grid grid-cols-3 gap-2">
+<div>
+<div class="flex justify-between items-center mb-0.5">
+<label class="text-docu-subtext text-[11px]">Axial Load <math><msub><mi>P</mi><mi>u</mi></msub></math> (kN)</label>
+</div>
+<input class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono" id="pu" oninput="performDesign()" required="" step="10" type="number" value="1200"/>
+</div>
+<div>
+<div class="flex justify-between items-center mb-0.5">
+<label class="text-docu-subtext text-[11px]">Moment <math><msub><mi>M</mi><mtext>ux</mtext></msub></math> (kNm)</label>
+</div>
+<input class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono" id="mux" oninput="performDesign()" required="" step="5" type="number" value="45"/>
+</div>
+<div>
+<div class="flex justify-between items-center mb-0.5">
+<label class="text-docu-subtext text-[11px]">Moment <math><msub><mi>M</mi><mtext>uy</mtext></msub></math> (kNm)</label>
+</div>
+<input class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono" id="muy" oninput="performDesign()" required="" step="5" type="number" value="30"/>
+</div>
+</div>
+</div>
+<!-- 4. Reinforcement Selection -->
+<div class="space-y-2">
+<div class="flex justify-between items-center border-b border-docu-border pb-1">
+<span class="font-bold text-slate-700 uppercase tracking-wider text-[10px]">4. Steel &amp; Lateral Ties</span>
+<span class="text-[10px] text-docu-primaryDark cursor-pointer font-mono hover:underline" onclick="openReferenceModal('theory-detailing')">Ref: Cl. 26.5.3</span>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div>
+<div class="flex justify-between items-center mb-0.5">
+<label class="text-docu-subtext text-[11px]">Main Bar Dia <math><msub><mi>ϕ</mi><mtext>main</mtext></msub></math></label>
+<span class="text-[9px] font-mono text-docu-primaryDark cursor-pointer" onclick="openReferenceModal('theory-detailing')">⩾ 12mm</span>
+</div>
+<select class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono" id="mainBarDia" onchange="performDesign()">
+<option value="12">12 mm</option>
+<option selected="" value="16">16 mm</option>
+<option value="20">20 mm</option>
+<option value="25">25 mm</option>
+<option value="32">32 mm</option>
+</select>
+</div>
+<div>
+<div class="flex justify-between items-center mb-0.5">
+<label class="text-docu-subtext text-[11px]">Bar Count <math><mi>N</mi></math></label>
+<span class="text-[9px] font-mono text-docu-primaryDark cursor-pointer" onclick="openReferenceModal('theory-detailing')">Min 4/6</span>
+</div>
+<input class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono" id="numBars" oninput="performDesign()" required="" step="2" type="number" value="8"/>
+</div>
+<div>
+<div class="flex justify-between items-center mb-0.5">
+<label class="text-docu-subtext text-[11px]">Lateral Tie Dia <math><msub><mi>ϕ</mi><mtext>tie</mtext></msub></math></label>
+<span class="text-[9px] font-mono text-docu-primaryDark cursor-pointer" onclick="openReferenceModal('theory-detailing')">Cl. 26.5.3.2</span>
+</div>
+<select class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono" id="tieDia" onchange="performDesign()">
+<option selected="" value="8">8 mm</option>
+<option value="10">10 mm</option>
+<option value="12">12 mm</option>
+</select>
+</div>
+<div>
+<div class="flex justify-between items-center mb-0.5">
+<label class="text-docu-subtext text-[11px]">Tie Spacing <math><mi>s</mi></math> (mm)</label>
+<span class="text-[9px] font-mono text-docu-primaryDark">Cl. 26.5.3.2</span>
+</div>
+<input class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono" id="tieSpacingInput" min="1" oninput="performDesign()" required="" step="5" type="number" value="150"/>
+</div>
+<div>
+<div class="flex justify-between items-center mb-0.5">
+<label class="text-docu-subtext text-[11px]">Tie Type</label>
+<span class="text-[9px] font-mono text-docu-primaryDark cursor-pointer" onclick="openReferenceModal('theory-helical')">Cl. 39.4</span>
+</div>
+<select class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono" id="tieType" onchange="performDesign()">
+<option selected="" value="ties">Lateral Ties</option>
+<option value="helical">Helical reinforcement (Cl. 39.4)</option>
+</select>
+</div>
+<div class="col-span-2">
+<div class="flex justify-between items-center mb-0.5">
+<label class="text-docu-subtext text-[11px]">Helix Pitch <math><mi>p</mi></math> (mm) <span class="text-[9px] text-docu-subtext">(used when helical)</span></label>
+<span class="text-[9px] font-mono text-docu-primaryDark">Cl. 26.5.3.2(d)</span>
+</div>
+<input class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono" id="helixPitchInput" min="1" oninput="performDesign()" required="" step="1" type="number" value="50"/>
+</div>
+</div>
+<label class="flex items-center gap-2 text-[11px] text-docu-subtext">
+<input class="rounded border-docu-border" id="lapSplice" onchange="performDesign()" type="checkbox"/>
+<span>Lap-spliced longitudinal reinforcement (4% maximum)</span>
+</label>
+<label class="flex items-center gap-2 text-[11px] text-docu-subtext">
+<input class="rounded border-docu-border" id="crossTies" onchange="performDesign()" type="checkbox"/>
+<span>Additional cross/open ties provided where required</span>
+</label>
+</div>
+<!-- Re-calculate Button -->
+<div class="pt-2">
+<button class="w-full py-2.5 bg-docu-primary hover:bg-docu-primaryDark text-slate-900 font-bold rounded-lg shadow-sm transition duration-150 flex items-center justify-center space-x-2" onclick="performDesign()" type="button">
+<i class="w-4 h-4 fill-slate-900" data-lucide="play"></i>
+<span>Re-calculate &amp; Verify Column</span>
+</button>
+</div>
+</form>
+</section>
+<!-- RESULTS & SCHEMATIC PANEL -->
+<section class="lg:col-span-7 xl:col-span-8 space-y-4 flex flex-col">
+<!-- Compact Status Banner -->
+<div class="bg-docu-primaryDark text-white px-4 py-3 rounded-lg shadow-sm flex items-center justify-between border border-emerald-600/30" id="statusBanner">
+<div class="flex items-center space-x-2.5">
+<i class="w-5 h-5 text-white shrink-0" data-lucide="check-circle-2" id="statusIcon"></i>
+<div>
+<h2 class="text-sm font-bold leading-none" id="statusTitle">Design OK - Safe Column Section</h2>
+<p class="text-[11px] text-emerald-100 mt-1" id="statusSubtitle">Section satisfies IS 456 Axial Capacity, Biaxial Bending &amp; Slenderness limits.</p>
+</div>
+</div>
+<div class="bg-black/20 px-3 py-1.5 rounded font-mono text-right text-xs">
+<span class="text-emerald-100 text-[10px] block leading-none">Pu / Puz Ratio</span>
+<span class="font-bold text-xs mt-0.5 block" id="axialRatioText">
+<math><mrow><msub><mi>P</mi><mi>u</mi></msub><mo>/</mo><msub><mi>P</mi><mtext>uz</mtext></msub></mrow><mo>=</mo><mn>0.65</mn></math>
+</span>
+</div>
+</div>
+<!-- ACTIONABLE MODIFICATION ADVICE PANEL -->
+<div class="hidden rounded-lg p-3.5 border text-xs shadow-sm transition-all duration-200" id="modAdviceContainer">
+<!-- Populated dynamically when checks fail -->
+</div>
+<!-- Analysis Tabs Workspace -->
+<div class="bg-docu-cardBg rounded-lg shadow-sm border border-docu-border overflow-hidden flex-1 flex flex-col">
+<!-- Tab Controls -->
+<div class="flex border-b border-docu-border bg-docu-sidebarBg text-xs font-medium text-docu-subtext overflow-x-auto">
+<button class="tab-btn px-3.5 py-2.5 border-b-2 border-docu-primaryDark text-docu-primaryDark font-semibold flex items-center space-x-1.5 whitespace-nowrap" id="btn-tab-detailing" onclick="switchTab('tab-detailing')">
+<i class="w-3.5 h-3.5" data-lucide="layers"></i><span>Section &amp; Detailing</span>
+</button>
+<button class="tab-btn px-3.5 py-2.5 border-b-2 border-transparent hover:text-docu-text flex items-center space-x-1.5 whitespace-nowrap" id="btn-tab-compliance" onclick="switchTab('tab-compliance')">
+<i class="w-3.5 h-3.5 text-emerald-600" data-lucide="clipboard-check"></i><span>IS 456 Verification Log</span>
+</button>
+<button class="tab-btn px-3.5 py-2.5 border-b-2 border-transparent hover:text-docu-text flex items-center space-x-1.5 whitespace-nowrap" id="btn-tab-axial" onclick="switchTab('tab-axial')">
+<i class="w-3.5 h-3.5" data-lucide="shield-check"></i><span>Axial Capacity</span>
+</button>
+<button class="tab-btn px-3.5 py-2.5 border-b-2 border-transparent hover:text-docu-text flex items-center space-x-1.5 whitespace-nowrap" id="btn-tab-biaxial" onclick="switchTab('tab-biaxial')">
+<i class="w-3.5 h-3.5" data-lucide="compass"></i><span>Biaxial Check (Cl. 39.6)</span>
+</button>
+<button class="tab-btn px-3.5 py-2.5 border-b-2 border-transparent hover:text-docu-text flex items-center space-x-1.5 whitespace-nowrap" id="btn-tab-slenderness" onclick="switchTab('tab-slenderness')">
+<i class="w-3.5 h-3.5" data-lucide="activity"></i><span>Slenderness &amp; Eccentricity</span>
+</button>
+</div>
+<!-- Tab Panels -->
+<div class="p-4 overflow-y-auto flex-1 text-xs space-y-3">
+<!-- TAB 1: DETAILING -->
+<div class="tab-content block space-y-4" id="tab-detailing">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+<div class="bg-docu-sidebarBg p-3 rounded-lg border border-docu-border flex flex-col items-center justify-center min-h-[240px]">
+<span class="text-[11px] font-semibold text-docu-subtext mb-2" id="svgTitle">Column Cross Section</span>
+<svg class="w-56 h-56 border border-docu-border rounded bg-white" id="columnSvg" viewbox="0 0 280 280"></svg>
+</div>
+<div class="space-y-2">
+<h3 class="font-bold text-docu-text border-b border-docu-border pb-1 text-xs flex justify-between items-center">
+<span>Reinforcement Schedule</span>
+<span class="text-[10px] text-docu-primaryDark cursor-pointer font-mono font-normal hover:underline" onclick="openReferenceModal('theory-detailing')">Ref: IS 456 Cl. 26.5.3</span>
+</h3>
+<table class="w-full text-left border-collapse font-mono text-[11px]">
+<tbody class="divide-y divide-docu-border" id="scheduleTableBody">
+<!-- Dynamic schedule via JS -->
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- TAB 2: COMPLIANCE CHECKLOG -->
+<div class="tab-content hidden space-y-3" id="tab-compliance">
+<div class="flex items-center justify-between border-b border-docu-border pb-1.5">
+<h3 class="font-bold text-docu-text text-xs">IS 456 Verification Log</h3>
+<span class="text-[10px] bg-docu-codeBg text-docu-subtext px-2 py-0.5 rounded font-mono border border-docu-border">Clause Verification Audit</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse border border-docu-border font-mono text-[11px]">
+<thead>
+<tr class="bg-docu-sidebarBg text-docu-text border-b border-docu-border">
+<th class="p-2 border-r border-docu-border">Clause Ref</th>
+<th class="p-2 border-r border-docu-border font-sans">Check Parameter</th>
+<th class="p-2 border-r border-docu-border">Calculated</th>
+<th class="p-2 border-r border-docu-border">Statutory Limit</th>
+<th class="p-2 text-center">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-docu-border" id="complianceLogTable"></tbody>
+</table>
+</div>
+</div>
+<!-- TAB 3: AXIAL CAPACITY -->
+<div class="tab-content hidden space-y-3" id="tab-axial">
+<div class="grid grid-cols-2 gap-3">
+<div class="p-3 bg-docu-sidebarBg rounded border border-docu-border">
+<span class="text-docu-subtext block text-[11px]">Factored Load (<math><msub><mi>P</mi><mi>u</mi></msub></math>)</span>
+<span class="text-base font-bold font-mono text-docu-text" id="calcPu">-</span>
+</div>
+<div class="p-3 bg-docu-sidebarBg rounded border border-docu-border">
+<span class="text-docu-subtext block text-[11px]">Short Axial Capacity (<math><msub><mi>P</mi><mtext>uo</mtext></msub></math>)</span>
+<span class="text-base font-bold font-mono text-docu-text" id="calcPuz">-</span>
+<span class="block text-[9px] text-docu-subtext mt-1">P<sub>uz</sub> reference: <span id="calcPuzValInline">-</span></span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="p-3 bg-docu-sidebarBg rounded border border-docu-border">
+<span class="text-docu-subtext block text-[11px]">Design Moment X (<math><msub><mi>M</mi><mi>ux</mi></msub></math>)</span>
+<span class="text-base font-bold font-mono" id="calcMuxDesign">-</span>
+</div>
+<div class="p-3 bg-docu-sidebarBg rounded border border-docu-border">
+<span class="text-docu-subtext block text-[11px]">Design Moment Y (<math><msub><mi>M</mi><mi>uy</mi></msub></math>)</span>
+<span class="text-base font-bold font-mono" id="calcMuyDesign">-</span>
+</div>
+</div>
+<div class="p-3 rounded border border-docu-border bg-white space-y-2">
+<h4 class="font-semibold text-docu-text text-xs">Cl. 39.3 Short Axially Loaded Compression Capacity Formula</h4>
+<div class="p-2 bg-docu-codeBg rounded text-center border border-docu-border overflow-x-auto font-mono text-[11px]" id="axialFormulaContainer">
+<math display="block">
+<msub><mi>P</mi><mi>u</mi></msub>
+<mo>=</mo>
+<mn>0.4</mn><mo>·</mo><msub><mi>f</mi><mtext>ck</mtext></msub><mo>·</mo><msub><mi>A</mi><mi>c</mi></msub>
+<mo>+</mo>
+<mn>0.67</mn><mo>·</mo><msub><mi>f</mi><mi>y</mi></msub><mo>·</mo><msub><mi>A</mi><mtext>sc</mtext></msub>
+</math>
+</div>
+<div class="grid grid-cols-3 gap-2 text-center font-mono">
+<div class="p-2 bg-docu-sidebarBg rounded border border-docu-border">
+<span class="block text-docu-subtext text-[10px] font-sans">Concrete Area (<math><msub><mi>A</mi><mi>c</mi></msub></math>)</span>
+<span class="font-bold text-xs" id="calcAc">-</span>
+</div>
+<div class="p-2 bg-docu-sidebarBg rounded border border-docu-border">
+<span class="block text-docu-subtext text-[10px] font-sans">Steel Area (<math><msub><mi>A</mi><mtext>sc</mtext></msub></math>)</span>
+<span class="font-bold text-xs" id="calcAsc">-</span>
+</div>
+<div class="p-2 bg-docu-sidebarBg rounded border border-docu-border">
+<span class="block text-docu-subtext text-[10px] font-sans">Steel Ratio (<math><msub><mi>p</mi><mtext>cc</mtext></msub></math>)</span>
+<span class="font-bold text-xs" id="calcPcc">-</span>
+</div>
+</div>
+</div>
+</div>
+<!-- TAB 4: BIAXIAL BENDING CHECK -->
+<div class="tab-content hidden space-y-3" id="tab-biaxial">
+<div class="p-3 bg-docu-sidebarBg rounded border border-docu-border space-y-2">
+<h4 class="font-semibold text-docu-text text-xs">Cl. 39.6 Biaxial Bending Interaction Check</h4>
+<div class="p-2 bg-docu-codeBg rounded text-center border border-docu-border font-mono text-[11px]">
+<math display="block">
+<msup><mfenced close=")" open="("><mfrac><msub><mi>M</mi><mtext>ux</mtext></msub><msub><mi>M</mi><mtext>ux1</mtext></msub></mfrac></mfenced><msub><mi>α</mi><mi>n</mi></msub></msup>
+<mo>+</mo>
+<msup><mfenced close=")" open="("><mfrac><msub><mi>M</mi><mtext>uy</mtext></msub><msub><mi>M</mi><mtext>uy1</mtext></msub></mfrac></mfenced><msub><mi>α</mi><mi>n</mi></msub></msup>
+<mo>⩽</mo>
+<mn>1.0</mn>
+</math>
+</div>
+<div class="grid grid-cols-3 gap-2 text-center font-mono">
+<div class="p-2 bg-docu-sidebarBg rounded border border-docu-border">
+<span class="block text-docu-subtext text-[10px] font-sans">Exponent (<math><msub><mi>α</mi><mi>n</mi></msub></math>)</span>
+<span class="font-bold text-xs" id="calcAlphaN">-</span>
+</div>
+<div class="p-2 bg-docu-sidebarBg rounded border border-docu-border">
+<span class="block text-docu-subtext text-[10px] font-sans">Interaction Sum</span>
+<span class="font-bold text-xs" id="calcInteractionSum">-</span>
+</div>
+<div class="p-2 bg-docu-sidebarBg rounded border border-docu-border">
+<span class="block text-docu-subtext text-[10px] font-sans">Pure Axial (<math><msub><mi>P</mi><mtext>uz</mtext></msub></math>)</span>
+<span class="font-bold text-xs" id="calcPuzVal">-</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="p-3 bg-white rounded border border-docu-border">
+<span class="block text-docu-subtext text-[10px]">Uniaxial Capacity X (<math><msub><mi>M</mi><mtext>ux1</mtext></msub></math>)</span>
+<span class="font-bold font-mono" id="calcMux1">-</span>
+</div>
+<div class="p-3 bg-white rounded border border-docu-border">
+<span class="block text-docu-subtext text-[10px]">Uniaxial Capacity Y (<math><msub><mi>M</mi><mtext>uy1</mtext></msub></math>)</span>
+<span class="font-bold font-mono" id="calcMuy1">-</span>
+</div>
+<div class="p-3 bg-white rounded border border-docu-border">
+<span class="block text-docu-subtext text-[10px]">Additional Moment X (Cl. 39.7)</span>
+<span class="font-bold font-mono" id="calcMax">-</span>
+</div>
+<div class="p-3 bg-white rounded border border-docu-border">
+<span class="block text-docu-subtext text-[10px]">Additional Moment Y (Cl. 39.7)</span>
+<span class="font-bold font-mono" id="calcMay">-</span>
+</div>
+<div class="p-3 bg-white rounded border border-docu-border">
+<span class="block text-docu-subtext text-[10px]">39.7.1.1 Factor kX / kY</span>
+<span class="font-bold font-mono"><span id="calcKx">-</span> / <span id="calcKy">-</span></span>
+</div>
+<div class="p-3 bg-white rounded border border-docu-border">
+<span class="block text-docu-subtext text-[10px]">Balanced Load Pb X / Pb Y</span>
+<span class="font-bold font-mono"><span id="calcPbX">-</span> / <span id="calcPbY">-</span></span>
+</div>
+</div>
+</div>
+<!-- TAB 5: SLENDERNESS & ECCENTRICITY -->
+<div class="tab-content hidden space-y-3" id="tab-slenderness">
+<div class="grid grid-cols-2 gap-3 text-center font-mono">
+<div class="p-3 bg-docu-sidebarBg rounded border border-docu-border">
+<span class="text-docu-subtext block text-[10px] font-sans">Slenderness Ratio Major (<math><mrow><msub><mi>l</mi><mtext>ex</mtext></msub><mo>/</mo><mi>D</mi></mrow></math>)</span>
+<span class="text-sm font-bold text-docu-text" id="calcSlenderX">-</span>
+</div>
+<div class="p-3 bg-docu-sidebarBg rounded border border-docu-border">
+<span class="text-docu-subtext block text-[10px] font-sans">Slenderness Ratio Minor (<math><mrow><msub><mi>l</mi><mtext>ey</mtext></msub><mo>/</mo><mi>b</mi></mrow></math>)</span>
+<span class="text-sm font-bold text-docu-text" id="calcSlenderY">-</span>
+</div>
+</div>
+<div class="p-3 bg-docu-sidebarBg rounded border border-docu-border space-y-2">
+<h4 class="font-semibold text-docu-text text-xs">Cl. 25.4 Minimum Eccentricity Check (<math><msub><mi>e</mi><mtext>min</mtext></msub></math>)</h4>
+<div class="p-2 bg-docu-codeBg rounded text-center border border-docu-border font-mono text-[11px]">
+<math display="block">
+<msub><mi>e</mi><mtext>min</mtext></msub>
+<mo>=</mo>
+<mo>max</mo>
+<mfenced close=")" open="(">
+<mrow><mfrac><mi>L</mi><mn>500</mn></mfrac><mo>+</mo><mfrac><mi>D</mi><mn>30</mn></mfrac><mo>,</mo><mtext> </mtext><mn>20</mn><mtext> mm</mtext></mrow>
+</mfenced>
+</math>
+</div>
+<div class="grid grid-cols-2 gap-2 text-xs font-mono text-center">
+<div class="p-2 bg-white rounded border border-docu-border">
+<span class="block text-docu-subtext text-[10px] font-sans"><math><msub><mi>e</mi><mtext>min,x</mtext></msub></math></span>
+<span class="font-bold text-xs" id="calcEminX">-</span>
+</div>
+<div class="p-2 bg-white rounded border border-docu-border">
+<span class="block text-docu-subtext text-[10px] font-sans"><math><msub><mi>e</mi><mtext>min,y</mtext></msub></math></span>
+<span class="font-bold text-xs" id="calcEminY">-</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- IS 456 COLUMN THEORY & DESIGN STEPS REFERENCE MODAL -->
+<div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" id="refModal">
+<div class="bg-white rounded-lg shadow-xl border border-docu-border max-w-4xl w-full max-h-[88vh] flex flex-col overflow-hidden">
+<div class="p-3 bg-docu-navbar text-white flex items-center justify-between">
+<span class="font-bold text-xs flex items-center">
+<i class="w-4 h-4 mr-1.5 text-docu-primary" data-lucide="book-marked"></i> IS 456:2000 Column Design Theory &amp; Technical Manual
+                </span>
+<button class="text-slate-400 hover:text-white" onclick="closeReferenceModal()">
+<i class="w-4 h-4" data-lucide="x"></i>
+</button>
+</div>
+<!-- Modal Navigation Tabs -->
+<div class="flex border-b border-docu-border bg-docu-sidebarBg text-xs font-medium text-docu-subtext">
+<button class="ref-tab-btn px-4 py-2 border-b-2 border-docu-primaryDark text-docu-primaryDark font-semibold" id="btn-ref-tab-intro" onclick="switchRefTab('ref-tab-intro')">Technical Background</button>
+<button class="ref-tab-btn px-4 py-2 border-b-2 border-transparent hover:text-docu-text" id="btn-ref-tab-steps" onclick="switchRefTab('ref-tab-steps')">Step-by-Step Procedure</button>
+<button class="ref-tab-btn px-4 py-2 border-b-2 border-transparent hover:text-docu-text" id="btn-ref-tab-formulas" onclick="switchRefTab('ref-tab-formulas')">IS 456 Formulas &amp; Detailing</button>
+</div>
+<div class="p-5 overflow-y-auto space-y-5 text-xs text-docu-text leading-relaxed">
+<!-- TAB 1: TECHNICAL BACKGROUND -->
+<div class="ref-tab-content space-y-4" id="ref-tab-intro">
+<div class="bg-docu-sidebarBg p-3 rounded border border-docu-border" id="theory-classification">
+<div class="flex items-start justify-between gap-3">
+<div>
+<h3 class="font-bold text-docu-primaryDarkest text-xs uppercase tracking-wider mb-1">1. Structural Behaviour of Compression Members</h3>
+<p class="text-[11px] text-docu-subtext">A reinforced-concrete column is a compression member designed for the factored axial load and the design moments acting about one or both principal axes. IS 456:2000 distinguishes short and slender compression members using the effective-length-to-lateral-dimension ratios.</p>
+</div>
+<span class="shrink-0 px-2 py-1 rounded bg-white border border-docu-border text-[9px] font-mono text-docu-subtext">IS 456 · Cl. 25</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+<div class="space-y-2 border-l-2 border-docu-primaryDark pl-3">
+<h4 class="font-bold text-docu-text text-xs">Slenderness Classification <span class="font-mono text-[10px] text-docu-primaryDark">Cl. 25.1.2</span></h4>
+<div class="p-2 bg-docu-codeBg rounded border border-docu-border">
+<math aria-label="short column condition" display="block">
+<mrow>
+<mfrac><msub><mi>l</mi><mtext>ex</mtext></msub><mi>D</mi></mfrac><mo>&lt;</mo><mn>12</mn>
+<mo> and </mo>
+<mfrac><msub><mi>l</mi><mtext>ey</mtext></msub><mi>b</mi></mfrac><mo>&lt;</mo><mn>12</mn>
+</mrow>
+</math>
+</div>
+<p class="text-[11px] text-docu-subtext"><strong>Short column:</strong> both principal-axis slenderness ratios are less than 12. If either ratio reaches 12, the member is treated as slender for the corresponding design consideration.</p>
+<p class="text-[11px] text-docu-subtext"><strong>Slender column:</strong> the additional moment provisions of Cl. 39.7 are considered because lateral deflection produces a second-order <math><mrow><mi>P</mi><mo> </mo><mi>Δ</mi></mrow></math> effect.</p>
+</div>
+<div class="space-y-2 border-l-2 border-docu-primaryDark pl-3">
+<h4 class="font-bold text-docu-text text-xs">Design Response</h4>
+<ul class="list-disc pl-4 text-[11px] space-y-1 text-docu-subtext">
+<li><strong>Axial compression:</strong> the short-column axial capacity is checked using Cl. 39.3 only when its applicability conditions are satisfied.</li>
+<li><strong>Combined axial load and bending:</strong> section resistance is evaluated from strain compatibility with the concrete compression strain limit of 0.0035 used for flexural design.</li>
+<li><strong>Biaxial bending:</strong> Cl. 39.6 combines the two uniaxial moment capacities at the specified axial load.</li>
+<li><strong>Slenderness:</strong> Cl. 39.7 additional moments are included before the final interaction check.</li>
+</ul>
+</div>
+</div>
+<div class="p-3 rounded border border-docu-border bg-white" id="theory-materials">
+<div class="flex items-center justify-between mb-1.5">
+<h4 class="font-bold text-docu-text text-xs">Material Strengths Used in Design</h4>
+<span class="font-mono text-[10px] text-docu-primaryDark">Tables 2 &amp; 3</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[10px]">
+<div class="p-2 rounded bg-docu-sidebarBg border border-docu-border"><strong>Concrete:</strong> <math><mrow><msub><mi>f</mi><mtext>ck</mtext></msub></mrow></math> is the characteristic compressive strength of concrete, in N/mm².</div>
+<div class="p-2 rounded bg-docu-sidebarBg border border-docu-border"><strong>Reinforcement:</strong> <math><mrow><msub><mi>f</mi><mi>y</mi></msub></mrow></math> is the characteristic yield strength of the selected longitudinal reinforcement, in N/mm².</div>
+</div>
+<p class="mt-2 text-[10px] text-docu-subtext">The selected grades are used as inputs to the implemented IS 456 resistance model; material grade selection does not by itself verify availability, ductility, welding, development length, or project-specific material specifications.</p>
+</div>
+<div class="p-3 rounded border border-docu-border bg-white">
+<h4 class="font-bold text-docu-text text-xs mb-1.5">Design Actions Used by This Calculator</h4>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-[10px]">
+<div class="p-2 rounded bg-docu-sidebarBg border border-docu-border"><strong>Axial:</strong> <math><mrow><msub><mi>P</mi><mi>u</mi></msub></mrow></math> — factored axial compression.</div>
+<div class="p-2 rounded bg-docu-sidebarBg border border-docu-border"><strong>Moment X:</strong> <math><mrow><msub><mi>M</mi><mtext>ux</mtext></msub></mrow></math> — design moment about the X design axis.</div>
+<div class="p-2 rounded bg-docu-sidebarBg border border-docu-border"><strong>Moment Y:</strong> <math><mrow><msub><mi>M</mi><mtext>uy</mtext></msub></mrow></math> — design moment about the Y design axis.</div>
+</div>
+<p class="mt-2 text-[10px] text-docu-subtext"><strong>Scope note:</strong> the action inputs are already factored design actions. The calculator does not generate load combinations or replace frame-level analysis.</p>
+</div>
+</div>
+<!-- TAB 2: STEP-BY-STEP DESIGN PROCEDURE -->
+<div class="ref-tab-content hidden space-y-4" id="ref-tab-steps">
+<div class="p-3 rounded border border-docu-border bg-docu-sidebarBg">
+<h3 class="font-bold text-docu-primaryDarkest text-xs uppercase tracking-wider">IS 456 Column Design Sequence</h3>
+<p class="mt-1 text-[11px] text-docu-subtext">Use the following sequence for the design/check implemented by this calculator. The applied actions <math class="manual-math"><mrow><msub><mi>P</mi><mi>u</mi></msub></mrow></math>, <math class="manual-math"><mrow><msub><mi>M</mi><mtext>ux</mtext></msub></mrow></math> and <math class="manual-math"><mrow><msub><mi>M</mi><mtext>uy</mtext></msub></mrow></math> are factored design actions supplied by the user; frame analysis and load-combination generation are outside this calculator.</p>
+</div>
+<div class="manual-step" id="theory-inputs">
+<h4><span>Step 1: Establish Design Inputs and Actions</span><span>Inputs / Scope</span></h4>
+<p>Select the column shape and dimensions, unsupported/effective lengths, concrete and reinforcement grades, nominal cover, longitudinal bars, transverse reinforcement, and factored design actions. Confirm that the input geometry and reinforcement arrangement are physically constructible.</p>
+<div aria-label="design actions" class="manual-formula">
+<math class="manual-math" display="block"><mrow><msub><mi>P</mi><mi>u</mi></msub><mo>,</mo><msub><mi>M</mi><mtext>ux</mtext></msub><mo>,</mo><msub><mi>M</mi><mtext>uy</mtext></msub></mrow></math>
+</div>
+</div>
+<div class="manual-step" id="theory-effective-length">
+<h4><span>Step 2: Determine Effective Length and Slenderness</span><span>Cl. 25.1.2, 25.2, Annex E</span></h4>
+<p>Determine the effective lengths about the two principal axes and calculate the slenderness ratios. A column is short only when both applicable ratios are below 12; if either ratio reaches 12, the corresponding plane is slender.</p>
+<div class="manual-formula-grid">
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><mfrac><msub><mi>l</mi><mtext>ex</mtext></msub><mi>D</mi></mfrac><mo>&lt;</mo><mn>12</mn></mrow></math></div>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><mfrac><msub><mi>l</mi><mtext>ey</mtext></msub><mi>b</mi></mfrac><mo>&lt;</mo><mn>12</mn></mrow></math></div>
+</div>
+<div class="manual-formula-grid">
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><mi>l</mi><mo>≤</mo><mn>60</mn><mo> </mo><mo>×</mo><mtext>least lateral dimension</mtext></mrow></math></div>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><mi>l</mi><mo>≤</mo><mn>100</mn><mfrac><msup><mi>b</mi><mn>2</mn></msup><mi>D</mi></mfrac></mrow></math></div>
+</div>
+<p class="manual-note">The first unsupported-length expression applies to the restraint condition used by the calculator; the second is the cantilever limit used in its Cl. 25.3 check. Effective lengths are supplied by the user; the calculator does not independently perform frame stiffness analysis or Annex E end-condition analysis.</p>
+</div>
+<div class="manual-step" id="theory-emin">
+<h4><span>Step 3: Check Minimum Eccentricity</span><span>Cl. 25.4</span></h4>
+<p>Minimum eccentricity is based on the unsupported length <math class="manual-math"><mrow><mi>l</mi></mrow></math>, not the effective length. Check both principal directions.</p>
+<div class="manual-formula"><math aria-label="minimum eccentricity" class="manual-math" display="block"><mrow><msub><mi>e</mi><mtext>min</mtext></msub><mo>=</mo><mo>max</mo><mo>⁡</mo><mrow><mo>(</mo><mfrac><mi>l</mi><mn>500</mn></mfrac><mo>+</mo><mfrac><mi>D</mi><mn>30</mn></mfrac><mo>,</mo><mn>20</mn><mtext> mm</mtext><mo>)</mo></mrow></mrow></math></div>
+<p class="manual-note">For the other principal direction, use the corresponding lateral dimension <math class="manual-math"><mrow><mi>b</mi></mrow></math> in place of <math class="manual-math"><mrow><mi>D</mi></mrow></math>.</p>
+</div>
+<div class="manual-step" id="theory-applicability">
+<h4><span>Step 4: Check Cl. 39.3 Applicability</span><span>Cl. 39.3</span></h4>
+<p>The simple short axially loaded expression may be used only when the member is short and the minimum eccentricity does not exceed 0.05 times the relevant lateral dimension. Otherwise the combined axial-load/bending or slender-column provisions govern.</p>
+<div class="manual-formula-grid">
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>e</mi><mtext>min,x</mtext></msub><mo>≤</mo><mn>0.05</mn><mi>D</mi></mrow></math></div>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>e</mi><mtext>min,y</mtext></msub><mo>≤</mo><mn>0.05</mn><mi>b</mi></mrow></math></div>
+</div>
+</div>
+<div class="manual-step" id="theory-axial">
+<h4><span>Step 5: Calculate Short Axial Capacity</span><span>Cl. 39.3</span></h4>
+<p>For an applicable short axially loaded member, calculate the nominal axial design capacity using the gross concrete area less longitudinal steel area.</p>
+<div class="manual-formula"><math aria-label="short column axial capacity" class="manual-math" display="block"><mrow><msub><mi>P</mi><mi>u</mi></msub><mo>=</mo><mn>0.4</mn><msub><mi>f</mi><mtext>ck</mtext></msub><msub><mi>A</mi><mi>c</mi></msub><mo>+</mo><mn>0.67</mn><msub><mi>f</mi><mi>y</mi></msub><msub><mi>A</mi><mtext>sc</mtext></msub></mrow></math></div>
+<p class="manual-note">This check is reported as N.A. when the Cl. 39.3 applicability conditions are not satisfied.</p>
+</div>
+<div class="manual-step" id="theory-uniaxial">
+<h4><span>Step 6: Determine Uniaxial Capacity at the Specified Axial Load</span><span>Cl. 39.5 / Cl. 39.1–39.2 assumptions</span></h4>
+<p>For each principal axis, determine the maximum uniaxial moment capacity corresponding to the specified <math class="manual-math"><mrow><msub><mi>P</mi><mi>u</mi></msub></mrow></math>. The implemented solver uses strain compatibility, equilibrium and the adopted concrete/steel stress relationships.</p>
+<div class="manual-formula-grid">
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>P</mi><mi>u</mi></msub><mo>=</mo><mo>∑</mo><mi>F</mi></mrow></math></div>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><mi>M</mi><mo>=</mo><mo>∑</mo><mrow><mi>F</mi><mo> </mo><mi>y</mi></mrow></mrow></math></div>
+</div>
+<p class="manual-note">The resulting capacities are <math class="manual-math"><mrow><msub><mi>M</mi><mtext>ux1</mtext></msub></mrow></math> and <math class="manual-math"><mrow><msub><mi>M</mi><mtext>uy1</mtext></msub></mrow></math>, i.e. the maximum uniaxial moment capacities for the specified axial load.</p>
+</div>
+<div class="manual-step" id="theory-puz-alpha">
+<h4><span>Step 7: Calculate <math class="manual-math"><mrow><msub><mi>P</mi><mtext>uz</mtext></msub></mrow></math> and <math class="manual-math"><mrow><msub><mi>α</mi><mi>n</mi></msub></mrow></math></span><span>Cl. 39.6</span></h4>
+<p>Calculate the theoretical axial-load reference and determine the exponent used in the biaxial interaction equation.</p>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>P</mi><mtext>uz</mtext></msub><mo>=</mo><mn>0.45</mn><msub><mi>f</mi><mtext>ck</mtext></msub><msub><mi>A</mi><mi>c</mi></msub><mo>+</mo><mn>0.75</mn><msub><mi>f</mi><mi>y</mi></msub><msub><mi>A</mi><mtext>sc</mtext></msub></mrow></math></div>
+<div class="manual-formula-grid">
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>α</mi><mi>n</mi></msub><mo>=</mo><mn>1</mn><mo> </mo><mtext>if </mtext><mfrac><msub><mi>P</mi><mi>u</mi></msub><msub><mi>P</mi><mtext>uz</mtext></msub></mfrac><mo>≤</mo><mn>0.2</mn></mrow></math></div>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>α</mi><mi>n</mi></msub><mo>=</mo><mn>2</mn><mo> </mo><mtext>if </mtext><mfrac><msub><mi>P</mi><mi>u</mi></msub><msub><mi>P</mi><mtext>uz</mtext></msub></mfrac><mo>≥</mo><mn>0.8</mn></mrow></math></div>
+</div>
+<p class="manual-note">Between 0.2 and 0.8, <math class="manual-math"><mrow><msub><mi>α</mi><mi>n</mi></msub></mrow></math> varies linearly from 1.0 to 2.0.</p>
+</div>
+<div class="manual-step" id="theory-slender">
+<h4><span>Step 8: Calculate Slender-Column Additional Moments</span><span>Cl. 39.7 / 39.7.1.1</span></h4>
+<p>Where slenderness governs and a separate second-order structural analysis is not supplied, calculate the base additional moment from Cl. 39.7.1 and multiply it by the reduction factor <math class="manual-math"><mrow><mi>k</mi></mrow></math> from Cl. 39.7.1.1.</p>
+<div class="manual-formula-grid">
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>M</mi><mtext>ax</mtext></msub><mo>=</mo><mfrac><msub><mi>P</mi><mi>u</mi></msub><mi>D</mi><mn>2000</mn></mfrac><msup><mrow><mo>(</mo><mfrac><msub><mi>l</mi><mtext>ex</mtext></msub><mi>D</mi></mfrac><mo>)</mo></mrow><mn>2</mn></msup></mrow></math></div>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>M</mi><mtext>ay</mtext></msub><mo>=</mo><mfrac><msub><mi>P</mi><mi>u</mi></msub><mi>b</mi><mn>2000</mn></mfrac><msup><mrow><mo>(</mo><mfrac><msub><mi>l</mi><mtext>ey</mtext></msub><mi>b</mi></mfrac><mo>)</mo></mrow><mn>2</mn></msup></mrow></math></div>
+</div>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><mi>k</mi><mo>=</mo><mfrac><mrow><msub><mi>P</mi><mtext>uz</mtext></msub><mo>−</mo><msub><mi>P</mi><mi>u</mi></msub></mrow><mrow><msub><mi>P</mi><mtext>uz</mtext></msub><mo>−</mo><msub><mi>P</mi><mi>b</mi></msub></mrow></mfrac><mo>≤</mo><mn>1</mn></mrow></math></div>
+<p class="manual-note"><math class="manual-math"><mrow><msub><mi>P</mi><mi>b</mi></msub></mrow></math> is the balanced axial load corresponding to concrete compression strain 0.0035 and tensile strain 0.002 in the outermost tension steel layer. The factor k is applied to the Cl. 39.7.1 base moment. For braced columns without transverse loads, the code's initial-moment rule based on end moments must be established by the structural analysis; this calculator uses the supplied governing design moment and does not perform frame analysis.</p>
+</div>
+<div class="manual-step" id="theory-biaxial">
+<h4><span>Step 9: Perform Biaxial Interaction Check</span><span>Cl. 39.6</span></h4>
+<p>Use the maximum uniaxial capacities corresponding to the specified axial load and check the combined interaction.</p>
+<div class="manual-formula"><math aria-label="IS 456 biaxial interaction" class="manual-math" display="block"><mrow><msup><mrow><mo>(</mo><mfrac><msub><mi>M</mi><mtext>ux</mtext></msub><msub><mi>M</mi><mtext>ux1</mtext></msub></mfrac><mo>)</mo></mrow><msub><mi>α</mi><mi>n</mi></msub></msup><mo>+</mo><msup><mrow><mo>(</mo><mfrac><msub><mi>M</mi><mtext>uy</mtext></msub><msub><mi>M</mi><mtext>uy1</mtext></msub></mfrac><mo>)</mo></mrow><msub><mi>α</mi><mi>n</mi></msub></msup><mo>≤</mo><mn>1.0</mn></mrow></math></div>
+<p class="manual-note">For a slender column, the moments entering this check include the applicable additional moments from Step 8.</p>
+</div>
+<div class="manual-step" id="theory-detailing-step">
+<h4><span>Step 10: Check Reinforcement, Cover and Constructability</span><span>Cl. 26.4.2.1, 26.5.3</span></h4>
+<p>Verify longitudinal steel percentage, minimum number and diameter of bars, peripheral spacing, nominal cover, tie diameter, tie spacing and lateral support/cross-tie arrangement. Where lap splices are used, the longitudinal steel percentage at the splice zone is limited to 4 percent. For circular columns, also verify the minimum number of longitudinal bars and helical requirements where a helix is selected.</p>
+<div class="manual-formula-grid">
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><mn>0.8</mn><mo>%</mo><msub><mi>A</mi><mi>g</mi></msub><mo>≤</mo><msub><mi>A</mi><mtext>sc</mtext></msub><mo>≤</mo><mn>6</mn><mo>%</mo><msub><mi>A</mi><mi>g</mi></msub></mrow></math></div>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>φ</mi><mtext>tie</mtext></msub><mo>≥</mo><mo>max</mo><mo>⁡</mo><mrow><mo>(</mo><mfrac><msub><mi>φ</mi><mtext>main,max</mtext></msub><mn>4</mn></mfrac><mo>,</mo><mn>6</mn><mtext> mm</mtext><mo>)</mo></mrow></mrow></math></div>
+</div>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><mfrac><msub><mi>V</mi><mi>s</mi></msub><msub><mi>V</mi><mi>c</mi></msub></mfrac><mo>≥</mo><mn>0.36</mn><mrow><mo>(</mo><mfrac><msub><mi>A</mi><mi>g</mi></msub><msub><mi>A</mi><mi>c</mi></msub></mfrac><mo>−</mo><mn>1</mn><mo>)</mo></mrow><mfrac><msub><mi>f</mi><mtext>ck</mtext></msub><msub><mi>f</mi><mi>y</mi></msub></mfrac></mrow></math></div>
+<p class="manual-note">For a qualifying helix, the strength is taken as 1.05 times that of the corresponding tied column; the calculator permits that enhancement only after its helix checks pass.</p>
+</div>
+<div class="manual-step" id="theory-final">
+<h4><span>Step 11: Final Verification and Governing Result</span><span>Verification Log</span></h4>
+<p>The final result is based on the applicable axial, bending, slenderness and detailing checks. A condition that is not applicable is reported as <strong>N.A.</strong>, while a failed applicable requirement prevents a passing design status. Review the verification log and modification checklist before adopting the section.</p>
+</div>
+</div>
+<!-- TAB 3: FORMULAS & DETAILING -->
+<div class="ref-tab-content hidden space-y-4" id="ref-tab-formulas">
+<div class="p-3 rounded border border-docu-border bg-docu-sidebarBg">
+<h3 class="font-bold text-docu-primaryDarkest text-xs uppercase tracking-wider">IS 456 Formula Sheet and Detailing Rules</h3>
+<p class="mt-1 text-[11px] text-docu-subtext">The equations below are presented in mathematical notation and correspond to the clauses implemented in the calculator. Symbols follow the notation used by IS 456.</p>
+</div>
+<div class="manual-reference" id="theory-design-actions">
+<h4><span>Design Actions and Section Areas</span><span>Notation</span></h4>
+<div class="manual-formula-grid">
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>P</mi><mi>u</mi></msub><mo>=</mo><mtext>factored axial load</mtext></mrow></math></div>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>A</mi><mi>c</mi></msub><mo>=</mo><msub><mi>A</mi><mi>g</mi></msub><mo>−</mo><msub><mi>A</mi><mtext>sc</mtext></msub></mrow></math></div>
+</div>
+</div>
+<div class="manual-reference" id="theory-25">
+<h4><span>Minimum Eccentricity</span><span>Cl. 25.4</span></h4>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>e</mi><mtext>min</mtext></msub><mo>=</mo><mo>max</mo><mo>⁡</mo><mrow><mo>(</mo><mfrac><mi>l</mi><mn>500</mn></mfrac><mo>+</mo><mfrac><mi>D</mi><mn>30</mn></mfrac><mo>,</mo><mn>20</mn><mtext> mm</mtext><mo>)</mo></mrow></mrow></math></div>
+<p>Use the corresponding lateral dimension for the direction being checked.</p>
+</div>
+<div class="manual-reference" id="theory-cover">
+<h4><span>Nominal Cover</span><span>Cl. 26.4.2.1</span></h4>
+<p>For a column, nominal cover is not less than 40 mm or the diameter of the longitudinal bar, whichever is greater. For columns with minimum dimension 200 mm or under and longitudinal bars not exceeding 12 mm, 25 mm nominal cover may be used. Fire-resistance cover is a separate requirement under Table 16A.</p>
+</div>
+<div class="manual-reference" id="theory-longitudinal">
+<h4><span>Longitudinal Reinforcement</span><span>Cl. 26.5.3.1</span></h4>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><mn>0.8</mn><mo>%</mo><msub><mi>A</mi><mi>g</mi></msub><mo>≤</mo><msub><mi>A</mi><mtext>sc</mtext></msub><mo>≤</mo><mn>6</mn><mo>%</mo><msub><mi>A</mi><mi>g</mi></msub></mrow></math></div>
+<ul><li>Minimum longitudinal bar diameter: 12 mm.</li><li>Minimum number of longitudinal bars: 4 for rectangular columns and 6 for circular columns.</li><li>Spacing of longitudinal bars measured along the periphery: not more than 300 mm.</li><li>Where bars are lapped, the longitudinal reinforcement at the lap location is limited to 4% of gross area as applicable.</li></ul>
+</div>
+<div class="manual-reference" id="theory-ties">
+<h4><span>Lateral Ties</span><span>Cl. 26.5.3.2</span></h4>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>φ</mi><mtext>tie</mtext></msub><mo>≥</mo><mo>max</mo><mo>⁡</mo><mrow><mo>(</mo><mfrac><msub><mi>φ</mi><mtext>main,max</mtext></msub><mn>4</mn></mfrac><mo>,</mo><mn>6</mn><mtext> mm</mtext><mo>)</mo></mrow></mrow></math></div>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><mi>s</mi><mo>≤</mo><mo>min</mo><mo>⁡</mo><mrow><mo>(</mo><mtext>least lateral dimension</mtext><mo>,</mo><mn>16</mn><msub><mi>φ</mi><mtext>main,min</mtext></msub><mo>,</mo><mn>300</mn><mtext> mm</mtext><mo>)</mo></mrow></mrow></math></div>
+<p>The transverse reinforcement arrangement must laterally support the longitudinal bars; cross-ties are provided where required by the bar arrangement.</p>
+</div>
+<div class="manual-reference" id="theory-39-3">
+<h4><span>Short Axially Loaded Column</span><span>Cl. 39.3</span></h4>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>P</mi><mi>u</mi></msub><mo>=</mo><mn>0.4</mn><msub><mi>f</mi><mtext>ck</mtext></msub><msub><mi>A</mi><mi>c</mi></msub><mo>+</mo><mn>0.67</mn><msub><mi>f</mi><mi>y</mi></msub><msub><mi>A</mi><mtext>sc</mtext></msub></mrow></math></div>
+<p>Applicable only when the member is short and the minimum eccentricity condition of Cl. 39.3 is satisfied.</p>
+</div>
+<div class="manual-reference" id="theory-39-4">
+<h4><span>Helical Reinforcement</span><span>Cl. 39.4 / 39.4.1</span></h4>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><mfrac><msub><mi>V</mi><mi>s</mi></msub><msub><mi>V</mi><mi>c</mi></msub></mfrac><mo>≥</mo><mn>0.36</mn><mrow><mo>(</mo><mfrac><msub><mi>A</mi><mi>g</mi></msub><msub><mi>A</mi><mi>c</mi></msub></mfrac><mo>−</mo><mn>1</mn><mo>)</mo></mrow><mfrac><msub><mi>f</mi><mtext>ck</mtext></msub><msub><mi>f</mi><mi>y</mi></msub></mfrac></mrow></math></div>
+<p><math class="manual-math"><mrow><msub><mi>A</mi><mi>c</mi></msub></mrow></math> here denotes the core area measured to the outside diameter of the helix. The helical steel strength used in this requirement is limited to 415 N/mm². A qualifying helical column has 1.05 times the strength of a similar tied column.</p>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><mn>2.5</mn><mo>≤</mo><mi>p</mi><mo>≤</mo><mo>min</mo><mo>⁡</mo><mrow><mo>(</mo><mn>75</mn><mtext> mm</mtext><mo>,</mo><mfrac><msub><mi>D</mi><mtext>core</mtext></msub><mn>6</mn></mfrac><mo>)</mo></mrow></mrow></math></div>
+</div>
+<div class="manual-reference" id="theory-39-6">
+<h4><span>Biaxial Interaction</span><span>Cl. 39.6</span></h4>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><msup><mrow><mo>(</mo><mfrac><msub><mi>M</mi><mtext>ux</mtext></msub><msub><mi>M</mi><mtext>ux1</mtext></msub></mfrac><mo>)</mo></mrow><msub><mi>α</mi><mi>n</mi></msub></msup><mo>+</mo><msup><mrow><mo>(</mo><mfrac><msub><mi>M</mi><mtext>uy</mtext></msub><msub><mi>M</mi><mtext>uy1</mtext></msub></mfrac><mo>)</mo></mrow><msub><mi>α</mi><mi>n</mi></msub></msup><mo>≤</mo><mn>1.0</mn></mrow></math></div>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>P</mi><mtext>uz</mtext></msub><mo>=</mo><mn>0.45</mn><msub><mi>f</mi><mtext>ck</mtext></msub><msub><mi>A</mi><mi>c</mi></msub><mo>+</mo><mn>0.75</mn><msub><mi>f</mi><mi>y</mi></msub><msub><mi>A</mi><mtext>sc</mtext></msub></mrow></math></div>
+<p><math class="manual-math"><mrow><msub><mi>α</mi><mi>n</mi></msub></mrow></math> = 1.0 for <math class="manual-math"><mrow><mfrac><msub><mi>P</mi><mi>u</mi></msub><msub><mi>P</mi><mtext>uz</mtext></msub></mfrac></mrow></math> ≤ 0.2; 2.0 for the ratio ≥ 0.8; linear variation between.</p>
+</div>
+<div class="manual-reference" id="theory-39-7">
+<h4><span>Slenderness Additional Moments</span><span>Cl. 39.7 / 39.7.1.1</span></h4>
+<div class="manual-formula-grid">
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>M</mi><mtext>ax</mtext></msub><mo>=</mo><mfrac><msub><mi>P</mi><mi>u</mi></msub><mi>D</mi><mn>2000</mn></mfrac><msup><mrow><mo>(</mo><mfrac><msub><mi>l</mi><mtext>ex</mtext></msub><mi>D</mi></mfrac><mo>)</mo></mrow><mn>2</mn></msup></mrow></math></div>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>M</mi><mtext>ay</mtext></msub><mo>=</mo><mfrac><msub><mi>P</mi><mi>u</mi></msub><mi>b</mi><mn>2000</mn></mfrac><msup><mrow><mo>(</mo><mfrac><msub><mi>l</mi><mtext>ey</mtext></msub><mi>b</mi></mfrac><mo>)</mo></mrow><mn>2</mn></msup></mrow></math></div>
+</div>
+<div class="manual-formula"><math class="manual-math" display="block"><mrow><mi>k</mi><mo>=</mo><mfrac><mrow><msub><mi>P</mi><mtext>uz</mtext></msub><mo>−</mo><msub><mi>P</mi><mi>u</mi></msub></mrow><mrow><msub><mi>P</mi><mtext>uz</mtext></msub><mo>−</mo><msub><mi>P</mi><mi>b</mi></msub></mrow></mfrac><mo>≤</mo><mn>1</mn></mrow></math></div>
+<p><math class="manual-math"><mrow><msub><mi>P</mi><mi>b</mi></msub></mrow></math> corresponds to the balanced condition with concrete compression strain 0.0035 and tensile strain 0.002 in the outermost tension steel layer.</p>
+</div>
+<div class="manual-reference" id="theory-check-summary">
+<h4><span>Final Design Checks</span><span>Implemented Verification</span></h4>
+<ul><li>Axial capacity, where Cl. 39.3 is applicable.</li><li>Uniaxial section resistance at the specified axial load.</li><li>Biaxial interaction per Cl. 39.6.</li><li>Additional moments for slenderness per Cl. 39.7 and Cl. 39.7.1.1.</li><li>Longitudinal reinforcement, cover, tie/helix detailing and constructability.</li><li>Overall result is reported as PASS, FAIL or N.A. according to applicability.</li></ul>
+</div>
+</div>
+</div>
+<div class="p-3 bg-docu-sidebarBg border-t border-docu-border flex justify-end">
+<button class="px-3 py-1 bg-docu-navbar text-white rounded text-xs font-semibold" onclick="closeReferenceModal()">Close Guide</button>
+</div>
+</div>
+</div>
+<!-- Minimal Footer -->
+<footer class="bg-docu-navbar border-t border-docu-navbarBorder text-slate-500 py-2 text-[10px] text-center" id="mainFooter">
+        IS 456:2000 (Amendments 1–6) — Column Design &amp; Verification Engine
+    </footer>
+<!-- JavaScript Engine -->
+<script>
+        function toggleShapeInputs() {
+            const shape = document.getElementById('colShape').value;
+            const grid = document.getElementById('dimFieldsGrid');
+
+            if (shape === 'rectangular') {
+                grid.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-docu-subtext text-[11px]">Width <math><mi>b</mi></math> (mm)</label>
+                        </div>
+                        <input type="number" step="10" id="colWidth" value="300" required oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-docu-subtext text-[11px]">Depth <math><mi>D</mi></math> (mm)</label>
+                        </div>
+                        <input type="number" step="10" id="colDepth" value="450" required oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                    </div>
+                `;
+            } else {
+                grid.innerHTML = `
+                    <div class="col-span-2">
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-docu-subtext text-[11px]">Column Diameter <math><mi>D</mi></math> (mm)</label>
+                        </div>
+                        <input type="number" step="10" id="colDepth" value="400" required oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                    </div>
+                `;
+            }
+            performDesign();
+        }
+
+        // ========================= IS 456 DESIGN ENGINE =========================
+        const ES = 200000; // N/mm²
+        const ECU = 0.0035;
+        const GAMMA_M_S = 1.15;
+
+        function steelDesignStress(fy, strain) {
+            const epsY = fy / (GAMMA_M_S * ES);
+            const sign = strain >= 0 ? 1 : -1;
+            const a = Math.min(Math.abs(strain), epsY);
+            return sign * a * ES; // N/mm²; capped at fy/1.15
+        }
+
+        function concreteStress(fck, strain) {
+            // IS 456 parabolic-rectangular compression stress block basis.
+            const e = Math.max(0, strain);
+            if (e <= 0) return 0;
+            if (e <= 0.002) return (0.4466666667 * fck) * (1 - Math.pow(1 - e / 0.002, 2));
+            if (e <= ECU) return 0.4466666667 * fck;
+            return 0;
+        }
+
+        function getBarCoordinates(shape, b, D, n, cover, tieDia, barDia) {
+            const rOff = cover + tieDia + barDia / 2;
+            const bars = [];
+            if (shape === 'circular') {
+                const R = D / 2 - rOff;
+                if (R <= 0) return bars;
+                for (let i = 0; i < n; i++) {
+                    const a = (2 * Math.PI * i) / n;
+                    bars.push({x: R * Math.cos(a), y: R * Math.sin(a)});
+                }
+                return bars;
+            }
+            const xMin = -b / 2 + rOff, xMax = b / 2 - rOff;
+            const yMin = -D / 2 + rOff, yMax = D / 2 - rOff;
+            n = Math.max(4, Math.floor(n));
+            bars.push({x:xMin,y:yMin},{x:xMax,y:yMin},{x:xMax,y:yMax},{x:xMin,y:yMax});
+            const extra = n - 4;
+            if (extra <= 0) return bars;
+            // Deterministic perimeter distribution that also supports odd bar counts.
+            // IS 456 requires minimum bar count and peripheral spacing; it does not
+            // require an even bar count for rectangular columns.
+            const faces = [
+                {name:'bottom', length:Math.max(1,xMax-xMin), make:t=>({x:xMin+t*(xMax-xMin),y:yMin})},
+                {name:'right',  length:Math.max(1,yMax-yMin), make:t=>({x:xMax,y:yMin+t*(yMax-yMin)})},
+                {name:'top',    length:Math.max(1,xMax-xMin), make:t=>({x:xMax-t*(xMax-xMin),y:yMax})},
+                {name:'left',   length:Math.max(1,yMax-yMin), make:t=>({x:xMin,y:yMax-t*(yMax-yMin)})}
+            ];
+            const counts=[0,0,0,0];
+            for(let k=0;k<extra;k++){
+                let best=0, bestScore=-Infinity;
+                for(let j=0;j<4;j++){
+                    const score=faces[j].length/(counts[j]+1);
+                    if(score>bestScore){bestScore=score;best=j;}
+                }
+                counts[best]++;
+            }
+            for(let j=0;j<4;j++){
+                for(let i=1;i<=counts[j];i++) bars.push(faces[j].make(i/(counts[j]+1)));
+            }
+            return bars.slice(0,n);
+        }
+
+        function sectionInside(shape,b,D,x,y) {
+            if (shape === 'circular') return (x*x + y*y) <= (D*D/4);
+            return Math.abs(x) <= b/2 && Math.abs(y) <= D/2;
+        }
+
+        function sectionResponse(shape,b,D,fck,fy,bars,theta,na) {
+            // Deterministic 1-D strip integration for the uniaxial section response.
+            // The solver is used only for x- or y-axis bending, so strip integration
+            // avoids the grid-alignment sensitivity of a 2-D fiber mesh.
+            const axis=Math.abs(Math.sin(theta))>0.5?'x':'y';
+            const depthTotal=axis==='x'?D:b;
+            const widthTotal=axis==='x'?b:D;
+            const dMin=-depthTotal/2;
+            const dMax=depthTotal/2;
+            const c=Math.max(1e-6,na);
+            // IS 456 Cl.39.1 strain limit: when the whole section remains in
+            // compression, the extreme-fibre strain is not allowed to remain at
+            // 0.0035; it is reduced to satisfy ecu = 0.0035 - 0.75*e_least.
+            // This correctly tends to 0.002 for uniform axial compression.
+            const allCompression = c > depthTotal;
+            const epsComp = allCompression
+                ? ECU / (1 + 0.75 * (1 - depthTotal / c))
+                : ECU;
+            const strainAt = d => epsComp * (c-(d-dMin))/c;
+            const nStrip=240;
+            let Fc=0,MxC=0,MyC=0;
+            const dd=depthTotal/nStrip;
+            for(let i=0;i<nStrip;i++){
+                const d=dMin+(i+0.5)*dd;
+                if(d>dMin+c) continue;
+                const strain=strainAt(d);
+                const sig=concreteStress(fck,strain);
+                let stripWidth=widthTotal;
+                if(shape==='circular'){
+                    const coord=d;
+                    const R=D/2;
+                    stripWidth=2*Math.sqrt(Math.max(0,R*R-coord*coord));
+                }
+                const A=stripWidth*dd;
+                const F=sig*A;
+                if(axis==='x'){ Fc+=F; MxC+=F*d; }
+                else { Fc+=F; MyC+=F*d; }
+            }
+            let Fs=0,MxS=0,MyS=0;
+            for(const bar of bars){
+                const d=axis==='x'?bar.y:bar.x;
+                const strain=strainAt(d);
+                const sig=steelDesignStress(fy,strain);
+                const cSig=concreteStress(fck,strain);
+                const F=(sig-cSig)*bar.area;
+                Fs+=F;
+                if(axis==='x') MxS+=F*bar.y; else MyS+=F*bar.x;
+            }
+            return {P:(Fc+Fs)/1000, Mx:(MxC+MxS)/1e6, My:(MyC+MyS)/1e6, depth:depthTotal};
+        }
+
+        function solveUniaxialCapacity(shape,b,D,fck,fy,bars,Pu,axis,strengthFactor=1) {
+            // Solve P = Pu over the full neutral-axis range and take the maximum
+            // uniaxial moment magnitude, consistent with Cl.39.5/39.6's Mux1/Muy1.
+            if (Pu < 0 || !Number.isFinite(Pu) || !Number.isFinite(strengthFactor) || strengthFactor<=0) return 0;
+            const targetPu=Pu/strengthFactor;
+            const theta=axis==='x'?Math.PI/2:0;
+            const maxNA=Math.max(b,D)*20;
+            const n=240;
+            const samples=[];
+            for(let i=0;i<=n;i++){
+                const na=0.05+(maxNA-0.05)*i/n;
+                samples.push({na,r:sectionResponse(shape,b,D,fck,fy,bars,theta,na)});
+            }
+            let best=null;
+            for(let i=0;i<samples.length;i++){
+                const a=samples[i];
+                if(Math.abs(a.r.P-targetPu)<0.5){
+                    const m=Math.abs(axis==='x'?a.r.Mx:a.r.My);
+                    if(!best||m>best.m) best={m};
+                }
+                if(i===samples.length-1) continue;
+                const c=samples[i+1];
+                const fa=a.r.P-targetPu, fc=c.r.P-targetPu;
+                if(fa===0 || fa*fc<0){
+                    let lo=a.na,hi=c.na;
+                    for(let k=0;k<70;k++){
+                        const mid=(lo+hi)/2;
+                        const rm=sectionResponse(shape,b,D,fck,fy,bars,theta,mid);
+                        if((rm.P-targetPu)*(fa)<=0) hi=mid; else lo=mid;
+                    }
+                    const rr=sectionResponse(shape,b,D,fck,fy,bars,theta,(lo+hi)/2);
+                    const m=Math.abs(axis==='x'?rr.Mx:rr.My);
+                    if(!best||m>best.m) best={m};
+                }
+            }
+            return best?best.m*strengthFactor:0;
+        }
+
+        function balancedAxialLoad(shape,b,D,fck,fy,bars,axis) {
+            // Pb: Pu corresponding to ecu=0.0035 at extreme compression concrete
+            // and tensile steel strain = 0.002, as specified in Cl.39.7.1.1.
+            const theta=axis==='x'?Math.PI/2:0;
+            const nx=Math.cos(theta), ny=Math.sin(theta);
+            const dVals=bars.map(q=>q.x*nx+q.y*ny);
+            const dMin=Math.min(...dVals), dMax=Math.max(...dVals);
+            // Compression extreme is at dMin in sectionResponse(); use the outermost
+            // tension-bar location, not the gross-section face, for the 0.002 strain condition.
+            const tensionD=dMax;
+            const c=Math.max(0.5,(tensionD-dMin)*0.0035/(0.0035+0.002));
+            const depthTotal=axis==='x'?D:b;
+            const widthTotal=axis==='x'?b:D;
+            const nStrip=400;
+            const dd=depthTotal/nStrip;
+            let P=0;
+            for(let i=0;i<nStrip;i++){
+                const d=dMin+(i+0.5)*dd;
+                const strain=0.0035*(c-(d-dMin))/c;
+                const sig=concreteStress(fck,strain);
+                if(sig>0){
+                    let stripWidth=widthTotal;
+                    if(shape==='circular'){
+                        const R=D/2;
+                        stripWidth=2*Math.sqrt(Math.max(0,R*R-d*d));
+                    }
+                    P+=sig*stripWidth*dd;
+                }
+            }
+            for(const bar of bars){
+                const d=axis==='x'?bar.y:bar.x;
+                const strain=0.0035*(c-(d-dMin))/c;
+                const sig=steelDesignStress(fy,strain);
+                const cSig=concreteStress(fck,strain);
+                P+=(sig-cSig)*bar.area;
+            }
+            return Math.max(0,P/1000);
+        }
+
+        function minimumEccentricity(L,b,D) {
+            return {x:Math.max(L/500 + D/30,20), y:Math.max(L/500 + b/30,20)};
+        }
+
+        function getTieSpacing(b,D,smallestBar) {
+            return Math.min(b,D,16*smallestBar,300);
+        }
+
+        function helixCheck(D,cover,helixDia,barDia,pitchProvided,fck,fy,Asc,Ag,Ac) {
+            // IS 456 Cl.39.4.1: core is measured to the outside diameter of the helix;
+            // helical steel strength is limited to 415 N/mm².
+            const coreD=Math.max(1,D-2*cover);
+            const helixFy=Math.min(fy,415);
+            const asp=Math.PI*helixDia*helixDia/4;
+            const coreArea=Math.PI*coreD*coreD/4;
+            const rhoReq=0.36*((Ag/coreArea)-1)*(fck/helixFy);
+            // Vs/Vc = (helix length per pitch × steel area)/(core volume per pitch)
+            const helixLengthPerPitch=Math.PI*(coreD-helixDia);
+            const pByVolume=(helixLengthPerPitch*asp)/(rhoReq*coreArea);
+            const pUpper=Math.min(75,coreD/6);
+            const pLower=Math.max(2.5,3*helixDia);
+            const pitchPossible=pUpper>=pLower;
+            const pitch=Number.isFinite(pitchProvided)&&pitchProvided>0?pitchProvided:(pitchPossible?Math.min(pUpper,pByVolume):pLower);
+            const volRatio=(helixLengthPerPitch*asp)/(coreArea*pitch);
+            const ratioOK=pitchPossible && volRatio>=rhoReq && pitch>=pLower && pitch<=pUpper;
+            return {coreD,coreArea,helixFy,pitch,pLower,pUpper,volRatio,rhoReq,ratioOK};
+        }
+
+        function performDesign() {
+            const shape=document.getElementById('colShape').value;
+            const restraint=document.getElementById('columnRestraint')?.value||'restrained';
+            const c_nom=parseFloat(document.getElementById('nominalCover').value);
+            const L=parseFloat(document.getElementById('unsupportedLength')?.value);
+            const lex=parseFloat(document.getElementById('lex').value);
+            const ley=parseFloat(document.getElementById('ley').value);
+            const fck=parseFloat(document.getElementById('fck').value);
+            const fy=parseFloat(document.getElementById('fy').value);
+            const Pu=parseFloat(document.getElementById('pu').value);
+            const MuxInput=Math.abs(parseFloat(document.getElementById('mux').value));
+            const MuyInput=Math.abs(parseFloat(document.getElementById('muy').value));
+            const mainBarDia=parseFloat(document.getElementById('mainBarDia').value);
+            const numBarsInput=parseFloat(document.getElementById('numBars').value);
+            let numBars=Number.isFinite(numBarsInput)?Math.trunc(numBarsInput):NaN;
+            const tieDia=parseFloat(document.getElementById('tieDia').value);
+            const tieSpacingProvided=parseFloat(document.getElementById('tieSpacingInput')?.value);
+            const helixPitchProvided=parseFloat(document.getElementById('helixPitchInput')?.value);
+            const tieType=document.getElementById('tieType').value;
+            const lapSplice=!!document.getElementById('lapSplice')?.checked;
+            let b=0,D=0,Ag=0;
+            if(shape==='rectangular'){b=parseFloat(document.getElementById('colWidth')?.value);D=parseFloat(document.getElementById('colDepth')?.value);Ag=b*D;}
+            else{D=parseFloat(document.getElementById('colDepth')?.value);b=D;Ag=Math.PI*D*D/4;}
+            if(![b,D,c_nom,L,lex,ley,fck,fy,Pu,MuxInput,MuyInput,mainBarDia,numBars,tieDia,tieSpacingProvided,helixPitchProvided].every(Number.isFinite) || b<=0||D<=0||c_nom<0||L<=0||lex<=0||ley<=0||fck<=0||fy<=0||Pu<0||MuxInput<0||MuyInput<0||numBars<1||!Number.isInteger(numBarsInput)||mainBarDia<=0||tieDia<=0||tieSpacingProvided<=0||helixPitchProvided<=0){
+                updateStatusBanner(false,0,false);
+                document.getElementById('modAdviceContainer').className='block bg-rose-50 rounded-lg p-3.5 border border-rose-200 text-xs shadow-sm';
+                document.getElementById('modAdviceContainer').innerHTML='<strong>Invalid input:</strong> All dimensions, lengths, material strengths and reinforcement selections must be positive and physically meaningful.';
+                return;
+            }
+            const minCoverRequired=(Math.min(b,D)<=200 && mainBarDia<=12)?25:Math.max(40,mainBarDia);
+            const unsupportedLimit=(restraint==='cantilever') ? Math.min(100*b*b/D,100*D*D/b) : 60*Math.min(b,D);
+            const unsupportedLengthOK=L*1000<=unsupportedLimit;
+            const reinforcementFitOK=(Math.min(b,D)-2*(c_nom+tieDia+mainBarDia/2))>0;
+            if(!reinforcementFitOK){
+                updateStatusBanner(false,0,false);
+                document.getElementById('modAdviceContainer').className='block bg-rose-50 rounded-lg p-3.5 border border-rose-200 text-xs shadow-sm';
+                document.getElementById('modAdviceContainer').innerHTML='<strong>Reinforcement geometry violation:</strong> The selected cover, tie diameter and longitudinal bar diameter do not fit within the column cross-section.';
+                return;
+            }
+            if(c_nom<minCoverRequired){
+                updateStatusBanner(false,0,false);
+                document.getElementById('modAdviceContainer').className='block bg-rose-50 rounded-lg p-3.5 border border-rose-200 text-xs shadow-sm';
+                document.getElementById('modAdviceContainer').innerHTML=`<strong>Nominal cover violation (Cl. 26.4.2.1):</strong> ${c_nom.toFixed(0)} mm provided; minimum is ${minCoverRequired.toFixed(0)} mm for this column/bar diameter.`;
+                return;
+            }
+            const isColumnMember=Math.max(lex,ley)*1000 > 3*Math.min(b,D);
+            if(!isColumnMember){
+                updateStatusBanner(false,0,false);
+                document.getElementById('modAdviceContainer').className='block bg-amber-50 rounded-lg p-3.5 border border-amber-200 text-xs shadow-sm';
+                document.getElementById('modAdviceContainer').innerHTML='<strong>Outside column-design scope (Cl. 25.1.1):</strong> The supplied effective length does not exceed three times the least lateral dimension; this member is treated as a pedestal/stocky compression member and is not certified by this column calculator.';
+                return;
+            }
+            const barArea=Math.PI*mainBarDia*mainBarDia/4;
+            const Asc=numBars*barArea, Ac=Ag-Asc, p_cc=100*Asc/Ag;
+            const bars=getBarCoordinates(shape,b,D,numBars,c_nom,tieDia,mainBarDia).map(q=>({...q,area:barArea}));
+            const slenderX=lex*1000/D, slenderY=ley*1000/b;
+            const isShort=slenderX<12 && slenderY<12;
+            const emin=minimumEccentricity(L*1000,b,D);
+            const minEccOKX=emin.x<=0.05*D, minEccOKY=emin.y<=0.05*b;
+            const minEccMomentX=Pu*emin.x/1000, minEccMomentY=Pu*emin.y/1000;
+            const PuoBase=(0.4*fck*Ac+0.67*fy*Asc)/1000;
+            const Puz=(0.45*fck*Ac+0.75*fy*Asc)/1000;
+            const puRatio=Puz>0?Pu/Puz:Infinity;
+            let alphaN=1;
+            if(puRatio<=0.2)alphaN=1; else if(puRatio>=0.8)alphaN=2; else alphaN=1+(puRatio-0.2)/0.6;
+            const PbX=balancedAxialLoad(shape,b,D,fck,fy,bars,'x');
+            const PbY=balancedAxialLoad(shape,b,D,fck,fy,bars,'y');
+            const kX=(Puz>PbX)?Math.min(1,Math.max(0,(Puz-Pu)/(Puz-PbX))):1;
+            const kY=(Puz>PbY)?Math.min(1,Math.max(0,(Puz-Pu)/(Puz-PbY))):1;
+            const M_addX=isShort?0:kX*(Pu*D/2000)*Math.pow(lex*1000/D,2)/1000;
+            const M_addY=isShort?0:kY*(Pu*b/2000)*Math.pow(ley*1000/b,2)/1000;
+            const Mux=Math.max(MuxInput,minEccMomentX)+M_addX;
+            const Muy=Math.max(MuyInput,minEccMomentY)+M_addY;
+            const helix=tieType==='helical'&&shape==='circular'?helixCheck(D,c_nom,tieDia,mainBarDia,helixPitchProvided,fck,fy,Asc,Ag,Ac):null;
+            const helixStrengthFactor=(helix&&helix.ratioOK)?1.05:1;
+            // Cl.39.4: for a qualifying helix, the complete tied-column strength basis is enhanced by 1.05.
+            // SP:16 treatment is equivalent to dividing Pu and M by 1.05 before obtaining the tied-column interaction capacity.
+            const Mux1=solveUniaxialCapacity(shape,b,D,fck,fy,bars,Pu,'x',helixStrengthFactor);
+            const Muy1=solveUniaxialCapacity(shape,b,D,fck,fy,bars,Pu,'y',helixStrengthFactor);
+            const ix=Mux1>0?Math.pow(Mux/Mux1,alphaN):Infinity;
+            const iy=Muy1>0?Math.pow(Muy/Muy1,alphaN):Infinity;
+            const interaction=ix+iy;
+            const minTieDia=Math.max(mainBarDia/4,6);
+            const tieDiaOK=tieDia>=minTieDia;
+            const tieSpacingMax=getTieSpacing(b,D,mainBarDia);
+            const tieSpacingOK=tieType==='helical' ? true : tieSpacingProvided<=tieSpacingMax;
+            const steelOK=p_cc>=0.8 && p_cc<=6 && (!lapSplice || p_cc<=4);
+            const barDiaOK=mainBarDia>=12;
+            const barCountOK=shape==='circular'?numBars>=6:numBars>=4;
+            // perimeter spacing audit
+            let maxBarSpacing=0;
+            if(shape==='circular') {
+                const r=Math.max(1,D/2-c_nom-tieDia-mainBarDia/2);
+                maxBarSpacing=2*Math.PI*r/numBars;
+            } else {
+                const off=c_nom+tieDia+mainBarDia/2;
+                const xMin=-b/2+off,xMax=b/2-off,yMin=-D/2+off,yMax=D/2-off;
+                const w=xMax-xMin,h=yMax-yMin,per=2*(w+h);
+                const pos=q=>{
+                    const eps=1e-6;
+                    if(Math.abs(q.y-yMin)<eps) return q.x-xMin;
+                    if(Math.abs(q.x-xMax)<eps) return w+(q.y-yMin);
+                    if(Math.abs(q.y-yMax)<eps) return w+h+(xMax-q.x);
+                    return w+h+w+(yMax-q.y);
+                };
+                const ps=bars.map(pos).sort((u,v)=>u-v);
+                for(let i=0;i<ps.length;i++){
+                    const gap=i===ps.length-1?ps[0]+per-ps[i]:ps[i+1]-ps[i];
+                    maxBarSpacing=Math.max(maxBarSpacing,gap);
+                }
+            }
+            const spacingOK=maxBarSpacing<=300;
+            const crossTies=!!document.getElementById('crossTies')?.checked;
+            const tieSupportOK=shape==='circular' || maxBarSpacing<=75 || crossTies;
+            const displayedTransverseSpacing=helix?helix.pitch:tieSpacingProvided;
+            const Puo=(PuoBase*(helix&&helix.ratioOK?1.05:1));
+            // Cl.39.3 is an applicability route, not a universal PASS/FAIL condition.
+            const axialApplicable=isShort&&minEccOKX&&minEccOKY;
+            const axialCapacityOK=Pu<=Puo;
+            const axialOK=axialApplicable?axialCapacityOK:true;
+            const bendingOK=interaction<=1;
+            const detailingOK=steelOK&&barDiaOK&&barCountOK&&tieDiaOK&&spacingOK&&tieSpacingOK&&tieSupportOK&&unsupportedLengthOK&&reinforcementFitOK&&(!helix||helix.ratioOK);
+            const overall=axialOK&&bendingOK&&detailingOK;
+            updateStatusBanner(overall,Puz>0?Pu/Puz:0,!bendingOK||(!axialApplicable&&Pu>Puz)|| (axialApplicable&&!axialCapacityOK));
+            generateModificationAdvice({isShortColumn:isShort,isSteelRatioOK:steelOK,isAxialOK:axialOK,isAxialApplicable:axialApplicable,isBiaxialOK:bendingOK,detailingOK,barDiaOK,barCountOK,tieDiaOK,spacingOK,tieSpacingOK,tieSpacingProvided,tieSpacingMax,tieSupportOK,unsupportedLengthOK,unsupportedLimit,restraint,reinforcementFitOK,helixOK:helix?helix.ratioOK:true,Pu,Puo,p_cc,slenderX,slenderY,interactionSum:interaction,b,D,shape});
+            document.getElementById('scheduleTableBody').innerHTML=`
+                <tr><td class="py-1 text-docu-subtext">Column Type</td><td class="font-bold text-right">${shape==='rectangular'?'Rectangular':'Circular'}</td></tr>
+                <tr><td class="py-1 text-docu-subtext">Dimensions</td><td class="font-bold text-right">${shape==='rectangular'?`${b}mm × ${D}mm`:`D = ${D}mm`}</td></tr>
+                <tr><td class="py-1 text-docu-subtext">Main Steel (<math><msub><mi>A</mi><mtext>sc</mtext></msub></math>)</td><td class="font-bold text-right">${numBars} nos. ${mainBarDia}mm (${Math.round(Asc)} mm²)</td></tr>
+                <tr><td class="py-1 text-docu-subtext">Steel Percentage</td><td class="font-bold text-right">${p_cc.toFixed(2)} %</td></tr>
+                <tr><td class="py-1 text-docu-subtext">${helix?'Helix':'Lateral Ties'}</td><td class="text-right">${tieDia}mm @ ${displayedTransverseSpacing.toFixed(1)} mm c/c</td></tr>
+                <tr><td class="py-1 text-docu-subtext">Maximum Bar Spacing</td><td class="text-right ${spacingOK?'':'text-rose-600 font-bold'}">${maxBarSpacing.toFixed(0)} mm (≤300)</td></tr>
+                <tr><td class="py-1 text-docu-subtext">Unsupported Length Limit</td><td class="text-right ${unsupportedLengthOK?'':'text-rose-600 font-bold'}">${(L*1000).toFixed(0)} / ${unsupportedLimit.toFixed(0)} mm</td></tr>
+                <tr><td class="py-1 text-docu-subtext">Column Classification</td><td class="text-right font-bold text-blue-800">${isShort?'Short Column':'Slender Column'}</td></tr>`;
+            document.getElementById('calcPu').innerText=`${Pu.toFixed(1)} kN`;
+            document.getElementById('calcPuz').innerText=`${Puo.toFixed(1)} kN`;
+            document.getElementById('calcAc').innerText=`${Math.round(Ac)} mm²`;
+            document.getElementById('calcAsc').innerText=`${Math.round(Asc)} mm²`;
+            document.getElementById('calcPcc').innerText=`${p_cc.toFixed(2)} %`;
+            document.getElementById('calcMuxDesign').innerText=`${Mux.toFixed(1)} kNm`;
+            document.getElementById('calcMuyDesign').innerText=`${Muy.toFixed(1)} kNm`;
+            document.getElementById('calcAlphaN').innerText=alphaN.toFixed(2);
+            document.getElementById('calcInteractionSum').innerText=interaction.toFixed(3);
+            document.getElementById('calcPuzVal').innerText=`${Puz.toFixed(1)} kN`;
+            if(document.getElementById('calcPuzValInline')) document.getElementById('calcPuzValInline').innerText=`${Puz.toFixed(1)} kN`;
+            document.getElementById('calcMux1').innerText=`${Mux1.toFixed(1)} kNm`;
+            document.getElementById('calcMuy1').innerText=`${Muy1.toFixed(1)} kNm`;
+            document.getElementById('calcMax').innerText=`${M_addX.toFixed(1)} kNm`;
+            document.getElementById('calcMay').innerText=`${M_addY.toFixed(1)} kNm`;
+            if(document.getElementById('calcKx')) document.getElementById('calcKx').innerText=kX.toFixed(3);
+            if(document.getElementById('calcKy')) document.getElementById('calcKy').innerText=kY.toFixed(3);
+            if(document.getElementById('calcPbX')) document.getElementById('calcPbX').innerText=`${PbX.toFixed(1)} kN`;
+            if(document.getElementById('calcPbY')) document.getElementById('calcPbY').innerText=`${PbY.toFixed(1)} kN`;
+            document.getElementById('calcSlenderX').innerText=slenderX.toFixed(2);
+            document.getElementById('calcSlenderY').innerText=slenderY.toFixed(2);
+            document.getElementById('calcEminX').innerText=`${emin.x.toFixed(1)} mm`;
+            document.getElementById('calcEminY').innerText=`${emin.y.toFixed(1)} mm`;
+            generateComplianceLog([
+                {clause:'25.1.2',param:'Slenderness X',calc:slenderX.toFixed(2),limit:'< 12 for short; ≥12 requires Cl.39.7',status:slenderX<12?'PASS':'N.A.',pass:true},
+                {clause:'25.1.2',param:'Slenderness Y',calc:slenderY.toFixed(2),limit:'< 12 for short; ≥12 requires Cl.39.7',status:slenderY<12?'PASS':'N.A.',pass:true},
+                {clause:'25.4',param:'Minimum eccentricity X',calc:`${emin.x.toFixed(1)} mm`,limit:`e_min ≤ 0.05D (${(.05*D).toFixed(1)} mm) for Cl.39.3`,status:minEccOKX?'PASS':'N.A.',pass:true},
+                {clause:'25.4',param:'Minimum eccentricity Y',calc:`${emin.y.toFixed(1)} mm`,limit:`e_min ≤ 0.05b (${(.05*b).toFixed(1)} mm) for Cl.39.3`,status:minEccOKY?'PASS':'N.A.',pass:true},
+                {clause:'26.4.2.1',param:'Nominal cover',calc:`${c_nom.toFixed(0)} mm`,limit:`≥ ${minCoverRequired.toFixed(0)} mm`,pass:c_nom>=minCoverRequired},
+                {clause:'25.3',param:'Unsupported length',calc:`${(L*1000).toFixed(0)} mm`,limit:`≤ ${unsupportedLimit.toFixed(0)} mm (${restraint==='cantilever'?'cantilever':'between restraints'})`,pass:unsupportedLengthOK},
+                {clause:'26.4/26.5.3',param:'Reinforcement cage fit',calc:reinforcementFitOK?'Fits':'Does not fit',limit:'Cover + tie + bar geometry must fit within section',pass:reinforcementFitOK},
+                {clause:'26.5.3.1',param:'Minimum steel',calc:`${p_cc.toFixed(2)} %`,limit:'≥ 0.80 %',pass:p_cc>=0.8},
+                {clause:'26.5.3.1',param:'Maximum steel',calc:`${p_cc.toFixed(2)} %`,limit:lapSplice?'≤ 4.00 % with laps':'≤ 6.00 %',pass:steelOK},
+                {clause:'26.5.3.1',param:'Bar diameter / count',calc:`${mainBarDia} mm / ${numBars}`,limit:shape==='circular'?'≥12 mm / ≥6 (helix also requires ≥6)':'≥12 mm / ≥4',pass:barDiaOK&&barCountOK},
+                {clause:'26.5.3.1',param:'Peripheral bar spacing',calc:`${maxBarSpacing.toFixed(1)} mm`,limit:'≤ 300 mm',pass:spacingOK},
+                {clause:'26.5.3.2',param:'Tie diameter',calc:`${tieDia} mm`,limit:`≥ ${minTieDia.toFixed(1)} mm`,pass:tieDiaOK},
+                {clause:'26.5.3.2',param:'Tie spacing',calc:`${tieSpacingProvided.toFixed(0)} mm`,limit:`≤ ${tieSpacingMax.toFixed(0)} mm (least of lateral dimension, 16φmin, 300)`,pass:tieSpacingOK},
+                {clause:'26.5.3.2',param:'Longitudinal bar lateral support',calc:tieSupportOK?'Adequately supported':'Additional cross-ties required',limit:'Cl.26.5.3.2 arrangement; provide cross/open ties where needed',pass:tieSupportOK},
+                {clause:'39.3',param:'Short axial capacity',calc:`Pu = ${Pu.toFixed(1)} kN`,limit:`Puo = ${Puo.toFixed(1)} kN`,status:axialApplicable?(axialCapacityOK?'PASS':'FAIL'):'N.A.',pass:axialApplicable?axialCapacityOK:true},
+                {clause:'39.6',param:'Puz / αn',calc:`${Puz.toFixed(1)} kN / ${alphaN.toFixed(2)}`,limit:'Puz basis and αn per Cl.39.6',pass:true},
+                {clause:'39.5/39.6',param:'Uniaxial capacity X',calc:`${Mux.toFixed(1)} / ${Mux1.toFixed(1)} kNm`,limit:'Reference capacity at Pu; combined check by Cl.39.6',status:'N.A.',pass:true},
+                {clause:'39.5/39.6',param:'Uniaxial capacity Y',calc:`${Muy.toFixed(1)} / ${Muy1.toFixed(1)} kNm`,limit:'Reference capacity at Pu; combined check by Cl.39.6',status:'N.A.',pass:true},
+                {clause:'39.6',param:'Biaxial interaction',calc:interaction.toFixed(3),limit:'≤ 1.000',pass:bendingOK},
+                {clause:'39.7.1',param:'Additional moment X',calc:`${M_addX.toFixed(1)} kNm`,limit:isShort?'Not applicable':'Included',pass:true},
+                {clause:'39.7.1',param:'Additional moment Y',calc:`${M_addY.toFixed(1)} kNm`,limit:isShort?'Not applicable':'Included',pass:true},
+                {clause:'39.7.1.1',param:'kX / kY',calc:`${kX.toFixed(3)} / ${kY.toFixed(3)}`,limit:'≤ 1.000',pass:true},
+                ...(helix?[{clause:'39.4',param:'Helical reinforcement',calc:`Vs/Vc=${helix.volRatio.toFixed(4)}; pitch=${helix.pitch.toFixed(1)} mm`,limit:`≥ ${helix.rhoReq.toFixed(4)}; ${helix.pLower.toFixed(1)}–${helix.pUpper.toFixed(1)} mm`,pass:helix.ratioOK}]:[])
+            ]);
+            drawColumnCrossSection(shape,b,D,numBars,mainBarDia,tieDia,c_nom,barArea,bars,crossTies);
+        }
+
+        function generateModificationAdvice(params) {
+            const container = document.getElementById('modAdviceContainer');
+            const { isShortColumn, isSteelRatioOK, isAxialOK, isAxialApplicable, isBiaxialOK, detailingOK, barDiaOK, barCountOK, tieDiaOK, spacingOK, tieSpacingOK, tieSpacingProvided, tieSpacingMax, tieSupportOK, unsupportedLengthOK, unsupportedLimit, restraint, reinforcementFitOK, helixOK, Pu, Puo, p_cc, slenderX, slenderY, interactionSum, b, D, shape, L } = params;
+
+            const isAllSafe = isSteelRatioOK && isAxialOK && isBiaxialOK && detailingOK;
+
+            if (isAllSafe) {
+                container.className = "hidden";
+                container.innerHTML = "";
+                return;
+            }
+
+            container.className = "block bg-rose-50 rounded-lg p-3.5 border border-rose-200 text-xs shadow-sm space-y-2";
+
+            let adviceList = [];
+
+            if (!isShortColumn) {
+                adviceList.push(`
+                    <li class="flex items-start space-x-1.5 text-rose-800">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-600 shrink-0 mt-0.5"></i>
+                        <div>
+                            <strong>Slender Column Warning (<math><mrow><msub><mi>l</mi><mi>e</mi></msub><mo>/</mo><mi>D</mi><mo>⩾</mo><mn>12</mn></mrow></math>):</strong> Slenderness ratio (${Math.max(slenderX, slenderY).toFixed(1)}) exceeds short column limit.
+                            <ul class="list-disc pl-4 mt-1 space-y-0.5 text-[11px] text-rose-900 font-mono">
+                                <li>Clause 39.7 additional moments are included in this calculation.</li>
+                                <li>If the interaction check fails, revise section dimensions, reinforcement, or effective length.</li>
+                            </ul>
+                        </div>
+                    </li>
+                `);
+            }
+
+            if (!isSteelRatioOK) {
+                adviceList.push(`
+                    <li class="flex items-start space-x-1.5 text-rose-800">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-600 shrink-0 mt-0.5"></i>
+                        <div>
+                            <strong>Reinforcement Percentage Limit Violation:</strong> Current steel ratio is ${p_cc.toFixed(2)}%.
+                            <ul class="list-disc pl-4 mt-1 space-y-0.5 text-[11px] text-rose-900 font-mono">
+                                ${p_cc < 0.8 ? '<li>Increase main bar count or bar diameter to achieve at least 0.80% steel ratio (Cl. 26.5.3.1).</li>' : ''}
+                                ${p_cc > 6.0 ? '<li>Reduce bar count or enlarge column section to bring steel ratio below 6.0%.</li>' : ''}
+                            </ul>
+                        </div>
+                    </li>
+                `);
+            }
+
+            if (isAxialApplicable && !isAxialOK) {
+                adviceList.push(`
+                    <li class="flex items-start space-x-1.5 text-rose-800">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-600 shrink-0 mt-0.5"></i>
+                        <div>
+                            <strong>Axial Capacity Overloaded (<math><mrow><msub><mi>P</mi><mi>u</mi></msub><mo>&gt;</mo><msub><mi>P</mi><mtext>uo</mtext></msub></mrow></math>):</strong> Factored load (${Pu} kN) exceeds column capacity (${Puo.toFixed(1)} kN).
+                            <ul class="list-disc pl-4 mt-1 space-y-0.5 text-[11px] text-rose-900 font-mono">
+                                <li>Enlarge column cross section dimensions.</li>
+                                <li>Upgrade concrete grade <math><msub><mi>f</mi><mtext>ck</mtext></msub></math> or increase main longitudinal reinforcement.</li>
+                            </ul>
+                        </div>
+                    </li>
+                `);
+            }
+
+            if (!detailingOK) {
+                const issues=[];
+                if(!barDiaOK) issues.push('Longitudinal bar diameter is below 12 mm.');
+                if(!barCountOK) issues.push(shape==='circular'?'Circular columns require at least 6 longitudinal bars.':'Rectangular columns require at least 4 longitudinal bars; the calculator uses the actual entered arrangement and does not impose an even-count rule.');
+                if(!tieDiaOK) issues.push('Tie/helix diameter is below max(largest main bar/4, 6 mm).');
+                if(!spacingOK) issues.push('Peripheral longitudinal-bar spacing exceeds 300 mm.');
+                if(!tieSpacingOK) issues.push(`Provided tie spacing ${tieSpacingProvided.toFixed(0)} mm exceeds the Cl.26.5.3.2 maximum of ${tieSpacingMax.toFixed(0)} mm.`);
+                if(!tieSupportOK) issues.push('Additional cross/open ties are required for effective lateral support.');
+                if(!unsupportedLengthOK) issues.push(`Unsupported length ${(L*1000).toFixed(0)} mm exceeds Cl.25.3 limit of ${unsupportedLimit.toFixed(0)} mm for the selected end condition.`);
+                if(!reinforcementFitOK) issues.push('Cover, tie and main-bar geometry does not fit inside the selected section.');
+                if(helixOK===false) issues.push('Helical reinforcement does not satisfy the required volumetric ratio/pitch limits.');
+                adviceList.push(`
+                    <li class="flex items-start space-x-1.5 text-rose-800">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-600 shrink-0 mt-0.5"></i>
+                        <div><strong>Reinforcement detailing violation:</strong>
+                            <ul class="list-disc pl-4 mt-1 space-y-0.5 text-[11px] text-rose-900 font-mono">${issues.map(x=>`<li>${x}</li>`).join('')}</ul>
+                        </div>
+                    </li>
+                `);
+            }
+
+            if (!isBiaxialOK) {
+                adviceList.push(`
+                    <li class="flex items-start space-x-1.5 text-rose-800">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-600 shrink-0 mt-0.5"></i>
+                        <div>
+                            <strong>Biaxial Bending Check Failed (Cl. 39.6):</strong> Biaxial interaction sum (${interactionSum.toFixed(2)}) exceeds 1.0.
+                            <ul class="list-disc pl-4 mt-1 space-y-0.5 text-[11px] text-rose-900 font-mono">
+                                <li>Increase depth or width along the axis receiving higher bending moment.</li>
+                                <li>Provide higher diameter bars along the perimeter to increase section modulus.</li>
+                            </ul>
+                        </div>
+                    </li>
+                `);
+            }
+
+            container.innerHTML = `
+                <div class="flex items-center space-x-1.5 text-rose-900 font-bold border-b border-rose-200 pb-1 mb-1.5">
+                    <i data-lucide="wrench" class="w-4 h-4 text-rose-700"></i>
+                    <span>Column Design Modification Checklist to Pass IS 456 Checks:</span>
+                </div>
+                <ul class="space-y-2 font-sans">${adviceList.join('')}</ul>
+            `;
+            lucide.createIcons();
+        }
+
+        function updateStatusBanner(isSafe, axialRatio, isOverloaded) {
+            const banner = document.getElementById('statusBanner');
+            const title = document.getElementById('statusTitle');
+            const sub = document.getElementById('statusSubtitle');
+
+            if (isSafe) {
+                banner.className = "bg-docu-primaryDark text-white px-4 py-3 rounded-lg shadow-sm flex items-center justify-between border border-emerald-600/30";
+                title.innerText = "Design OK - Safe Column Section";
+                sub.innerText = "All implemented IS 456 column checks pass for the stated calculation scope.";
+            } else if (isOverloaded) {
+                banner.className = "bg-rose-600 text-white px-4 py-3 rounded-lg shadow-sm flex items-center justify-between border border-rose-500/30";
+                title.innerText = "Column Capacity Overloaded";
+                sub.innerText = "Axial load or biaxial bending interaction exceeds capacity. Review checklist below.";
+            } else {
+                banner.className = "bg-amber-600 text-white px-4 py-3 rounded-lg shadow-sm flex items-center justify-between border border-amber-500/30";
+                title.innerText = "Column Limit Violation";
+                sub.innerText = "One or more implemented design/detailing checks do not pass. Review the verification log.";
+            }
+
+            document.getElementById('axialRatioText').innerHTML = `<math><mrow><msub><mi>P</mi><mi>u</mi></msub><mo>/</mo><msub><mi>P</mi><mtext>uz</mtext></msub></mrow><mo>=</mo><mn>${axialRatio.toFixed(2)}</mn></math>`;
+        }
+
+        function generateComplianceLog(checks) {
+            const tableBody = document.getElementById('complianceLogTable');
+            tableBody.innerHTML = checks.map(c => `
+                <tr class="hover:bg-docu-sidebarBg transition">
+                    <td class="p-1.5 border-r border-docu-border font-bold text-docu-primaryDarkest">${c.clause}</td>
+                    <td class="p-1.5 border-r border-docu-border font-sans">${c.param}</td>
+                    <td class="p-1.5 border-r border-docu-border ${!c.pass ? 'text-rose-600 font-bold' : ''}">${c.calc}</td>
+                    <td class="p-1.5 border-r border-docu-border text-docu-subtext">${c.limit}</td>
+                    <td class="p-1.5 text-center">
+                        <span class="inline-flex px-1.5 py-0.5 rounded text-[9px] font-bold ${c.status==='N.A.' ? 'bg-slate-100 text-slate-600' : (c.pass ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800')}">
+                            ${c.status || (c.pass ? 'PASS' : 'FAIL')}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function drawColumnCrossSection(shape,b,D,numBars,barDia,tieDia,cover,barArea,bars,crossTies=false) {
+            const svg=document.getElementById('columnSvg');
+            const scale=Math.min(180/b,180/D);
+            const w=b*scale,h=D*scale,x0=(280-w)/2,y0=(280-h)/2;
+            let barsHtml='';
+            bars.forEach(p=>{
+                const x=140+p.x*scale, y=140-p.y*scale;
+                barsHtml+=`<circle cx="${x}" cy="${y}" r="${Math.max(barDia*scale/2,4)}" fill="#1fa78a" stroke="#18806a" stroke-width="1.5"/>`;
+            });
+            if(shape==='rectangular'){
+                const cs=cover*scale, innerW=w-2*cs, innerH=h-2*cs;
+                const crossHtml=(crossTies && bars.length>4)?`<line x1="${x0+cs}" y1="140" x2="${x0+w-cs}" y2="140" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4 3"/><line x1="140" y1="${y0+cs}" x2="140" y2="${y0+h-cs}" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4 3"/>`:'';
+                svg.innerHTML=`<rect x="${x0}" y="${y0}" width="${w}" height="${h}" fill="#f8f9fa" stroke="#303846" stroke-width="2" rx="2"/><rect x="${x0+cs}" y="${y0+cs}" width="${innerW}" height="${innerH}" fill="none" stroke="#e11d48" stroke-width="1.5" rx="3"/>${crossHtml}${barsHtml}<text x="140" y="${y0-8}" text-anchor="middle" font-size="10" fill="#525860" font-weight="600">${b} mm</text><text x="${x0-8}" y="140" text-anchor="middle" font-size="10" fill="#525860" font-weight="600" transform="rotate(-90 ${x0-8} 140)">${D} mm</text>`;
+            } else {
+                const R=D*scale/2, cx=140,cy=140, innerR=R-cover*scale;
+                svg.innerHTML=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="#f8f9fa" stroke="#303846" stroke-width="2"/><circle cx="${cx}" cy="${cy}" r="${innerR}" fill="none" stroke="#e11d48" stroke-width="1.5"/>${barsHtml}<text x="${cx}" y="${cy-R-8}" text-anchor="middle" font-size="10" fill="#525860" font-weight="600">D = ${D} mm</text>`;
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('border-docu-primaryDark', 'text-docu-primaryDark', 'font-semibold');
+                el.classList.add('border-transparent');
+            });
+
+            document.getElementById(tabId).classList.remove('hidden');
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.add('border-docu-primaryDark', 'text-docu-primaryDark', 'font-semibold');
+            activeBtn.classList.remove('border-transparent');
+        }
+
+        function switchRefTab(refTabId) {
+            document.querySelectorAll('.ref-tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.ref-tab-btn').forEach(el => {
+                el.classList.remove('border-docu-primaryDark', 'text-docu-primaryDark', 'font-semibold');
+                el.classList.add('border-transparent');
+            });
+
+            document.getElementById(refTabId).classList.remove('hidden');
+            const activeBtn = document.getElementById('btn-' + refTabId);
+            if (activeBtn) activeBtn.classList.add('border-docu-primaryDark', 'text-docu-primaryDark', 'font-semibold');
+        }
+
+        function openReferenceModal(section) {
+            document.getElementById('refModal').classList.remove('hidden');
+            /* Typeset only the manual/reference box; no calculation or result DOM is touched. */
+            const manualBox = document.getElementById('refModal');
+            if (section) {
+                if (section.includes('classification')) switchRefTab('ref-tab-intro');
+                else if (section.includes('axial') || section.includes('biaxial')) switchRefTab('ref-tab-steps');
+                else if (section.includes('detailing') || section.includes('helical')) switchRefTab('ref-tab-formulas');
+
+                const target = document.getElementById(section);
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function closeReferenceModal() {
+            document.getElementById('refModal').classList.add('hidden');
+        }
+
+        function resetDefaults() {
+            document.getElementById('colShape').value='rectangular';
+            if(document.getElementById('unsupportedLength')) document.getElementById('unsupportedLength').value='3.0';
+            if(document.getElementById('lapSplice')) document.getElementById('lapSplice').checked=false;
+            if(document.getElementById('crossTies')) document.getElementById('crossTies').checked=false;
+            if(document.getElementById('columnRestraint')) document.getElementById('columnRestraint').value='restrained';
+            if(document.getElementById('tieSpacingInput')) document.getElementById('tieSpacingInput').value='150';
+            if(document.getElementById('helixPitchInput')) document.getElementById('helixPitchInput').value='50';
+            toggleShapeInputs();
+        }
+
+        window.onload = function() {
+            lucide.createIcons();
+            toggleShapeInputs();
+        };
+    </script>
+</body>
+</html>

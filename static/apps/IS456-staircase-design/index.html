@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>IS 456:2000 RC Staircase Design Suite</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+:root{
+  --docu-primary:#25c2a0;--docu-primaryDark:#1fa78a;--docu-primaryDarkest:#18806a;
+  --docu-bg:#f8f9fa;--docu-cardBg:#ffffff;--docu-sidebarBg:#f6f8fa;
+  --docu-navbar:#1e1f21;--docu-navbarBorder:#2d3035;--docu-text:#1c1e21;
+  --docu-subtext:#525860;--docu-codeBg:#f1f3f5;--docu-border:#e3e8ee;
+  --docu-danger:#b42318;--docu-warn:#9a6700;--docu-reviewBg:#fff8e8;--docu-reviewBorder:#edd18b;
+  --bg:var(--docu-bg);--card:var(--docu-cardBg);--ink:var(--docu-text);--muted:var(--docu-subtext);
+  --line:var(--docu-border);--accent:var(--docu-primary);--accent2:var(--docu-primaryDark);
+  --soft:#eff9f6;--danger:var(--docu-danger);--warn:var(--docu-warn);--good:var(--docu-primaryDark);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,Segoe UI,Arial,sans-serif;font-size:14px}
+header{background:var(--docu-navbar);color:#fff;position:sticky;top:0;z-index:10;border-bottom:1px solid var(--docu-navbarBorder)}
+.head{max-width:1400px;margin:auto;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;gap:15px}
+h1{font-size:18px;margin:0}.tag{font-size:11px;color:#9bd8cb;border:1px solid #32665d;padding:4px 8px;border-radius:999px}
+.wrap{max-width:1400px;margin:auto;padding:18px}.grid{display:grid;grid-template-columns:350px 1fr;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:15px;box-shadow:0 1px 2px #00000008;margin-bottom:14px}
+.card h2{font-size:14px;margin:0 0 12px;color:var(--docu-primaryDarkest)}.sub{font-size:11px;color:var(--muted);line-height:1.55}
+label{display:block;font-size:11px;font-weight:700;margin:10px 0 5px;color:#39464d}
+input,select{width:100%;padding:8px 9px;border:1px solid #cbd5da;border-radius:6px;background:#fff;font-size:12px}
+input:focus,select:focus{outline:2px solid #bde6dc;border-color:var(--accent)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+button{border:0;border-radius:6px;padding:9px 12px;background:var(--docu-primary);color:#fff;font-weight:700;cursor:pointer}.secondary{background:#e9efed;color:#155b50}
+.tabs{display:flex;gap:4px;overflow:auto;border-bottom:1px solid var(--line);margin-bottom:14px}.tab{background:transparent;color:#526067;border-bottom:3px solid transparent;border-radius:0;padding:10px 12px;white-space:nowrap}.tab.active{color:var(--docu-primaryDark);border-bottom-color:var(--docu-primary)}
+.panel{display:none}.panel.active{display:block}
+.status{padding:13px 15px;border-radius:9px;background:#eff9f6;border:1px solid #b7ded5;margin-bottom:14px}.status.fail{background:#fff1f0;border-color:#efb3ad}.status.warn{background:var(--docu-reviewBg);border-color:var(--docu-reviewBorder)}
+.status strong{display:block;font-size:15px}.status span{font-size:11px;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.kpi{border:1px solid var(--line);border-radius:8px;padding:11px;background:#fff}.kpi .v{font:700 18px 'JetBrains Mono',ui-monospace,monospace}.kpi .l{font-size:10px;color:var(--muted);margin-top:3px}
+table{width:100%;border-collapse:collapse;font-size:11px}th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:var(--docu-sidebarBg);color:#405057}
+.pass{color:var(--good);font-weight:800}.failtxt{color:var(--danger);font-weight:800}.na{color:#68757b;font-weight:800}
+.clause{display:inline-block;margin-left:5px;padding:2px 6px;border:1px solid var(--docu-border);border-radius:999px;background:#fff;color:var(--docu-primaryDark);font:500 9px 'JetBrains Mono',monospace;white-space:nowrap}
+.eq{background:var(--docu-codeBg);border:1px solid var(--docu-border);border-radius:8px;padding:13px;text-align:center;margin:9px 0;overflow-x:auto;font-size:18px}
+math{font-family:'Cambria Math','STIX Two Math','Times New Roman',serif;font-size:1.05em;white-space:nowrap}
+.manual{color:var(--docu-text)}
+.manual p,.manual li{font-size:11px;line-height:1.6;color:var(--docu-subtext)}.manual ul{padding-left:20px}
+.manual .guide-shell{border:1px solid var(--docu-border);border-radius:10px;background:#fff;overflow:hidden}
+.manual .guide-head{padding:12px 14px;background:var(--docu-navbar);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.manual .guide-head strong{font-size:12px}.manual .guide-head span{font:500 9px 'JetBrains Mono',monospace;color:#9bd8cb}
+.manual .guide-tabs{display:flex;overflow:auto;border-bottom:1px solid var(--docu-border);background:var(--docu-sidebarBg)}
+.manual .guide-tab{background:transparent;color:var(--docu-subtext);border-bottom:2px solid transparent;border-radius:0;padding:9px 12px;font-size:10px;font-weight:600;white-space:nowrap}
+.manual .guide-tab.active{color:var(--docu-primaryDark);border-bottom-color:var(--docu-primary)}
+.manual .guide-panel{padding:15px;display:none}.manual .guide-panel.active{display:block}
+.manual .guide-intro{padding:10px 12px;background:var(--docu-sidebarBg);border:1px solid var(--docu-border);border-radius:7px;margin-bottom:12px}
+.manual .guide-intro h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--docu-primaryDarkest);margin:0 0 4px}
+.manual .manual-step,.manual .manual-reference{border-left:2px solid var(--docu-primaryDark);padding-left:12px;display:flex;flex-direction:column;gap:6px;margin:0 0 13px}
+.manual .manual-step h4,.manual .manual-reference h4{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:11px;font-weight:700;color:var(--docu-text);margin:0}
+.manual .manual-step h4>span:last-child,.manual .manual-reference h4>span:last-child{font:500 9px 'JetBrains Mono',monospace;color:var(--docu-primaryDark);white-space:nowrap}
+.manual .manual-formula{background:var(--docu-codeBg);border:1px solid var(--docu-border);border-radius:6px;padding:8px 10px;text-align:center;overflow-x:auto}
+.manual .manual-formula-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.manual .manual-note{padding:8px 10px;background:#f7fafb;border-left:3px solid #8fa3aa;font-size:10px;color:#5a6870;margin:3px 0}
+.manual .goodbox{padding:9px;background:#eff9f6;border-left:3px solid var(--docu-primaryDark);font-size:10px;color:#166354;margin:9px 0}
+.manual .warnbox{padding:9px;background:var(--docu-reviewBg);border-left:3px solid #d19b2a;font-size:10px;color:#725400;margin:9px 0}
+.manual .manual-reference ul,.manual .manual-step ul{margin:2px 0}
+.badge{font:700 10px 'JetBrains Mono',monospace;color:var(--docu-primaryDark)}.note{padding:9px;background:#f7fafb;border-left:3px solid #8fa3aa;font-size:11px;color:#5a6870;margin:9px 0}
+.warnbox{padding:9px;background:var(--docu-reviewBg);border-left:3px solid #d19b2a;font-size:11px;color:#725400;margin:9px 0}
+.goodbox{padding:9px;background:#eff9f6;border-left:3px solid var(--docu-primaryDark);font-size:11px;color:#166354;margin:9px 0}
+svg{width:100%;height:260px;border:1px solid var(--line);border-radius:8px;background:#fff}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.manual .manual-formula-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="head"><div><h1>IS 456:2000 RC Staircase Design Suite</h1><div style="font-size:10px;color:#aab5ba;margin-top:3px">Limit State Method · Straight / Doglegged Longitudinal Staircase</div></div><div class="tag">IS 456:2000 · Cl. 33 / 38 / 40 / 26</div></div></header>
+<div class="wrap">
+<div class="grid">
+<aside>
+<div class="card">
+<h2>1. Stair Geometry</h2>
+<div class="row"><div><label>Stair type</label><select id="stairType"><option value="straight">Straight flight</option><option value="dogleg">Doglegged</option></select></div><div><label>Floor-to-floor height H (mm)</label><input id="H" type="number" value="3000"></div></div>
+<div class="row"><div><label>Target riser R (mm)</label><input id="Rtarget" type="number" value="165"></div><div><label>Tread T (mm)</label><input id="T" type="number" value="270"></div></div>
+<div class="row"><div><label>Designed flight risers</label><input id="flightRisers" type="number" value="9"></div><div><label>Stair width (mm)</label><input id="width" type="number" value="1200"></div></div>
+<div class="sub">For a doglegged stair, the designed flight is checked as a longitudinally spanning flight. Enter the actual risers in the designed flight; the app does not assume the opposite flight geometry.</div>
+</div>
+<div class="card">
+<h2>2. Effective Span · Cl. 33.1</h2>
+<label>Support / landing condition</label>
+<select id="spanType">
+<option value="landingEdges">Supported on edges of landings spanning parallel to risers</option>
+<option value="beamCC">Supported at top/bottom risers by beams</option>
+<option value="landingSame">Landing spans in same direction as stairs</option>
+</select>
+<div class="row"><div><label>Left landing length X (mm)</label><input id="X" type="number" value="1000"></div><div><label>Calculated flight going G (mm)</label><input id="goingDisplay" type="text" value="2160" readonly></div></div>
+<div class="row"><div><label>Right landing length Y (mm)</label><input id="Y" type="number" value="1000"></div><div><label>c/c support span (mm)</label><input id="ccSpan" type="number" value="2400"></div></div>
+<div class="note">Cl. 33.1 uses horizontal distances. For landing-edge support, each landing contribution is limited to 1 m: <b>Leff = going + min(X/2, 1 m) + min(Y/2, 1 m)</b>. Beam support uses c/c beam distance. Same-direction landings act with the flight as one slab.</div>
+</div>
+<div class="card">
+<h2>3. Structural Section & Materials</h2>
+<div class="row"><div><label>Waist thickness D (mm)</label><input id="D" type="number" value="160"></div><div><label>Nominal cover (mm)</label><input id="cover" type="number" value="20"></div></div>
+<div class="row"><div><label>Exposure</label><select id="exposure"><option value="mild" selected>Mild — 20 mm</option><option value="moderate">Moderate — 30 mm</option><option value="severe">Severe — 45 mm</option><option value="verysevere">Very severe — 50 mm</option><option value="extreme">Extreme — 75 mm</option></select></div><div><label>Maximum aggregate size (mm)</label><input id="agg" type="number" value="20"></div></div>
+<div class="row"><div><label>Concrete f<sub>ck</sub> (MPa)</label><select id="fck"><option>20</option><option selected>25</option><option>30</option><option>35</option><option>40</option></select></div><div><label>Main steel f<sub>y</sub> (MPa)</label><select id="fy"><option>415</option><option selected>500</option></select></div></div>
+<div class="row"><div><label>Main bar diameter φ (mm)</label><select id="phi"><option>8</option><option>10</option><option selected>12</option><option>16</option><option>20</option></select></div><div><label>Floor finish q<sub>f</sub> (kN/m²)</label><input id="finish" type="number" value="1.0" step="0.1"></div></div>
+<div class="row"><div><label>Live load q<sub>L</sub> (kN/m²)</label><select id="live"><option selected value="3">Residential stairs — 3.0</option><option value="4">Office/public circulation — 4.0</option><option value="5">Assembly / heavy-use basis — 5.0</option><option value="custom">Custom</option></select></div><div><label>Custom live load (kN/m²)</label><input id="customLive" type="number" value="3" step="0.1"></div></div>
+<div class="row"><div><label>Distribution bar φ (mm)</label><select id="phiDist"><option>8</option><option selected>10</option><option>12</option></select></div><div><label>Provided main spacing (mm)</label><input id="sMain" type="number" value="150"></div></div>
+<div class="row"><div><label>Provided distribution spacing (mm)</label><input id="sDist" type="number" value="200"></div><div><label>Support anchorage length L₀ (mm)</label><input id="L0" type="number" value="150"></div></div>
+<div class="row"><div><label>Fig. 4 tension-steel modification factor Kt</label><input id="Kt" type="number" value="1.0" step="0.05" min="1"></div><div><label>Support confinement factor</label><select id="conf"><option value="1">1.0 — not confined</option><option value="1.3">1.3 — confined by compression</option></select></div></div>
+<button onclick="design()">Run Design</button>
+</div>
+</aside>
+
+<main>
+<div class="status" id="status"><strong>Enter inputs and run the staircase design.</strong><span>The calculator uses a 1 m longitudinal strip and reports IS 456 checks within the implemented scope.</span></div>
+<div class="kpis" id="kpis"></div>
+<div class="tabs">
+<button class="tab active" onclick="tab('results',this)">Design Results</button>
+<button class="tab" onclick="tab('detail',this)">Reinforcement & Detailing</button>
+<button class="tab" onclick="tab('audit',this)">IS 456 Verification</button>
+<button class="tab" onclick="tab('manual',this)">Technical Manual</button>
+</div>
+
+<section id="results" class="panel active">
+<div class="card"><h2>Geometry & Loads</h2><div id="geomTable"></div></div>
+<div class="card"><h2>Flexure, Shear & Deflection</h2><div id="designTable"></div></div>
+</section>
+
+<section id="detail" class="panel">
+<div class="card"><h2>Reinforcement Schedule</h2><div id="rebarTable"></div></div>
+<div class="card"><h2>Staircase Geometry Preview</h2><svg id="stairSvg" viewBox="0 0 900 260"></svg></div>
+</section>
+
+<section id="audit" class="panel">
+<div class="card"><h2>IS 456 / IS 875 Verification Log</h2><div id="auditTable"></div></div>
+<div class="card"><h2>Scope & Engineering Limitations</h2>
+<div class="warnbox">This is a longitudinal 1 m strip design tool. It does not perform frame analysis, two-way/open-well load distribution, combined flight+landing load modelling for Cl. 33.1(c) same-direction landings, torsion analysis of landings, re-entrant/kink reinforcement design, seismic detailing, fire engineering, or the IS 875 concentrated-load local check. UDL and concentrated load cases are not to be added together; the governing case must be established separately.</div>
+</div>
+</section>
+
+<section id="manual" class="panel manual">
+<div class="card" style="padding:0">
+  <div class="guide-shell">
+    <div class="guide-head"><strong>IS 456:2000 RC Staircase — Design Guide & Technical Manual</strong><span>Limit State Method · Independent Reference</span></div>
+    <div class="guide-tabs">
+      <button class="guide-tab active" onclick="manualTab('m-intro',this)">Technical Background</button>
+      <button class="guide-tab" onclick="manualTab('m-steps',this)">Step-by-Step Design Guide</button>
+      <button class="guide-tab" onclick="manualTab('m-formulas',this)">Formula & Detailing Reference</button>
+    </div>
+    <div class="guide-panel active" id="m-intro">
+      <div class="guide-intro">
+        <h3>Purpose and scope</h3>
+        <p>This guide is an independent design reference for the longitudinal 1 m strip model implemented in this calculator. It separates mandatory IS 456 provisions from architectural guidance, load-code inputs, and engineer-review items. The calculator does not replace structural analysis or project-specific detailing.</p>
+      </div>
+      <div class="manual-step">
+        <h4><span>1. Structural behaviour of a stair flight</span><span>IS 456 · Cl. 33</span></h4>
+        <p>The flight is treated as a reinforced-concrete slab spanning longitudinally between its supports. For the implemented model, the design strip is 1 m wide. Straight and doglegged flights are handled as the selected flight strip; open-well/two-way load sharing is not silently assumed.</p>
+        <p class="manual-note">IS 456 Cl. 33 specifically addresses effective span, distribution of loading and depth of stairs. Open-well cases require the loading distribution provisions of Cl. 33.2 to be considered separately.</p>
+      </div>
+      <div class="manual-step">
+        <h4><span>2. Geometry versus structural-code requirements</span><span>Architectural guidance</span></h4>
+        <p>Riser/tread proportions and the relation 2R + T ≈ 600–640 mm are presented as planning/comfort guidance in this tool, not as requirements of IS 456. They must also satisfy the applicable architectural, building and accessibility requirements for the project.</p>
+      </div>
+      <div class="manual-step">
+        <h4><span>3. Loads and design values</span><span>IS 875 Part 2 · IS 456 Cl. 36</span></h4>
+        <p>Dead loads include the inclined waist-slab self-weight, step load and finish load. Imposed load is selected from the occupancy basis. The characteristic loads are then converted to the collapse design load using the selected limit-state load factor implemented by the calculator.</p>
+        <div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>w</mi><mi>u</mi></msub><mo>=</mo><mn>1.5</mn><mo>(</mo><msub><mi>w</mi><mi>slab</mi></msub><mo>+</mo><msub><mi>w</mi><mi>steps</mi></msub><mo>+</mo><msub><mi>q</mi><mi>f</mi></msub><mo>+</mo><msub><mi>q</mi><mi>L</mi></msub><mo>)</mo></mrow></math></div>
+      </div>
+      <div class="manual-step">
+        <h4><span>4. Flexure, shear and serviceability</span><span>Cl. 38 · Cl. 40 · Cl. 23.2.1</span></h4>
+        <p>Flexural resistance is checked using the singly reinforced rectangular-section basis. Shear is checked using the solid-slab modification factor and Table 19 values. Deflection is controlled using the span-to-effective-depth method with the engineer-verified Fig. 4 modification factor.</p>
+      </div>
+      <div class="manual-step">
+        <h4><span>5. Reinforcement and anchorage</span><span>Cl. 26.2 · 26.3 · 26.4 · 26.5.2</span></h4>
+        <p>Main and distribution reinforcement are checked for minimum area, maximum spacing, bar diameter and clear spacing. Development length is based on the design bond stress. Support anchorage is shown separately so the engineer can verify the actual support and confinement condition.</p>
+      </div>
+      <div class="warnbox"><strong>Important:</strong> The point-load case from IS 875 is not combined automatically with the UDL case. Open-well load distribution, same-direction landing load modelling, landing torsion, re-entrant/kink detailing, support restraint, seismic detailing, fire resistance and project-specific frame action remain engineer-review items.</div>
+    </div>
+    <div class="guide-panel" id="m-steps">
+      <div class="guide-intro"><h3>Independent staircase design sequence</h3><p>Follow this sequence from geometry through final verification. The sequence is deliberately independent of the result tables so the engineer can review the design logic before accepting the calculated reinforcement.</p></div>
+      <div class="manual-step"><h4><span>Step 1: Establish geometry</span><span>Planning input</span></h4><p>Determine floor-to-floor height, riser count, actual riser, tread, flight going and stair width. Check the comfort relation separately from structural-code checks.</p><div class="manual-formula"><math class="manual-math" display="block"><mrow><mi>R</mi><mo>=</mo><mfrac><mi>H</mi><mi>n</mi></mfrac><mo>;</mo><mspace width="0.4em"></mspace><mn>2</mn><mi>R</mi><mo>+</mo><mi>T</mi><mo>≈</mo><mn>600</mn><mo>–</mo><mn>640</mn><mtext> mm</mtext></mrow></math></div></div>
+      <div class="manual-step"><h4><span>Step 2: Determine effective span</span><span>Cl. 33.1</span></h4><p>Use the support condition explicitly. For landing-edge support, use the horizontal going plus the limited landing contributions. For beam support, use centre-to-centre beam distance. For landings spanning in the same direction, treat the landing and flight as one slab.</p><div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>L</mi><mi>eff</mi></msub><mo>=</mo><mi>G</mi><mo>+</mo><mi>min</mi><mo>(</mo><mfrac><mi>X</mi><mn>2</mn></mfrac><mo>,</mo><mn>1</mn><mtext> m</mtext><mo>)</mo><mo>+</mo><mi>min</mi><mo>(</mo><mfrac><mi>Y</mi><mn>2</mn></mfrac><mo>,</mo><mn>1</mn><mtext> m</mtext><mo>)</mo></mrow></math></div></div>
+      <div class="manual-step"><h4><span>Step 3: Establish section depth and effective depth</span><span>Cl. 33.3 · Cl. 26.4</span></h4><p>Overall stair depth is the minimum thickness perpendicular to the soffit. For the selected main bar, the effective depth is taken to the centroid of the tension steel.</p><div class="manual-formula"><math class="manual-math" display="block"><mrow><mi>d</mi><mo>=</mo><mi>D</mi><mo>−</mo><mi>cover</mi><mo>−</mo><mfrac><mi>φ</mi><mn>2</mn></mfrac></mrow></math></div></div>
+      <div class="manual-step"><h4><span>Step 4: Calculate characteristic loads on horizontal projection</span><span>Load model</span></h4><p>For the implemented 1 m longitudinal strip, convert the inclined waist slab self-weight to horizontal projection and add the step, finish and imposed loads.</p><div class="manual-formula-grid"><div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>w</mi><mi>slab</mi></msub><mo>=</mo><mn>25</mn><mfrac><mi>D</mi><mn>1000</mn></mfrac><mfrac><msqrt><mrow><msup><mi>R</mi><mn>2</mn></msup><mo>+</mo><msup><mi>T</mi><mn>2</mn></msup></mrow></msqrt><mi>T</mi></mfrac></mrow></math></div><div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>w</mi><mi>steps</mi></msub><mo>=</mo><mn>25</mn><mfrac><mi>R</mi><mn>2000</mn></mfrac></mrow></math></div></div></div>
+      <div class="manual-step"><h4><span>Step 5: Determine design actions</span><span>Simply supported strip model</span></h4><p>For the implemented UDL model, calculate the ultimate midspan moment and support shear.</p><div class="manual-formula-grid"><div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>M</mi><mi>u</mi></msub><mo>=</mo><mfrac><msub><mi>w</mi><mi>u</mi></msub><msup><msub><mi>L</mi><mi>eff</mi></msub><mn>2</mn></msup><mn>8</mn></mfrac></mrow></math></div><div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>V</mi><mi>u</mi></msub><mo>=</mo><mfrac><msub><mi>w</mi><mi>u</mi></msub><msub><mi>L</mi><mi>eff</mi></msub><mn>2</mn></mfrac></mrow></math></div></div><p class="manual-note">This is a modelling assumption of the calculator, not a statement that every staircase is simply supported. Continuous, partially fixed or frame-integrated stairs require a different analysis. A same-direction landing under Cl. 33.1(c) also requires explicit landing-load treatment; the present engine flags that case for review rather than silently using flight-only loading.</p></div>
+      <div class="manual-step"><h4><span>Step 6: Check depth and flexural capacity</span><span>Cl. 38 · Annex G</span></h4><p>Determine the limiting moment capacity and required effective depth. If the section cannot resist the design moment as a singly reinforced section, increase the section depth or redesign the section; do not force the reinforcement equation beyond its valid range.</p></div>
+      <div class="manual-step"><h4><span>Step 7: Provide main and distribution steel</span><span>Cl. 26.3.3 · 26.5.2.1 · 26.5.2.2</span></h4><p>Use the required flexural steel or slab minimum, whichever governs. Check main spacing ≤ min(3d, 300 mm), distribution spacing ≤ min(5d, 450 mm), and bar diameter ≤ D/8. Check clear spacing independently.</p></div>
+      <div class="manual-step"><h4><span>Step 8: Check shear</span><span>Cl. 40.2.1.1 · Table 19</span></h4><p>Calculate nominal shear stress from the design shear and compare it with the slab design shear strength, including the depth factor k applicable to solid slabs. The table values are interpolated in the implemented range.</p></div>
+      <div class="manual-step"><h4><span>Step 9: Check deflection</span><span>Cl. 23.2.1 · Fig. 4</span></h4><p>Compare L/d with the permitted basic ratio modified by the verified tension-steel factor Kt. The calculator does not fabricate a Fig. 4 value; the engineer-entered value must be verified from the code figure for the actual reinforcement condition.</p></div>
+      <div class="manual-step"><h4><span>Step 10: Check development and support anchorage</span><span>Cl. 26.2.1 · 26.2.2</span></h4><p>Calculate development length from bar stress and design bond stress. Then review the available anchorage at the actual support. The confinement factor is explicit and must not be increased merely to make the check pass.</p></div>
+      <div class="manual-step"><h4><span>Step 11: Detail landing / re-entrant junctions</span><span>Cl. 26.2.2.6 · Cl. 41</span></h4><p>At a doglegged or otherwise kinked stair, review the flight-to-landing junction separately. IS 456 requires additional links or stirrups where a change in reinforcement direction creates an outward splitting force, and it cautions against bent tension bars at re-entrant angles. Any equilibrium torsion required at a landing/support must be designed separately; the present longitudinal-strip engine does not invent that reinforcement.</p></div>
+      <div class="manual-step"><h4><span>Step 12: Serviceability and final verification</span><span>Cl. 42.1 · Cl. 43.1</span></h4><p>Confirm the deflection and reinforcement-spacing provisions used for flexural crack control. Where the implemented spacing provisions are not sufficient or a special condition requires an explicit crack-width calculation, perform the Annex F check separately. Confirm every applicable automated check is PASS and close all ENGINEER REVIEW items before issue.</p></div>
+    </div>
+    <div class="guide-panel" id="m-formulas">
+      <div class="guide-intro"><h3>Formula and detailing reference</h3><p>The following compact reference is tied to the clauses actually used by the calculator. Formula rendering uses native MathML so equations remain independent of a third-party equation engine.</p></div>
+      <div class="manual-reference"><h4><span>Effective span of stairs</span><span>Cl. 33.1</span></h4><div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>L</mi><mi>eff</mi></msub><mo>=</mo><mi>G</mi><mo>+</mo><mi>min</mi><mo>(</mo><mfrac><mi>X</mi><mn>2</mn></mfrac><mo>,</mo><mn>1</mn><mtext> m</mtext><mo>)</mo><mo>+</mo><mi>min</mi><mo>(</mo><mfrac><mi>Y</mi><mn>2</mn></mfrac><mo>,</mo><mn>1</mn><mtext> m</mtext><mo>)</mo></mrow></math></div><p>Alternative support conditions are defined explicitly in Cl. 33.1.</p></div>
+      <div class="manual-reference"><h4><span>Distribution of loading in open-well stairs</span><span>Cl. 33.2</span></h4><p>Where spans cross at right angles in an open well, the code permits the common load area to be taken half in each direction. The present longitudinal-strip tool does not automate this distribution; it is intentionally flagged for engineer review.</p></div>
+      <div class="manual-reference"><h4><span>Depth of staircase section</span><span>Cl. 33.3</span></h4><p>The overall depth is the minimum thickness perpendicular to the stair soffit.</p></div>
+      <div class="manual-reference"><h4><span>Limiting moment and flexural steel</span><span>Cl. 38 · Annex G</span></h4><div class="manual-formula-grid"><div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>M</mi><mi>u,lim</mi></msub><mo>=</mo><msub><mi>R</mi><mrow><mi>u</mi><mo>,</mo><mi>max</mi></mrow></msub><mi>b</mi><msup><mi>d</mi><mn>2</mn></msup></mrow></math></div><div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>A</mi><mi>st</mi></msub><mo>=</mo><mn>0.5</mn><mfrac><msub><mi>f</mi><mi>ck</mi></msub><msub><mi>f</mi><mi>y</mi></msub></mfrac><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msqrt><mrow><mn>1</mn><mo>−</mo><mfrac><mrow><mn>4.6</mn><msub><mi>M</mi><mi>u</mi></msub></mrow><mrow><msub><mi>f</mi><mi>ck</mi></msub><mi>b</mi><msup><mi>d</mi><mn>2</mn></msup></mrow></mfrac></mrow></msqrt><mo>)</mo></mrow><mi>b</mi><mi>d</mi></mrow></math></div></div><p>For the implemented grades, Ru,max is 0.148 for Fe250, 0.138 for Fe415 and 0.133 for Fe500.</p></div>
+      <div class="manual-reference"><h4><span>Minimum reinforcement and bar diameter</span><span>Cl. 26.5.2.1 · 26.5.2.2</span></h4><div class="manual-formula-grid"><div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>A</mi><mtext>st,min</mtext></msub><mo>=</mo><mn>0.0015</mn><mi>b</mi><mi>D</mi></mrow></math></div><div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>A</mi><mtext>st,min</mtext></msub><mo>=</mo><mn>0.0012</mn><mi>b</mi><mi>D</mi><mo> </mo><mtext>for HYSD</mtext></mrow></math></div></div><p>Bar diameter shall not exceed D/8. Spacing limits are governed separately by Cl. 26.3.3.</p></div>
+      <div class="manual-reference"><h4><span>Spacing and clear distance</span><span>Cl. 26.3.1 · 26.3.3</span></h4><div class="manual-formula-grid"><div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>s</mi><mi>main,max</mi></msub><mo>=</mo><mi>min</mi><mo>(</mo><mn>3</mn><mi>d</mi><mo>,</mo><mn>300</mn><mtext> mm</mtext><mo>)</mo></mrow></math></div><div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>s</mi><mi>dist,max</mi></msub><mo>=</mo><mi>min</mi><mo>(</mo><mn>5</mn><mi>d</mi><mo>,</mo><mn>450</mn><mtext> mm</mtext><mo>)</mo></mrow></math></div></div><p>Minimum clear spacing is checked independently against the bar diameter and aggregate-related requirements used by the calculator.</p></div>
+      <div class="manual-reference"><h4><span>Shear strength of solid slabs</span><span>Cl. 40.2.1.1 · Table 19</span></h4><div class="manual-formula-grid"><div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>τ</mi><mi>v</mi></msub><mo>=</mo><mfrac><msub><mi>V</mi><mi>u</mi></msub><mi>b</mi><mi>d</mi></mfrac></mrow></math></div><div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>τ</mi><mi>c,allow</mi></msub><mo>=</mo><mi>k</mi><msub><mi>τ</mi><mi>c</mi></msub></mrow></math></div></div><p>The slab depth factor k is selected from the code values by overall depth; τc is obtained from Table 19 for the applicable concrete grade and tension-steel percentage.</p></div>
+      <div class="manual-reference"><h4><span>Deflection control</span><span>Cl. 23.2.1 · Fig. 4</span></h4><div class="manual-formula"><math class="manual-math" display="block"><mrow><mfrac><msub><mi>L</mi><mi>eff</mi></msub><mi>d</mi></mfrac><mo>≤</mo><mn>20</mn><msub><mi>K</mi><mi>t</mi></msub></mrow></math></div><p>Kt is deliberately engineer-entered from Fig. 4. The calculator's default of 1.0 is not a fabricated chart interpolation.</p></div>
+      <div class="manual-reference"><h4><span>Development length and bond</span><span>Cl. 26.2.1</span></h4><div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>L</mi><mi>d</mi></msub><mo>=</mo><mfrac><mrow><mi>φ</mi><msub><mi>σ</mi><mi>s</mi></msub></mrow><mrow><mn>4</mn><msub><mi>τ</mi><mi>bd</mi></msub></mrow></mfrac></mrow></math></div><p>For the implemented tension-bar calculation, σs = 0.87fy. Design bond stress is taken from Cl. 26.2.1.1 and increased by 60 percent for deformed bars conforming to IS 1786.</p></div>
+      <div class="manual-reference"><h4><span>Support anchorage review</span><span>Cl. 26.2 · engineer review</span></h4><div class="manual-formula"><math class="manual-math" display="block"><mrow><msub><mi>L</mi><mi>d</mi></msub><mo>≤</mo><mi>η</mi><mfrac><msub><mi>M</mi><mn>1</mn></msub><mi>V</mi></mfrac><mo>+</mo><msub><mi>L</mi><mn>0</mn></msub></mrow></math></div><p>The calculator exposes η rather than assuming confinement. Use η = 1.3 only where the support condition actually satisfies the relevant confinement assumption; otherwise use 1.0 and provide the required anchorage.</p></div>
+      <div class="goodbox"><strong>Audit discipline carried forward:</strong> clause references are shown beside the governing check; architectural guidance is not labelled as an IS 456 requirement; Fig. 4 Kt is not hard-coded as a chart result; unsupported concentrated-load/two-way/open-well/same-direction-landing cases are flagged rather than silently simplified; re-entrant junction detailing is explicitly reviewed; equations use native MathML; and the manual distinguishes calculator scope from engineering judgement.</div>
+    </div>
+  </div>
+</div>
+</section>
+</main>
+</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const n=id=>parseFloat($(id).value)||0;
+const fmt=(x,d=2)=>Number.isFinite(x)?x.toFixed(d):'—';
+const areaBar=phi=>Math.PI*phi*phi/4;
+const pass=x=>x?'<span class="pass">PASS</span>':'<span class="failtxt">FAIL</span>';
+const bondBase={20:1.2,25:1.4,30:1.5,35:1.7,40:1.9};
+const tauTable={
+20:[[0.15,.28],[.25,.35],[.50,.46],[.75,.54],[1,.60],[1.25,.64],[1.5,.68],[1.75,.71],[2,.71],[2.25,.71],[2.5,.71],[2.75,.71],[3,.71]],
+25:[[.15,.29],[.25,.36],[.50,.48],[.75,.56],[1,.64],[1.25,.70],[1.5,.74],[1.75,.78],[2,.82],[2.25,.85],[2.5,.88],[2.75,.90],[3,.92]],
+30:[[.15,.29],[.25,.37],[.50,.49],[.75,.59],[1,.66],[1.25,.71],[1.5,.76],[1.75,.80],[2,.84],[2.25,.88],[2.5,.91],[2.75,.94],[3,.96]],
+35:[[.15,.29],[.25,.37],[.50,.50],[.75,.59],[1,.67],[1.25,.73],[1.5,.78],[1.75,.82],[2,.86],[2.25,.90],[2.5,.93],[2.75,.96],[3,.99]],
+40:[[.15,.30],[.25,.38],[.50,.51],[.75,.60],[1,.68],[1.25,.74],[1.5,.79],[1.75,.84],[2,.88],[2.25,.92],[2.5,.95],[2.75,.98],[3,1.01]]
+};
+function interpTau(fck,pt){
+  const g=Math.min(40,Math.max(20,Math.round(fck/5)*5)); const a=tauTable[g]||tauTable[25];
+  pt=Math.min(3,Math.max(.15,pt));
+  if(pt<=a[0][0])return a[0][1];
+  for(let i=1;i<a.length;i++){if(pt<=a[i][0]){let [x1,y1]=a[i-1],[x2,y2]=a[i];return y1+(y2-y1)*(pt-x1)/(x2-x1)}}
+  return a[a.length-1][1];
+}
+function kSlab(D){if(D<=150)return 1.3;if(D<=175)return 1.25;if(D<=200)return 1.2;if(D<=225)return 1.15;if(D<=250)return 1.1;if(D<=275)return 1.05;return 1.0}
+function tab(id,btn){document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active')}
+function manualTab(id,btn){document.querySelectorAll('.guide-panel').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('.guide-tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active')}
+function effectiveSpan(){
+ const type=$('spanType').value, G=(Math.max(1,n('flightRisers')-1)*n('T'))/1000, X=n('X')/1000, Y=n('Y')/1000, cc=n('ccSpan')/1000;
+ if(type==='landingEdges')return G+Math.min(X/2,1)+Math.min(Y/2,1);
+ if(type==='beamCC')return cc;
+ return cc;
+}
+function design(){
+ const H=n('H'), Rt=n('Rtarget'), Tmm=n('T'), flightR=n('flightRisers'), W=n('width'), D=n('D'), cover=n('cover'), fck=n('fck'), fy=n('fy'), phi=n('phi'), finish=n('finish');
+ const qL=$('live').value==='custom'?n('customLive'):parseFloat($('live').value), phiD=n('phiDist'), sM=n('sMain'), sD=n('sDist'), L0=n('L0'), Kt=Math.max(1,n('Kt')), conf=parseFloat($('conf').value), agg=n('agg');
+ const actualR=H/Math.max(1,Math.round(H/Rt)), riserCount=Math.max(1,Math.round(H/Rt));
+ $('goingDisplay').value=fmt(Math.max(1,flightR-1)*Tmm,0);
+ const flightTreads=Math.max(1,flightR-1), T=Tmm/1000, R=actualR/1000, G=flightTreads*T;
+ const Leff=effectiveSpan(), b=1000, d=D-cover-phi/2;
+ const wslab=25*(D/1000)*Math.sqrt(actualR**2+Tmm**2)/Tmm;
+ const wsteps=25*actualR/2000;
+ const w= wslab+wsteps+finish+qL, wu=1.5*w;
+ const Mu=wu*Leff*Leff/8, Vu=wu*Leff/2;
+ const Ru={250:.148,415:.138,500:.133}[fy]||.133;
+ const Mulim=Ru*fck*b*d*d/1e6;
+ const dreq=Math.sqrt((Mu*1e6)/(Ru*fck*b));
+ const disc=1-4.6*(Mu*1e6)/(fck*b*d*d);
+ const AstReq=disc>=0?.5*fck/fy*(1-Math.sqrt(disc))*b*d:NaN;
+ const AstMin=(fy===250?.0015:.0012)*b*D;
+ const AstUse=Math.max(AstReq||0,AstMin);
+ const AstProv=1000/sM*areaBar(phi);
+ const AstDistMin=AstMin, AstDistProv=1000/sD*areaBar(phiD);
+ const maxMain=Math.min(3*d,300), maxDist=Math.min(5*d,450), maxPhi=D/8;
+ const pt=100*AstProv/(b*d);
+ const tauC=interpTau(fck,pt), k=kSlab(D), tauAllow=k*tauC, tauV=Vu*1000/(b*d);
+ const fs=0.58*fy*(AstReq&&AstReq>0?AstReq/AstProv:1);
+ const ldActual=Leff*1000/d, ldAllow=20*Kt;
+ const tauBd=(bondBase[Math.min(40,Math.max(20,Math.round(fck/5)*5))]||1.4)*1.6;
+ const Ld=phi*(0.87*fy)/(4*tauBd);
+ const xu1=AstProv>0?(0.87*fy*AstProv)/(0.36*fck*b):0;
+ const xuMax={250:.53,415:.48,500:.46}[fy]||.46;
+ const M1= xu1<=xuMax*d ? 0.87*fy*AstProv*(d-0.42*xu1)/1e6 : 0;
+ const anchLength=conf*(M1*1e6)/(Vu*1000)+L0;
+ const exposureReq={mild:20,moderate:30,severe:45,verysevere:50,extreme:75}[$('exposure').value]||20;
+ const coverReq=Math.max(exposureReq,phi,phiD);
+ const clearMain=sM-phi, clearDist=sD-phiD, minClear=Math.max(phi,25,agg+5);
+ const comfort=2*actualR+Tmm;
+ const checks={
+  geometry:actualR>=0.15&&actualR<=0.19&&Tmm>=250&&Tmm<=300&&comfort>=600&&comfort<=640,
+  depth:d>=dreq,
+  flexure:Number.isFinite(AstReq)&&Mu<=Mulim,
+  mainSteel:AstProv>=AstMin&&AstProv>=AstUse&&sM<=maxMain&&phi<=maxPhi,
+  distSteel:AstDistProv>=AstDistMin&&sD<=maxDist&&phiD<=maxPhi,
+  shear:tauV<=tauAllow,
+  deflection:ldActual<=ldAllow,
+  anchorage:anchLength>=Ld,
+ cover:cover>=coverReq,
+ clearSpacing:clearMain>=minClear&&clearDist>=Math.max(phiD,25,agg+5)
+ };
+ const landingSameReview=$('spanType').value==='landingSame';
+ const overall=Object.values(checks).every(Boolean)&&!landingSameReview;
+ const geometryMsg=comfort<600?'Comfort relation below 600 mm':comfort>640?'Comfort relation above 640 mm':'Within stated 600–640 mm guidance';
+ $('status').className='status '+(overall?'':'fail');
+ $('status').innerHTML=`<strong>${overall?'Design checks pass within implemented scope':'Design requires revision'}</strong><span>${overall?'All implemented structural checks pass. Verify project-specific loading/support/detailing before issue.':geometryMsg}</span>`;
+ $('kpis').innerHTML=[
+ ['Leff',fmt(Leff,3)+' m'],['wu',fmt(wu,2)+' kN/m²'],['Mu',fmt(Mu,2)+' kN·m/m'],['Vu',fmt(Vu,2)+' kN/m'],
+ ['d',fmt(d,1)+' mm'],['Ast req',fmt(AstReq,0)+' mm²/m'],['Ast prov',fmt(AstProv,0)+' mm²/m'],['τv / τallow',fmt(tauV,3)+' / '+fmt(tauAllow,3)]
+ ].map(x=>`<div class="kpi"><div class="v">${x[1]}</div><div class="l">${x[0]}</div></div>`).join('');
+ $('geomTable').innerHTML=`<table><tr><th>Item</th><th>Result</th><th>Basis</th></tr>
+ <tr><td>Risers from H</td><td>${riserCount} @ ${fmt(actualR,1)} mm</td><td>Geometrical calculation</td></tr>
+ <tr><td>Designed flight</td><td>${flightR} risers, ${flightTreads} treads</td><td>User input</td></tr>
+ <tr><td>2R + T</td><td>${fmt(comfort,0)} mm</td><td>Architectural comfort guidance</td></tr>
+ <tr><td>Effective span <span class="clause">Cl. 33.1</span></td><td>${fmt(Leff,3)} m</td><td>IS 456 staircase effective-span rule</td></tr>
+ <tr><td>Waist load <span class="clause">Load model</span></td><td>${fmt(wslab,2)} kN/m²</td><td>Inclined slab self-weight on horizontal projection</td></tr>
+ <tr><td>Step load <span class="clause">Load model</span></td><td>${fmt(wsteps,2)} kN/m²</td><td>25R/2 on horizontal projection</td></tr>
+ <tr><td>Floor finish</td><td>${fmt(finish,2)} kN/m²</td><td>User input</td></tr>
+ <tr><td>Live load <span class="clause">IS 875 Pt.2</span></td><td>${fmt(qL,2)} kN/m²</td><td>IS 875 Part 2 basis</td></tr>
+ <tr><td>Total characteristic load</td><td>${fmt(w,2)} kN/m²</td><td>Sum of characteristic loads</td></tr></table>`;
+ $('designTable').innerHTML=`<table><tr><th>Check</th><th>Calculated</th><th>Limit / requirement</th><th>Status</th></tr>
+ <tr><td>Effective depth <span class="clause">Cl. 33.3</span></td><td>${fmt(d,1)} mm</td><td>≥ ${fmt(dreq,1)} mm required</td><td>${pass(checks.depth)}</td></tr>
+ <tr><td>Limiting moment <span class="clause">Cl. 38 / Annex G</span></td><td>${fmt(Mulim,2)} kN·m/m</td><td>Mu = ${fmt(Mu,2)} kN·m/m</td><td>${pass(checks.flexure)}</td></tr>
+ <tr><td>Main steel <span class="clause">Cl. 26.5.2.1</span></td><td>${fmt(AstProv,0)} mm²/m</td><td>≥ ${fmt(AstUse,0)} mm²/m; s ≤ ${fmt(maxMain,0)} mm</td><td>${pass(checks.mainSteel)}</td></tr>
+ <tr><td>Distribution steel <span class="clause">Cl. 26.3.3(b)</span></td><td>${fmt(AstDistProv,0)} mm²/m</td><td>≥ ${fmt(AstDistMin,0)} mm²/m; s ≤ ${fmt(maxDist,0)} mm</td><td>${pass(checks.distSteel)}</td></tr>
+ <tr><td>Shear stress <span class="clause">Cl. 40.2.1.1</span></td><td>${fmt(tauV,3)} N/mm²</td><td>≤ ${fmt(tauAllow,3)} N/mm² (k=${fmt(k,2)})</td><td>${pass(checks.shear)}</td></tr>
+ <tr><td>Deflection L/d <span class="clause">Cl. 23.2.1</span></td><td>${fmt(ldActual,2)}</td><td>≤ ${fmt(ldAllow,2)} (Kt=${Kt.toFixed(2)})</td><td>${pass(checks.deflection)}</td></tr>
+ <tr><td>Development length <span class="clause">Cl. 26.2.1</span></td><td>${fmt(Ld,0)} mm</td><td>1.3/1.0·M₁/V + L₀ = ${fmt(anchLength,0)} mm; M₁ = ${fmt(M1,2)} kN·m/m</td><td>${pass(checks.anchorage)}</td></tr>
+ <tr><td>Nominal cover <span class="clause">Cl. 26.4.1 / 26.4.2</span></td><td>${cover} mm</td><td>Required ≥ ${coverReq} mm (exposure ${exposureReq} mm; bar diameter governs where larger)</td><td>${pass(checks.cover)}</td></tr>
+ <tr><td>Clear bar spacing <span class="clause">Cl. 26.3.1</span></td><td>${fmt(clearMain,0)} / ${fmt(clearDist,0)} mm</td><td>≥ applicable minimum ${fmt(minClear,0)} mm</td><td>${pass(checks.clearSpacing)}</td></tr></table>
+ <div class="note">Kt is taken from the engineer-entered IS 456 Fig. 4 value. The default Kt = 1.0 is the conservative lower bound; replace it with the verified project value before final issue.</div>`;
+ $('rebarTable').innerHTML=`<table><tr><th>Reinforcement</th><th>Provision</th><th>Detailing check</th></tr>
+ <tr><td>Main longitudinal</td><td>${phi} mm @ ${sM} mm c/c</td><td>${fmt(AstProv,0)} mm²/m ≥ ${fmt(AstUse,0)}; ${pass(checks.mainSteel)}</td></tr>
+ <tr><td>Distribution</td><td>${phiD} mm @ ${sD} mm c/c</td><td>${fmt(AstDistProv,0)} mm²/m ≥ ${fmt(AstDistMin,0)}; ${pass(checks.distSteel)}</td></tr>
+ <tr><td>Nominal cover <span class="clause">Cl. 26.4.1 / 26.4.2</span></td><td>${cover} mm</td><td>Required ≥ ${coverReq} mm</td></tr>
+ <tr><td>Maximum bar diameter</td><td>${phi} mm</td><td>≤ D/8 = ${fmt(maxPhi,1)} mm</td></tr>
+ <tr><td>Development length <span class="clause">Cl. 26.2.1</span></td><td>${fmt(Ld,0)} mm</td><td>τbd = ${fmt(tauBd,2)} N/mm² (deformed bars)</td></tr></table>`;
+ drawStair(Tmm,actualR,flightR);
+ $('auditTable').innerHTML=`<table><tr><th>Clause / basis</th><th>Verification</th><th>Status</th></tr>
+ <tr><td><span class="clause">Cl. 33.1</span></td><td>Effective span based on selected support condition</td><td>${pass(Leff>0)}</td></tr>
+ <tr><td><span class="clause">Cl. 33.3</span></td><td>Depth measured perpendicular to soffit; d = D − cover − φ/2</td><td>${pass(d>0)}</td></tr>
+ <tr><td><span class="clause">Cl. 26.5.2.1</span></td><td>Minimum slab reinforcement = 0.12% for HYSD / 0.15% mild steel</td><td>${pass(checks.mainSteel&&checks.distSteel)}</td></tr>
+ <tr><td><span class="clause">Cl. 26.3.3(b)</span></td><td>Main spacing ≤ min(3d,300); distribution ≤ min(5d,450)</td><td>${pass(sM<=maxMain&&sD<=maxDist)}</td></tr>
+ <tr><td><span class="clause">Cl. 26.5.2.2</span></td><td>Bar diameter ≤ D/8</td><td>${pass(phi<=maxPhi&&phiD<=maxPhi)}</td></tr>
+ <tr><td><span class="clause">Cl. 26.3.1</span></td><td>Minimum clear spacing based on bar, 25 mm and aggregate size</td><td>${pass(checks.clearSpacing)}</td></tr>
+ <tr><td><span class="clause">Cl. 26.4 / Table 16</span></td><td>Nominal cover for selected exposure</td><td>${pass(checks.cover)}</td></tr>
+ <tr><td><span class="clause">Cl. 38 / Annex G</span></td><td>Mu ≤ limiting singly reinforced moment</td><td>${pass(checks.flexure)}</td></tr>
+ <tr><td><span class="clause">Cl. 40.2.1.1</span></td><td>τv ≤ kτc for solid slab</td><td>${pass(checks.shear)}</td></tr>
+ <tr><td><span class="clause">Cl. 23.2.1</span></td><td>Basic L/d = 20 for simply supported, modified by Kt</td><td>${pass(checks.deflection)}</td></tr>
+ <tr><td><span class="clause">Cl. 26.2.1</span></td><td>Development length from design bond stress</td><td>${pass(checks.anchorage)}</td></tr>
+ <tr><td><span class="clause">Cl. 26.2.2.6</span></td><td>Re-entrant / kink junction: outward splitting force and bent tension-bar detailing require separate review for doglegged stairs</td><td>${$('stairType').value==='dogleg'?'<span class="na">ENGINEER REVIEW</span>':'<span class="na">N.A.</span>'}</td></tr>
+ <tr><td><span class="clause">Cl. 41</span></td><td>Landing/support torsion is outside the longitudinal-strip model</td><td><span class="na">ENGINEER REVIEW</span></td></tr>
+ <tr><td><span class="clause">Cl. 33.1(c)</span></td><td>Same-direction landing is treated as one slab; this calculator does not separately model landing loads across the combined span</td><td>${landingSameReview?'<span class="na">ENGINEER REVIEW</span>':'<span class="na">N.A.</span>'}</td></tr>
+ <tr><td><span class="clause">Cl. 43.1</span></td><td>Flexural crack control is normally addressed by reinforcement spacing; explicit Annex F crack-width analysis remains available where required</td><td>${(sM<=maxMain&&sD<=maxDist)?'<span class="pass">SPACING CONTROL</span>':'<span class="failtxt">REVIEW</span>'}</td></tr>
+ <tr><td>IS 875 Part 2 Table 1</td><td>Selected imposed-load basis</td><td>${pass(qL>0)}</td></tr>
+ <tr><td>IS 875 concentrated load</td><td>Point-load check is not automated because load distribution depends on stair/support geometry</td><td><span class="na">ENGINEER REVIEW</span></td></tr>
+ <tr><td>Architectural guidance</td><td>Riser/tread and 2R+T comfort check</td><td>${checks.geometry?'<span class="pass">PASS</span>':'<span class="failtxt">REVIEW</span>'}</td></tr></table>`;
+}
+function drawStair(T,R,n){
+ const s=$('stairSvg');s.innerHTML='';
+ const x0=40,y0=210, run=720/Math.max(n,1), rise=130/Math.max(n,1);
+ let path=`M ${x0} ${y0}`;
+ for(let i=0;i<n;i++){path+=` h ${run} v ${-rise}`;}
+ path+=` h 60`; const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',path);p.setAttribute('fill','none');p.setAttribute('stroke','#25c2a0');p.setAttribute('stroke-width','4');s.appendChild(p);
+ const base=document.createElementNS('http://www.w3.org/2000/svg','line');base.setAttribute('x1',x0);base.setAttribute('y1',y0);base.setAttribute('x2',840);base.setAttribute('y2',y0);base.setAttribute('stroke','#525860');base.setAttribute('stroke-width','2');s.appendChild(base);
+}
+window.addEventListener('load',design);
+</script>
+</body></html>

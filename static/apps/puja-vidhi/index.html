@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+
+<html lang="hi">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<meta content="#166534" name="theme-color"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<title>सम्पूर्ण पूजा विधि</title>
+<style>
+:root{
+  --primary:#166534;--dark:#14532d;--accent:#16a34a;--soft:#dcfce7;
+  --pale:#f0fdf4;--bg:#fcfcfb;--ink:#243027;--muted:#66716a;
+  --line:#ccebd4;--white:#fff;--shadow:0 10px 28px rgba(20,83,45,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{min-height:100vh}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
+.container{max-width:980px;margin:auto;padding:16px}
+.top{background:#ffffff;border-bottom:1px solid #dbe8de;position:sticky;top:0;z-index:30}
+.quick{max-width:980px;margin:auto;display:flex;gap:8px;padding:9px 16px;overflow-x:auto}
+.quick button{background:#ffffff;color:#14532d;border:1px solid #c9e3cf;box-shadow:none}
+.quick button.active{background:#dcfce7;color:#14532d;border-color:#9fc9aa;box-shadow:none}
+.hero{text-align:center;padding:22px 8px 14px}
+.om{font-size:46px;color:var(--primary);line-height:1}
+h1{margin:8px 0 4px;color:var(--dark);font-family:"Noto Serif Devanagari","Mangal",Georgia,serif;font-size:clamp(30px,7vw,44px)}
+.hero p{margin:0 auto;color:var(--muted);max-width:720px}
+.card{background:var(--white);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:18px}
+.section-title{margin:0 0 12px;color:var(--dark);font-size:23px}
+.page{display:none}
+.page.active{display:block}
+.guide-badge{display:inline-flex;background:var(--soft);color:var(--dark);border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800}
+.step-title{font-size:30px;color:var(--dark);margin:8px 0 2px}
+.step-sub{color:var(--muted);margin:0 0 15px}
+.illustration{height:190px;background:linear-gradient(180deg,#f7fff9,#effaf2);border:1px solid var(--soft);border-radius:20px;display:grid;place-items:center;margin:12px 0 16px}
+.illustration svg{width:150px;height:150px;stroke:var(--primary);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.illustration:after{content:'क्या करना है';position:absolute;bottom:8px;left:12px;background:var(--primary);color:#fff;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:800}.illustration{position:relative}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.panel{border:1px solid var(--soft);background:#fbfffc;border-radius:16px;padding:14px}
+.panel h4{margin:0 0 6px;color:var(--dark);font-size:15px}
+.panel p{margin:0;color:#47534b}
+.mantra{margin-top:12px;border-left:4px solid var(--accent);background:var(--pale);border-radius:10px;padding:14px;font-family:"Noto Serif Devanagari","Mangal",serif;font-size:21px;line-height:1.9;white-space:pre-line;overflow-wrap:anywhere}
+.mantra-label{font-size:11px;color:var(--accent);font-weight:850;text-transform:uppercase;letter-spacing:.06em}
+.navrow{display:flex;justify-content:space-between;gap:10px;margin-top:18px}
+.btn{border:1px solid var(--line);background:#fff;color:var(--dark);border-radius:13px;padding:11px 16px;font-weight:800}
+.btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.hint{font-size:13px;color:var(--muted);margin-top:10px}
+.materials{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.material{background:var(--soft);color:var(--dark);border-radius:999px;padding:6px 9px;font-size:12px;font-weight:700}
+.progress-wrap{background:#e9f4ec;border-radius:999px;height:8px;overflow:hidden;margin-top:14px}
+.progress{height:100%;background:var(--accent);width:0;transition:width .25s}
+.sank-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sank-grid .full{grid-column:1/-1}
+label{display:block;font-size:12px;font-weight:750;color:var(--muted);margin-bottom:5px}
+input,select,textarea{width:100%;border:1px solid #d7e4da;background:#fff;border-radius:12px;padding:10px 12px;color:var(--ink)}
+textarea{min-height:92px;resize:vertical;line-height:1.55}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(22,163,74,.11)}
+.sank-text{margin-top:14px;background:#fbfffc;border:1px solid var(--line);border-radius:16px;padding:16px;font-family:"Noto Serif Devanagari","Mangal",serif;font-size:19px;line-height:2.05;text-align:center;overflow-wrap:anywhere}
+.dyn{background:var(--soft);color:var(--dark);padding:.03em .2em;border-radius:.25em;font-weight:800}
+.detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.detail{background:var(--pale);border:1px solid var(--soft);border-radius:12px;padding:9px}
+.detail थोड़ा{display:block;color:var(--muted);font-size:10px}.detail b{display:block;margin-top:2px}
+.finish{text-align:center}
+.finish .big{font-size:54px;color:var(--primary)}
+.source{font-size:11px;color:var(--muted);margin-top:12px}
+@media(max-width:700px){
+ .two,.sank-grid{grid-template-columns:1fr}
+ .sank-grid .full{grid-column:auto}
+ .detail-grid{grid-template-columns:1fr 1fr}
+ .illustration{height:170px}.illustration svg{width:130px;height:130px}
+ .step-title{font-size:27px}.mantra{font-size:19px}
+}
+@media print{
+ .top,.hero,.no-print,.navrow,.progress-wrap{display:none!important}
+ .page{display:block!important;break-inside:avoid;margin-bottom:18px}
+ body{background:#fff}.card{box-shadow:none}
+}
+
+/* Stronger green devotional visual hierarchy */
+:root{
+  --primary:#166534;--dark:#14532d;--accent:#16a34a;--soft:#dcfce7;
+  --pale:#f0fdf4;--bg:#f7fbf8;--ink:#243027;--muted:#5f6f65;
+  --line:#b7dfc2;--green-wash:#e9f8ed;
+}
+body{background:linear-gradient(180deg,#f7fbf8 0%,#eef8f1 100%)}
+.top{background:rgba(240,253,244,.96);border-bottom:2px solid var(--primary)}
+.quick button{background:var(--green-wash);border-color:#b7dfc2;color:var(--dark)}
+.quick button.active{background:var(--primary);border-color:var(--primary);box-shadow:0 4px 14px rgba(22,101,52,.22)}
+.hero{background:linear-gradient(180deg,#e9f8ed 0%,rgba(233,248,237,.25) 100%);border-radius:0 0 26px 26px;padding:26px 14px 20px;margin-bottom:14px}
+.om{color:var(--primary)}
+.card{border-color:#b7dfc2;box-shadow:0 12px 30px rgba(20,83,45,.09)}
+.step-title{color:var(--dark)}
+.guide-badge{background:#c9efd3;color:var(--dark);border:1px solid #a9dbb5}
+.illustration{background:linear-gradient(145deg,#eaf8ed,#dff3e5);border:2px solid #b7dfc2;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7)}
+.panel{background:#f3fbf5;border-color:#c3e8cc}
+.mantra{background:#ebf8ee;border-left-color:var(--primary)}
+.btn.primary{background:var(--primary);border-color:var(--primary);box-shadow:0 5px 14px rgba(22,101,52,.18)}
+.btn.primary:hover{background:var(--dark)}
+.sank-text{background:#effaf1;border:2px solid #b7dfc2}
+.detail{background:#effaf1;border-color:#c4e8cc}
+.material{background:#cfeeda}
+.progress-wrap{background:#dbeedf}
+.progress{background:var(--accent)}
+.section-title{color:var(--dark)}
+.source{color:#5f6f65}
+
+
+/* Noto Sans Devanagari for Hindi/Sanskrit */
+h1,.step-title,.section-title,.mantra,.sank-text,.action-block,.panel,.hint,[lang="hi"],[lang="sa"]{font-family:"Noto Sans Devanagari",system-ui,sans-serif;}
+.mantra,.sank-text{font-weight:500;}
+
+.mantra{margin-top:14px;border-left-width:5px;background:#edf8f0;border-color:#c5e5cc;}
+.step-sub{margin-bottom:8px;}
+/* Final Hindi typography */
+body{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+h1,.step-title,.section-title,.step-sub,.panel,.mantra,.sank-text,.hint,.material,.detail{font-family:"Noto Sans Devanagari",system-ui,sans-serif}
+.mantra{font-weight:500}
+/* Final stable visual treatment */
+body{background:#fbfdfb}
+.hero{background:#166534 !important;border-radius:0 0 22px 22px;padding:24px 14px 20px}
+.hero .om,.hero h1,.hero p{color:#fff !important}
+.top{background:#166534 !important;border-bottom:1px solid #14532d}
+.quick button{background:#f0fdf4;color:#14532d;border-color:#c9e3cf}
+.quick button.active{background:#14532d;color:#fff;border-color:#14532d;box-shadow:none}
+.card{border-color:#c9e3cf;box-shadow:0 8px 20px rgba(20,83,45,.05)}
+.step-title{color:#14532d}
+.step-sub{line-height:1.75;margin-bottom:14px;color:#617067}
+.mantra{margin:18px 0 !important;padding:17px !important;background:#f0fdf4 !important;border:1px solid #c9e3cf !important;border-left:5px solid #166534 !important;border-radius:13px;line-height:1.95 !important}
+.navrow{margin-top:24px;border-top:1px solid #edf4ee;padding-top:12px}
+.btn.primary{background:#166534;border-color:#166534;box-shadow:none}
+.action-block,.panel{background:#fbfdfb;border-color:#d5e9da}
+.progress-wrap{background:#e6f1e8}
+.progress{background:#16a34a}
+@media(max-width:700px){.page>.card{padding:17px}.mantra{font-size:20px;line-height:1.9 !important}.navrow .btn{min-width:0;flex:1}}
+
+/* Hindi clean minimal */
+.action-block{margin:12px 0;padding:12px 14px;background:#fff;border:1px solid #e3eee6}
+.action-block .action-title{font-size:13px;margin-bottom:4px}
+.panel{padding:13px 14px}
+.step-sub{margin-bottom:14px}
+.navrow{margin-top:20px}
+
+
+/* Polished header/navigation */
+.top{
+  background:#ffffff !important;
+  border-bottom:1px solid #d9e8dc !important;
+}
+.quick{
+  justify-content:center;
+  max-width:980px;
+  padding:10px 16px !important;
+}
+.quick button{
+  background:#f4faf5 !important;
+  color:#14532d !important;
+  border:1px solid #cfe3d3 !important;
+  border-radius:999px !important;
+  padding:8px 14px !important;
+  font-weight:700;
+  box-shadow:none !important;
+}
+.quick button.active{
+  background:#166534 !important;
+  color:#ffffff !important;
+  border-color:#166534 !important;
+}
+
+
+/* Title/header: green panel; page around it stays light */
+.hero{
+  background:#166534 !important;
+  border:1px solid #14532d !important;
+  border-radius:0 0 28px 28px !important;
+  padding:24px 18px 22px !important;
+  margin:0 0 18px;
+}
+.hero .om,.hero h1,.hero p{
+  color:#ffffff !important;
+}
+.hero h1{
+  font-weight:800;
+}
+
+
+/* Prominent, comfortable mantra reading */
+.mantra{
+  margin:22px 0 !important;
+  padding:20px 18px !important;
+  background:#eef9f1 !important;
+  border:1px solid #c5e3cc !important;
+  border-left:6px solid #166534 !important;
+  border-radius:16px !important;
+  font-size:clamp(23px,5.2vw,29px) !important;
+  line-height:2.05 !important;
+  text-align:center !important;
+  font-weight:500;
+}
+.mantra-label{
+  font-size:15px !important;
+  line-height:1.2;
+  font-weight:800 !important;
+  color:#166534 !important;
+  margin-bottom:12px !important;
+  letter-spacing:0 !important;
+  text-transform:none !important;
+}
+@media(max-width:700px){
+  .mantra{
+    font-size:22px !important;
+    line-height:2 !important;
+    padding:18px 14px !important;
+  }
+}
+
+
+/* Quiet supporting information */
+.action-block{
+  margin:14px 0 !important;
+  padding:12px 14px !important;
+  background:#ffffff !important;
+  border:1px solid #e2ece4 !important;
+  border-radius:12px !important;
+}
+.action-block .action-title{
+  font-size:13px !important;
+  color:#166534 !important;
+  margin-bottom:4px !important;
+}
+.hint{
+  color:#657268 !important;
+}
+.panel{
+  background:#ffffff !important;
+  border:1px solid #e2ece4 !important;
+}
+
+
+/* Prominent mantra heading */
+.mantra{position:relative;}
+.mantra .mantra-label{position:static;display:block;margin:0 0 8px !important;padding:0;font-size:20px !important;font-weight:800 !important;color:#166534 !important;line-height:1.2;letter-spacing:0;text-transform:none;}
+
+
+.navrow .btn{
+  min-width:150px;
+  padding:12px 16px;
+  font-weight:800;
+}
+@media(max-width:700px){
+  .navrow .btn{min-width:0;}
+}
+
+
+/* Sankalpa: show the actual generated sankalpa first */
+.sankalpa-heading{
+  margin:18px 0 8px;
+  text-align:center;
+  color:#14532d;
+  font-family:"Noto Sans Devanagari",system-ui,sans-serif;
+  font-size:24px;
+  font-weight:800;
+}
+.sankalpa-top-spacer{display:none}
+#sankalpa{
+  margin:0 !important;
+}
+
+
+/* Compact Sankalpa options */
+.sankalpa-options{
+  margin-top:14px;
+  border:1px solid #d8e8dc;
+  border-radius:12px;
+  background:#fbfdfb;
+  overflow:hidden;
+}
+.sankalpa-options summary{
+  list-style:none;
+  cursor:pointer;
+  padding:12px 14px;
+  color:#14532d;
+  font-weight:800;
+  font-size:13px;
+}
+.sankalpa-options summary::-webkit-details-marker{display:none}
+.sankalpa-options summary:before{content:"＋";display:inline-block;margin-right:7px;color:#16a34a;font-weight:900}
+.sankalpa-options[open] summary:before{content:"−"}
+.sankalpa-options-body{padding:0 14px 14px}
+.sankalpa-heading{
+  margin:16px 0 7px;
+  text-align:center;
+  color:#14532d;
+  font-size:22px;
+  font-weight:800;
+}
+.sank-tools{margin-top:16px}
+
+
+/* Final mantra spacing reset */
+.mantra{
+  display:block !important;
+  position:static !important;
+  height:auto !important;
+  min-height:0 !important;
+  max-height:none !important;
+  margin:16px 0 !important;
+  padding:14px 16px !important;
+  text-align:center !important;
+  line-height:1.8 !important;
+  overflow:visible !important;
+  transform:none !important;
+}
+.mantra .mantra-label{
+  display:block !important;
+  position:static !important;
+  margin:0 0 6px !important;
+  padding:0 !important;
+  line-height:1.2 !important;
+  font-size:18px !important;
+  text-align:left !important;
+}
+
+
+.step-sub{margin:0 0 10px !important;line-height:1.6 !important}
+.action-block{margin:10px 0 !important;padding:11px 13px !important}
+.panel{padding:12px 13px !important}
+
+
+/* Swasti-vachan: long Vedic passage in Step 16 */
+.swasti-vachan{margin-top:12px !important;margin-bottom:14px !important;text-align:left !important;font-size:18px !important;line-height:1.75 !important;}
+.swasti-vachan .mantra-label{text-align:left !important;margin-bottom:7px !important;}
+.swasti-vachan .mantra-text{white-space:pre-line !important;text-align:left !important;}
+@media(max-width:700px){
+  .swasti-vachan{font-size:16px !important;line-height:1.7 !important;}
+}
+
+  .swasti-vachan + .mantra{font-size:20px !important}
+}
+
+/* Swasti-vachan follows the same mantra-box typography */
+.swasti-vachan{
+  font-size:22px !important;
+  line-height:1.9 !important;
+  text-align:center !important;
+}
+.swasti-vachan .mantra-label{
+  font-size:19px !important;
+  text-align:left !important;
+  margin-bottom:5px !important;
+}
+.swasti-vachan .mantra-text{
+  font-size:22px !important;
+  line-height:1.9 !important;
+  text-align:center !important;
+  white-space:pre-line !important;
+}
+@media(max-width:700px){
+  .swasti-vachan{font-size:20px !important;line-height:1.85 !important;}
+  .swasti-vachan .mantra-text{font-size:20px !important;line-height:1.85 !important;}
+}
+
+
+/* चरण 13: deity panels follow the same vertical flow as other steps */
+.step13-panels{display:flex;flex-direction:column;gap:14px;margin-top:14px}
+.step13-panels .panel{width:100%;box-sizing:border-box}
+
+/* चरण 13: Vishnu/Guru panels intentionally placed after navigation */
+.step13-panels{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  width:100%;
+  margin-top:18px;
+}
+.step13-panels .panel{
+  width:100%;
+  box-sizing:border-box;
+}
+</style>
+</head>
+<body>
+<div class="top">
+<div class="quick" id="quick">
+<button class="active" data-page="0">शुरुआत</button>
+<button data-page="5">संकल्प</button>
+<button data-page="8">देवता</button>
+<button data-page="13">षोडशोपचार</button>
+<button data-page="29">आरती</button>
+<button data-page="30">समापन</button>
+</div>
+</div>
+<main class="container">
+<header class="hero">
+<div class="om">ॐ</div>
+<h1>सम्पूर्ण पूजा विधि</h1>
+<p>घर पर पूजा करने के लिए सरल साथी — हर चरण में जानें <b>क्या करना है</b>, <b>क्या अर्पित करना है</b> और <b>क्या बोलना है</b>।</p>
+</header>
+<div id="pages">
+<section class="page active" data-index="0">
+<div class="card">
+<span class="guide-badge">शुरुआत</span>
+<h2 class="step-title">पूजा की तैयारी</h2>
+<p class="step-sub">पूजा शुरू करने से पहले आवश्यक सामग्री अपने पास रख लें। आराम से बैठें और मन को शांत करें।</p>
+<div class="two">
+<div class="panel"><h4>कहाँ बैठें</h4><p>पूजा का स्थान स्वच्छ रखें। सामान्य पूजा में पूर्व या उत्तर की ओर मुख करके बैठना शुभ माना जाता है।</p></div>
+<div class="panel"><h4>सामग्री पास रखें</h4><div class="materials">
+<span class="material">जल</span><span class="material">अक्षत</span><span class="material">पुष्प</span><span class="material">चन्दन/रोली</span><span class="material">दीप</span><span class="material">धूप</span><span class="material">नैवेद्य</span>
+</div></div>
+</div>
+<p class="hint">किसी सामग्री के न होने से पूजा रोकने की आवश्यकता नहीं है। उपलब्ध वस्तु से श्रद्धा के साथ पूजा करें।</p>
+<div class="navrow"><button class="btn" disabled="">← Previous Step</button><button class="btn primary next">Next Step →</button></div>
+</div>
+</section>
+<section class="page" data-index="1" hidden="">
+<div class="card">
+<span class="guide-badge">चरण 2</span><h2 class="step-title">शुद्धिकरण</h2><p class="step-sub">थोड़ा जल लेकर मंत्र बोलते हुए दाहिने हाथ से अपने ऊपर हल्का जल छिड़कें।</p>
+<div class="panel"><h4>क्या करें</h4><p>सिर से शरीर तक अपने ऊपर हल्का जल छिड़कें। मन को शांत रखें और आंतरिक एवं बाहरी शुद्धि का भाव रखें।</p></div>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div>
+</div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ॐ अपवित्रः पवित्रो वा सर्वावस्थां गतोऽपिवा ।
+यः स्मरेत्पुण्डरीकाक्षं स बाह्यभ्यन्तरः शुचिः ॥</div></div></section>
+<section class="page" data-index="2" hidden="">
+<div class="card">
+<span class="guide-badge">चरण 3</span><h2 class="step-title">आचमन</h2><p class="step-sub">प्रत्येक नाम के साथ थोड़ा जल ग्रहण करें। तीन नामों के बाद हाथ धो लें।</p>
+<div class="two">
+<div class="panel"><h4>ऐसे करें</h4><p>हर नाम के साथ थोड़ा जल ग्रहण करें और श्रद्धापूर्वक मंत्र बोलें।</p></div>
+<div class="panel"><h4>इसके बाद</h4><p>चौथा नाम बोलकर हाथ धो लें।</p></div>
+</div>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div>
+</div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ऊँ माधवाय नमः
+ऊँ केशवाय नमः
+ऊँ नारायणाय नमः
+ऊँ हृषिकेषाय नमः</div></div></section>
+<section class="page" data-index="3" hidden="">
+<div class="card">
+<span class="guide-badge">चरण 4</span><h2 class="step-title">आसन पूजा</h2><p class="step-sub">आसन पर रोली/चन्दन, अक्षत और पुष्प अर्पित करें। चाहें तो नीचे चन्दन/रोली से छोटा त्रिकोण बनाएं।</p>
+<p class="hint">मंत्र पढ़ने के बाद पुष्प और अक्षत आसन पर अर्पित करें।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div>
+</div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ऊँ पृथ्वि त्वया धृता लोका देवि त्वं विष्णुना धृता।
+त्वं च धारय मां देवि पवित्रं कुरू चासनम्।।</div></div></section>
+<section class="page" data-index="4" hidden="">
+<div class="card">
+<span class="guide-badge">चरण 5</span>
+<h2 class="step-title">शिखा बन्धन</h2>
+<p class="step-sub">शिखा हो तो बाँधें। यदि शिखा न हो तो मंत्र बोलते हुए शिखा-स्थान का स्पर्श करें।</p>
+<div class="action-block">
+<div class="action-title">क्या करें</div>
+<div>शिखा को बाँधें। यदि शिखा नहीं है तो दाहिने हाथ से शिखा-स्थान का हल्का स्पर्श करते हुए मंत्र पढ़ें।</div>
+</div>
+<div class="navrow">
+<button class="btn prev">← Previous Step</button>
+<button class="btn primary next">Next Step →</button>
+</div>
+</div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ॐ चिद्रूपिणी महामाये दिव्यतेजः समन्विते।
+तिष्ठ देवि शिखामध्ये तेजोवृद्धिं कुरूष्व मे ॥</div></div></section>
+<section class="page" data-index="5" hidden="">
+<div class="card" id="sankalpaStep">
+<span class="guide-badge">चरण 6</span>
+<h2 class="step-title">महासंकल्प</h2>
+<p class="step-sub">दाहिने हाथ में जल, अक्षत, पुष्प, रोली/चन्दन और सिक्का लेकर नीचे दिया गया संकल्प पढ़ें।</p>
+<div class="sankalpa-heading">निष्काम संकल्प</div>
+<div class="sank-text" id="sankalpa"></div>
+<details class="sankalpa-options">
+<summary>संकल्प बदलें / पंचांग विवरण देखें</summary>
+<div class="sankalpa-options-body">
+<div class="detail-grid" id="details"></div>
+<p class="hint" id="status"></p>
+<div id="sankalpaApp">
+<div class="sank-grid">
+<div><label>गोत्र</label><input id="gotra" value="गौतम"/></div>
+<div><label>नाम</label><input id="nama" value="अंकित शर्मा"/></div>
+<div><label>उद्देश्य</label>
+<select id="purposePreset">
+<option selected="" value="family">सपरिवार कल्याण</option>
+<option value="obstacles">आपद्-निवारण / कार्य-सिद्धि</option>
+<option value="custom">स्वयं लिखें</option>
+</select>
+</div>
+<div><label>स्थान / नगर</label><input id="place" value="रादौर"/></div>
+<div class="full"><label>संकल्प का पाठ</label>
+<textarea id="purpose">मम सपरिवारस्य श्रुति-स्मृति-पुराणोक्त-फल-प्राप्त्यर्थं, आयुरारोग्य-ऐश्वर्य-अभिवृद्ध्यर्थं, अहं मम सकल दुरितक्षय द्वारा श्रीपरमेश्वर प्रीत्यर्थं यथा शक्ति देवस्य पूजनं करिष्ये</textarea>
+</div>
+<div class="full"><label>मास पद्धति</label>
+<select id="monthSystem">
+<option selected="" value="purnimanta">पूर्णिमान्त मास (उत्तर भारत)</option>
+<option value="amanta">अमान्त मास</option>
+</select>
+</div>
+</div>
+<div class="navrow no-print sank-tools">
+<div style="display:flex;gap:7px;flex-wrap:wrap">
+<button class="btn" id="locate">📍 स्थान पहचानें</button>
+<button class="btn" id="refresh">↻ पुनर्गणना</button>
+</div>
+<div style="display:flex;gap:7px;flex-wrap:wrap">
+<button class="btn" id="copy">कॉपी</button>
+<button class="btn" id="print">प्रिंट / PDF</button>
+</div>
+</div>
+</div>
+</div>
+</details>
+<div class="action-block">
+<div class="action-title">संकल्प के बाद</div>
+<div>हाथ में ली हुई सामग्री देवता के सामने या पूजा स्थान के आधार में अर्पित कर दें।</div>
+</div>
+<div class="navrow">
+<button class="btn prev">← Previous Step</button>
+<button class="btn primary next">Next Step →</button>
+</div>
+</div>
+</section>
+<section class="page" data-index="6" hidden="">
+<div class="card"><span class="guide-badge">चरण 7</span><h2 class="step-title">प्राणायाम</h2><p class="step-sub">धीरे-धीरे श्वास लें और छोड़ें। बिना जोर लगाए मन को शांत करें।</p>
+<div class="panel"><h4>श्वास</h4><p>धीरे-धीरे श्वास लें, कुछ क्षण सहज रूप से रोकें और दाहिनी नासिका से धीरे छोड़ें। श्वास पर बिना जोर दिए ध्यान रखें।</p></div>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ॐ भूः ॐ भुवः ॐ स्वः ॐ महः ॐ जनः ॐ तपः ॐ सत्यम् ।।
+ॐ तत्सवितुर्वरेण्यं भर्गो देवस्य धीमहि धियो यो नः प्रचोदयात् ।।
+ॐ आपोज्योतीरसोऽमृतं ब्रह्मभूर्भुवः स्वः ॐ ।।</div></div></section>
+<section class="page" data-index="7" hidden="">
+<div class="card"><span class="guide-badge">चरण 8</span><h2 class="step-title">न्यास</h2><p class="step-sub">हर पंक्ति के साथ बताए गए अंग का हल्का स्पर्श करें और शरीर को पूजा के लिए समर्पित करने का भाव रखें।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ॐ वाङ्मे आस्येऽस्तु (मुख को स्पर्श करें)
+ॐ नसोर्मे प्राणोऽस्तु (नासिका के दोनों छिद्रों को स्पर्श करें)
+ॐ अक्ष्णोर्मे चक्षुरस्तु (दोनों नेत्रों को स्पर्श करें)
+ॐ कर्णयोर्मे श्रोत्रमस्तु (दोनों कानों को स्पर्श करें)
+ॐ बाह्वोर्मे बलमस्तु (दोनों बाहों को स्पर्श करें)
+ॐ ऊर्वोर्मेओजोऽस्तु (दोनों जंघाओं को स्पर्श करें)
+ॐ अरिष्टानिमेऽअङ्गानि तनूस्तान्वा में सह सन्तु (समस्त शरीर को स्पर्श करें)</div></div></section>
+<section class="page" data-index="8" hidden="">
+<div class="card"><span class="guide-badge">चरण 9</span><h2 class="step-title">दिग्बन्धन — विघ्न निवारण</h2><p class="step-sub">पीली सरसों लें। उपलब्ध न हो तो जल या अक्षत से चारों दिशाओं में हल्का छिड़काव करें।</p>
+<p class="hint">मंत्र के बाद दाहिनी एड़ी से भूमि पर हल्का तीन बार स्पर्श करें।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ॐ अपसर्पन्तु ते भूता: ये भूता: भूमि संस्थिता: ये भूता: विघ्नकर्तारस्ते नशयन्तु शिवाज्ञया,
+
+अपक्रामन्तु भूतानि पिशाचा: सर्वतो दिशम्, सर्वेषामविरोधेन पूजाकर्म समारम्भे ॥</div></div></section>
+<section class="page" data-index="9" hidden="">
+<div class="card"><span class="guide-badge">चरण 10</span><h2 class="step-title">गणपति</h2><p class="step-sub">हाथ में पुष्प और अक्षत लें। गणेश जी का स्मरण करें और मंत्र के बाद अर्पित करें।</p>
+<p class="hint">मंत्र के बाद पुष्प और अक्षत गणेश जी को अर्पित करें।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">गजाननं भूतगणादिसेवितं कपित्थजम्बूफलचारुभक्षणम्।
+उमासुतं शोकविनाशकारकं नमामि विघ्नेश्वरपादपङ्कजम्।।</div></div><div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">विघ्नेश्वराय वरदाय सुरप्रियाय, लम्बोदराय सकलायजगद्विताय।
+नागाननाय श्रुति यज्ञविभूषिताय, गौरी सुतायगणनाथ नमो नमस्ते॥</div></div><div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ॐ गणानां त्वा गणपति गूम हवामहे
+प्रियाणां त्वा प्रियपति गूम हवामहे
+निधीनां त्वा निधिपति गूम हवामहे
+वसो मम। आहमजानि गर्भधमा त्वमजासि गर्भधम्।।</div></div><div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">एह्येहि हेरम्ब महेशपुत्र ! समस्तविघ्नौघविनाशदक्ष !।
+माङ्गल्यपूजाप्रथमप्रधान गृहाण पूजां भगवन् ! नमस्ते।।</div></div><div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ॐ भूर्भुवः स्वः सिद्धिबुद्धिसहिताय गणपतये नमः, गणपतिमावाहयामि, स्थापयामि, पूजयामि च।</div></div></section>
+<section class="page" data-index="10" hidden="">
+<div class="card"><span class="guide-badge">चरण 11</span><h2 class="step-title">शिव</h2><p class="step-sub">पुष्प-अक्षत हाथ में लेकर महादेव का स्मरण करें, मंत्र बोलें और अर्पित करें।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ॐ मृत्युंजय परेशान जगदाभयनाशन ।
+तव ध्यानेन देवेश मृत्युप्राप्नोति जीवती ।।
+वन्दे ईशान देवाय नमस्तस्मै पिनाकिने ।
+आदिमध्यांत रूपाय मृत्युनाशं करोतु मे ।।</div></div><div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">नमस्तस्मै भगवते कैलासाचल वासिने ।
+नमोब्रह्मेन्द्र रूपाय मृत्युनाशं करोतु मे ।।
+त्र्यंबकाय नमस्तुभ्यं पंचस्याय नमोनमः ।
+नमो दोर्दण्डचापाय मम मृत्युम् विनाशय ।।</div></div><div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">नमोर्धेन्दु स्वरूपाय नमो दिग्वसनाय च ।
+नमो भक्तार्ति हन्त्रे च मम मृत्युं विनाशय ।।
+देवं मृत्युविनाशनं भयहरं साम्राज्य मुक्ति प्रदम् ।
+नाना भूतगणान्वितं दिवि पदैः देवैः सदा सेवितम् ।।</div></div><div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">अज्ञानान्धकनाशनं शुभकरं विध्यासु सौख्य प्रदम् ।
+सर्व सर्वपति महेश्वर हरं मृत्युंजय भावये ।।</div></div><div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ॐ तत्पुरुषाय विद्महे महादेवाय धीमहि तन्नो रुद्रः प्रचोदयात् श्रीसदाशिव आवाहयामि, स्थापयामि, पूजयामि च।</div></div></section>
+<section class="page" data-index="11" hidden="">
+<div class="card"><span class="guide-badge">चरण 12</span><h2 class="step-title">दुर्गा देवी</h2><p class="step-sub">पुष्प और अक्षत लेकर माँ दुर्गा का स्मरण करें, मंत्र बोलें और अर्पित करें।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">नमो देव्यै महादेव्यै शिवायै सततं नमः।
+नमः प्रकृत्यै भद्रायै नियताः प्रणताः स्मताम्।।
+या देवी सर्व भूतेषु मातृरूपेण संस्थिता।
+नमस्तस्यै नमस्तस्यै नमस्तस्यै नमो नम:॥
+श्री दुर्गादेव्यै ध्यानं समर्पयामि, आवाहयामि, स्थापयामि, पूजयामि च।</div></div></section>
+<section class="page" data-index="12" hidden="">
+<div class="card"><span class="guide-badge">चरण 13</span><h2 class="step-title">विष्णु, गुरु एवं नवग्रह</h2><p class="step-sub">हर स्मरण के साथ पुष्प-अक्षत अर्पित करें। अपने गुरु का स्मरण करें; गुरु न हों तो श्रीकृष्ण को जगद्गुरु रूप में प्रणाम कर सकते हैं।</p>
+
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div><div class="step13-panels"><div class="panel"><h4>विष्णु</h4>
+<p>नारायण का स्मरण करें और पुष्प-अक्षत अर्पित करें।</p>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">शान्ताकारं भुजगशयनं पद्मनाभं सुरेशं,
+विश्वाधारं गगनसदृशं मेघवर्ण शुभाङ्गम् ।
+लक्ष्मीकान्तं कमलनयनं योगिभिर्ध्यानगम्यम्,
+वन्दे विष्णुं भवभयहरं सर्वलोकैकनाथम् ॥
+ॐ नारायणाय विद्महे वासुदेवाय धीमहि तन्नो विष्णु प्रचोदयात्।
+श्रीभगवान विष्णुः ध्यानं समर्पयामि, आवाहयामि, स्थापयामि, पूजयामि च।</div></div></div><div class="panel"><h4>गुरु एवं नवग्रह</h4><p>गुरु का स्मरण करके अर्पित करें, फिर नवग्रहों का पूजन करें।</p><div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">गुरूर्ब्रह्मा गुरूर्विष्णुः गुरूर्देवो महेश्वरः
+गुरू साक्षात परंब्रह्म तस्मै श्री गुरूवे नमः॥
+
+अखंड मंडलाकारं व्याप्तं येन चराचरं,
+तत्पदं दर्शितं येन तस्मै श्रीगुरुवे नमः ॥
+
+ॐ परम तत्वाय नारायण गुरुभ्यों नम: ध्यानं समर्पयामि, आवाहयामि, स्थापयामि, पूजयामि च.
+
+ब्रह्मा मुरारिः त्रिपुरांतकारी भानु: शशि भूमि सुतो बुधश्च।
+गुरुश्च शुक्रः शनि राहु केतवः सर्वे ग्रहा शांति करा भवंतु॥</div></div></div></div></div>
+</section>
+<section class="page" data-index="13" hidden="">
+<div class="card"><span class="guide-badge">चरण 14</span><h2 class="step-title">कलश स्थापना</h2><p class="step-sub">कलश में जल भरें। पुष्प, अक्षत, रोली, सिक्का और सुपारी डालें; उपलब्ध हों तो पत्ते रखें और ऊपर नारियल स्थापित करें।</p>
+<p class="hint">मंत्र पढ़ने के बाद कलश को प्रणाम करें और मन में पवित्र नदियों का आवाहन करें।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ऊँ कलशस्य मुखे विष्णुः कण्ठे रूद्रः समाश्रितः।
+मूले त्वस्य स्थितो ब्रह्मा मध्ये मातृगणाः स्मृताः।।
+गंगे च यमुने चैव गोदावरी सरस्वति ।
+नर्मदे सिन्धु कावेरि जलेऽस्मिन् सन्निधिं कुरू ।।
+अस्मिन् कलशे सर्वाणि तीर्थान्यावाहयामि नमस्करोमि.</div></div></section>
+<section class="page" data-index="14" hidden="">
+<div class="card"><span class="guide-badge">चरण 15</span><h2 class="step-title">दीप प्रज्वलन</h2><p class="step-sub">दीपक देवता के दाहिने रखें। चन्दन/अक्षत/पुष्प अर्पित करके सावधानी से दीप जलाएँ।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ॐ अग्निर्ज्योति: ज्योतिरग्निः स्वाहा सूर्यो ज्योति: ज्योति: सूर्य: स्वाहा, अग्निर्वर्च ज्योतिर्वर्चः स्वाहा सूर्योवर्च ज्योतिर्वर्चः स्वाहा, ज्योतिः सूर्य: सूर्यःज्योतिः स्वाहा।</div></div><div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">शुभं करोति कल्याणम् आरोग्यम् धनसंपदा, शत्रुबुद्धिविनाशाय दीपज्योतिर्नमोस्तुते।</div></div></section>
+<section class="page" data-index="15" hidden="">
+<div class="card"><span class="guide-badge">चरण 16</span><h2 class="step-title">सभी देवताओं का आवाहन</h2><p class="step-sub">पुष्प और अक्षत हाथ में लेकर इष्टदेव, कुलदेवता, ग्रामदेवता तथा पूज्य देवताओं का श्रद्धापूर्वक स्मरण करें।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">षोडशोपचार →</button></div></div>
+<div class="mantra swasti-vachan"><div class="mantra-label">स्वस्ति-वाचन</div><div class="mantra-text">आ नो भद्राः क्रतवो यन्तु विश्वतोऽद्ब्धासो अपरीतास उद्भिदः ।
+देवा नो यथा सदमिद् वृधे असन्नप्रयुवो रक्षितारो दिवे-दिवे ॥
+देवानां भद्रा सुमतिरृजायतां देवानां रातिरभि नो नि वर्तताम् ।
+देवानां सख्यमुप सेदिमा वयं देवा न आयुः प्र तिरन्तु जीवसे ॥
+तान् पूर्वया निविदा हूमहे वयं भगं मित्रमदितिं दक्षमस्रिधम् ।
+अर्यमणं वरुणं सोममश्विना सरस्वती नः सुभगा मयस्करतु ॥
+तन्नो वातो मयोभु वातु भेषजं तन्माता पृथिवी ततु पिता द्यौः ।
+तद् गुरावाणः सोमसुतो मयोभुवस्तदश्विना शृणुतं धिष्ण्या युवम् ॥
+तमीशानं जगतस्तस्थुषस्पतिं धियंजिन्वमवसे हूमहे वयम् ।
+पूषा नो यथा वेदसामसद् वृधे रक्षिता पायुरदब्धः स्वस्तये ॥
+स्वस्ति न इन्द्रो वृद्धश्रवाः स्वस्ति नः पूषा विश्ववेदाः ।
+स्वस्ति नस्तार्क्ष्यो अरिष्टनेमिः स्वस्ति नो बृहस्पतिर्दधातु ॥
+पृषदश्वा मरुतः पृश्निमातरः शुभंयावानो विदथेषु जग्मयः ।
+अग्निजिह्वा मनवः सूरचक्षसो विश्वे नो देवा अवसा गमन्निह ॥
+भद्रं कर्णेभिः शृणुयाम देवा भद्रं पश्येमाक्षभिर्यजत्राः ।
+स्थिरैरङ्गैस्तुष्टुवांसस्तनूभिर्व्यशेम देवहितं यदायुः ॥
+शतमिन्नु शरदो अन्ति देवा यत्रा नश्चक्रा जरसं तनूनाम् ।
+पुत्रासो यत्र पितरो भवन्ति मा नो मध्याः रीरिषतायुर्गन्तोः ॥
+अदितिर्द्यौरदितिरन्तरिक्षमदितिर्माता स पिता स पुत्रः ।
+विश्वे देवा अदितिः पञ्च जना अदितिर्जातमदितिर्जनित्वम् ॥
+(ऋग्वेद १ । ८९ । १-१०)</div></div><div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">श्रीमन्महागणाधिपतये नमः।
+लक्ष्मीनारायणाभ्यां नमः।
+उमामहेश्वराभ्यां नमः।
+वाणीहिरण्यगर्भाभ्यां नमः।
+शचीपुरन्दराभ्यां नमः।
+मातापितृचरणकमलेभ्यो नमः।
+इष्टदेवताभ्यो नमः।
+कुलदेवताभ्यो नमः।
+ग्रामदेवताभ्यो नमः।
+वास्तुदेवताभ्यो नमः।
+स्थानदेवताभ्यो नमः।
+सर्वेभ्यो देवेभ्यो नमः।
+सर्वेभ्यो ब्राह्मणेभ्यो नमः.</div></div></section>
+<section class="page" data-index="16" hidden="">
+<div class="card"><span class="guide-badge">उपचार 1 / 16</span><h2 class="step-title">आसन — आसन अर्पण</h2><p class="step-sub">देवता के सामने आसन के रूप में पुष्प और थोड़ा अक्षत अर्पित करें।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">अनेक रत्न संयुक्तं, नानामणि गणान्वितम् ।
+भावित हेममयं दिव्यमासनं प्रतिगृह्यताम्।।
+आसनार्थे पुष्पं समर्पयामि</div></div></section>
+<section class="page" data-index="17" hidden="">
+<div class="card"><span class="guide-badge">उपचार 2 / 16</span><h2 class="step-title">पाद्य — चरण प्रक्षालन</h2><p class="step-sub">प्रतीक रूप से चरण प्रक्षालन के लिए थोड़ा जल अर्पित करें।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ऊँ तीर्थोदकं निर्मलऽच सर्वसौगन्ध्यसंयुतम्।
+पादप्रक्षालनार्थाय दत्तं ते प्रतिगृह्यताम्।।
+पादप्रक्षालनार्थाय जलं समर्पयामि</div></div></section>
+<section class="page" data-index="18" hidden="">
+<div class="card"><span class="guide-badge">उपचार 3 / 16</span><h2 class="step-title">अर्घ्य — स्वागत अर्पण</h2><p class="step-sub">चन्दन, पुष्प या अक्षतयुक्त जल अर्घ्य रूप में अर्पित करें।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ऊँ गन्ध-पुष्पाक्षतैर्युक्तं अध्र्यंसम्मपादितं मया।गृह्णात्वेतत्प्रसादेन अनुगृह्णातुनिर्भरम्।।</div></div></section>
+<section class="page" data-index="19" hidden="">
+<div class="card"><span class="guide-badge">उपचार 4 / 16</span><h2 class="step-title">आचमन — अर्पित करें जल</h2><p class="step-sub">प्रतीक रूप से आचमन के लिए थोड़ा स्वच्छ जल अर्पित करें।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ऊँ कर्पूरेण सुगन्धेन वासितं स्वादु शीतलं, त्वमाचमनायेदं पीयूषसदृषं पिब।।</div></div></section>
+<section class="page" data-index="20" hidden="">
+<div class="card"><span class="guide-badge">उपचार 5 / 16</span><h2 class="step-title">स्नान — अभिषेक</h2><p class="step-sub">स्वच्छ जल में थोड़ा चन्दन मिलाकर स्नान/अभिषेक अर्पित करें। फोटो या छोटी मूर्ति हो तो केवल हल्का जल छिड़कें।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ऊँ मन्दाकिन्याः समानीतैः कर्पूरागरूवासितैः
+पयोभिर्निर्मलैरेभिःदिव्यःकायो हि षोध्यताम।।
+स्नान्ते जलं समर्पयामि</div></div></section>
+<section class="page" data-index="21" hidden="">
+<div class="card"><span class="guide-badge">उपचार 6 / 16</span><h2 class="step-title">वस्त्र — वस्त्र अर्पण</h2><p class="step-sub">नया वस्त्र उपलब्ध हो तो अर्पित करें। आवश्यकता अनुसार स्वच्छ मौली भी प्रतीक रूप में चढ़ा सकते हैं।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ऊँ सर्वभूषाधिके सौम्ये लोकलज्जानिवारणे। मया सम्पादिते तुभ्यं गृह्येतां वाससी षुभे।।</div></div></section>
+<section class="page" data-index="22" hidden="">
+<div class="card"><span class="guide-badge">उपचार 7 / 16</span><h2 class="step-title">आभूषण — श्रृंगार</h2><p class="step-sub">आभूषण हों तो अर्पित करें; न हों तो कुछ अक्षत से प्रतीकात्मक श्रृंगार करें।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ऊँ अलंकारान् महादिव्यान् नानारत्नैर्विनिर्मितान्, धारयैतान् स्वकीयेऽस्मिन् शरीरे दिव्यतेजसि।।</div></div></section>
+<section class="page" data-index="23" hidden="">
+<div class="card"><span class="guide-badge">उपचार 8 / 16</span><h2 class="step-title">गन्ध — चन्दन</h2><p class="step-sub">देवता को चन्दन, अष्टगन्ध या उपयुक्त सुगन्ध अर्पित करें।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ऊँ श्रीकरं चन्दनं दिव्यं गन्धाढ्यं सुमनोहरम्, वपुषे सुफलं ह्येतत् शीतलं प्रतिगृह्यताम्।।</div></div></section>
+<section class="page" data-index="24" hidden="">
+<div class="card"><span class="guide-badge">उपचार 9 / 16</span><h2 class="step-title">पुष्प / माला</h2><p class="step-sub">ताजे पुष्प या माला अर्पित करें। देवता के अनुकूल और उपलब्ध पुष्प का प्रयोग करें।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ॐ माल्यादीनि सुगन्धीनि मालत्यादीनि भक्त्तितः, मयाऽऽहृतानि पुष्पाणि पादयोरर्पितानी ते।</div></div></section>
+<section class="page" data-index="25" hidden="">
+<div class="card"><span class="guide-badge">उपचार 10 / 16</span><h2 class="step-title">धूप — धूप अर्पण</h2><p class="step-sub">धूप/अगरबत्ती सुरक्षित रूप से जलाकर देवता को दिखाएँ। ज्वलनशील वस्तुओं और बच्चों से दूर रखें।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ऊँ वनस्पतिरसोद्भूतः सुगन्धिः घ्राणतर्पणः, सर्वैर्देवैः ष्लाघितोऽयं सुधूपः प्रतिगृह्यताम्।</div></div></section>
+<section class="page" data-index="26" hidden="">
+<div class="card"><span class="guide-badge">उपचार 11 / 16</span><h2 class="step-title">दीप — ज्योति अर्पण</h2><p class="step-sub">दीपक उठाकर श्रद्धा से देवता को ज्योति दिखाएँ।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ऊँ साज्यः सुवर्तिसंयुक्तो वह्निना द्योतितो मया, गृह्यतां दीपकोह्येष त्रैलोक्य-तिमिरापहः।</div></div></section>
+<section class="page" data-index="27" hidden="">
+<div class="card"><span class="guide-badge">उपचार 12 / 16</span><h2 class="step-title">नैवेद्य — भोग</h2><p class="step-sub">सात्त्विक मिठाई, फल या तैयार भोग अर्पित करें और कुछ क्षण शांत भाव से प्रतीक्षा करें।</p>
+<p class="hint">अर्पित करें with gratitude. Food offered to God becomes prasāda.</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ऊँ षर्कराखण्डखाद्यानि दधि-क्षीर घृतानि च, रसनाकर्षणान्येतत् नैवेद्यं प्रतिगृह्यताम्।</div></div></section>
+<section class="page" data-index="28" hidden="">
+<div class="card"><span class="guide-badge">उपचार 13 / 16</span><h2 class="step-title">आचमन &amp; ताम्बूल</h2><p class="step-sub">नैवेद्य के बाद जल अर्पित करें और उपलब्ध हो तो ताम्बूल अर्पित करें।</p>
+<div class="two"><div class="panel"><h4>आचमन</h4></div><div class="panel"><h4>ताम्बूल</h4><p>उपलब्ध हो तो पान, सुपारी, लौंग/इलायची और दक्षिणा अर्पित करें।</p></div></div>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ऊँ गंगाजलं समानीतं सुवर्णकलषस्थितम्, सुस्वादु पावनं ह्येतदाचम मुख-शुद्धये।</div></div><div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ऊँ लवंगैलादि-संयुक्तं ताम्बूलं दक्षिणां तथा, पत्र-पुष्पस्वरूपां हि गृहाणानुगृहाण माम्.</div></div></section>
+<section class="page" data-index="29" hidden="">
+<div class="card"><span class="guide-badge">उपचार 15 / 16</span><h2 class="step-title">आरती</h2><p class="step-sub">दीप/आरती लेकर शांत और भक्तिभाव से देवता को ज्योति दिखाएँ।</p>
+<p class="hint">दीपक को देवता के सामने धीरे-धीरे गोल घुमाकर आरती करें। इसके बाद अपनी परिचित आरती भी गा सकते हैं।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary next">Next Step →</button></div></div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ऊँ चन्द्रादित्यौ च धरणी विद्युदग्निस्तथैव च, त्वमेव सर्व-ज्योतींषि आर्तिक्यं प्रतिगृह्यताम्।</div></div></section>
+<section class="page" data-index="30" hidden="">
+<div class="card finish"><span class="guide-badge">उपचार 16 / 16 + समापन</span><div class="big">ॐ</div>
+<h2 class="step-title">प्रदक्षिणा एवं क्षमा प्रार्थना</h2>
+<p class="step-sub">अंत में प्रदक्षिणा करें। इसके बाद पूजा में हुई ज्ञात-अज्ञात त्रुटियों के लिए क्षमा प्रार्थना करें।</p>
+<p style="margin-top:18px;font-weight:800;color:var(--dark)">पूजा पूर्ण हुई। शांत मन से प्रसाद ग्रहण करें।</p>
+<div class="navrow"><button class="btn prev">← Previous Step</button><button class="btn primary" id="restart">फिर से शुरुआत ↺</button></div>
+</div>
+<div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ऊँ यानि कानि च पापानि जन्मांतर-कृतानि च। तानि तानि विनश्यन्ति प्रदक्षिणाय च पदे पदे.</div></div><div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">आवाहनं न जानामि न जानामि विसर्जनं,
+पूजां चैव न जानामि क्षम्यतां परमेश्वरा,
+मंत्रहीनं क्रियाहीनं भक्तिहीनं तथैव च,
+यद्पूजितम मयादेव, परिपूर्णं तदस्तु में।।</div></div><div class="mantra"><div class="mantra-label">मंत्र</div><div class="mantra-text">ऊँ सर्वे भवन्तु सुखिनः सर्वे सन्तु निरामयाः, सर्वे भद्राणि पश्यन्तु मा कश्चिद् दुःख-भाग्भवेत् ।</div></div></section>
+</div>
+<div class="progress-wrap no-print"><div class="progress" id="progress"></div></div>
+<p class="footer-note" style="text-align:center;color:#718078;font-size:11px;margin:18px 0 28px">घर पर सामान्य पूजा के लिए सरल मार्गदर्शिका। विशेष पूजा में अपनी पारिवारिक या आचार्य परम्परा को प्राथमिकता दें।</p>
+</main>
+<script>
+const pages=[...document.querySelectorAll(".page")];
+let current=0;
+function show(i,scroll=true){
+ current=Math.max(0,Math.min(pages.length-1,i));
+ pages.forEach((p,n)=>p.classList.toggle("active",n===current));
+ document.querySelectorAll("#quick button").forEach(b=>b.classList.toggle("active",Number(b.dataset.page)===current));
+ document.getElementById("progress").style.width=((current)/(pages.length-1)*100)+"%";
+ if(scroll) window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll(".next").forEach(b=>b.addEventListener("click",()=>show(current+1)));
+document.querySelectorAll(".prev").forEach(b=>b.addEventListener("click",()=>show(current-1)));
+document.querySelectorAll("#quick button").forEach(b=>b.addEventListener("click",()=>show(Number(b.dataset.page))));
+document.getElementById("restart").addEventListener("click",()=>show(0));
+window.addEventListener("keydown",e=>{
+ if(e.key==="ArrowRight") show(current+1);
+ if(e.key==="ArrowLeft") show(current-1);
+});
+
+/* संकल्प */
+let state={lat:30.0250,lon:77.1500,tz:"Asia/Kolkata",lang:"dev"};
+const NAK=["अश्विनी","भरणी","कृत्तिका","रोहिणी","मृगशीर्ष","आर्द्रा","पुनर्वसु","पुष्य","आश्लेषा","मघा","पूर्वाफाल्गुनी","उत्तराफाल्गुनी","हस्त","चित्रा","स्वाती","विशाखा","अनुराधा","ज्येष्ठा","मूल","पूर्वाषाढा","उत्तराषाढा","श्रवण","धनिष्ठा","शतभिषा","पूर्वाभाद्रपदा","उत्तराभाद्रपदा","रेवती"];
+const TITHI=["प्रतिपदा","द्वितीया","तृतीया","चतुर्थी","पञ्चमी","षष्ठी","सप्तमी","अष्टमी","नवमी","दशमी","एकादशी","द्वादशी","त्रयोदशी","चतुर्दशी","पूर्णिमा","प्रतिपदा","द्वितीया","तृतीया","चतुर्थी","पञ्चमी","षष्ठी","सप्तमी","अष्टमी","नवमी","दशमी","एकादशी","द्वादशी","त्रयोदशी","चतुर्दशी","अमावास्या"];
+const DAYS=["रविवासरे","सोमवासरे","मङ्गलवासरे","बुधवासरे","गुरुवासरे","शुक्रवासरे","शनिवासरे"];
+const MONTHS=["चैत्र","वैशाख","ज्येष्ठ","आषाढ","श्रावण","भाद्रपद","आश्विन","कार्तिक","मार्गशीर्ष","पौष","माघ","फाल्गुन"];
+function norm(x){return (x%360+360)%360}
+function jd(d){return d.getTime()/86400000+2440587.5}
+function sd(x){return Math.sin(x*Math.PI/180)}
+function sunLon(d){const T=(jd(d)-2451545)/36525,L=norm(280.46646+36000.76983*T+.0003032*T*T),M=norm(357.52911+35999.05029*T-.0001537*T*T);return norm(L+(1.914602-.004817*T-.000014*T*T)*sd(M)+(.019993-.000101*T)*sd(2*M)+.000289*sd(3*M))}
+function moonLon(d){const T=(jd(d)-2451545)/36525,Lp=norm(218.3164477+481267.88123421*T-.0015786*T*T+T*T*T/538841-T*T*T*T/65194000),D=norm(297.8501921+445267.1114034*T-.0018819*T*T+T*T*T/545868-T*T*T*T/113065000),M=norm(357.5291092+35999.0502909*T-.0001536*T*T),Mp=norm(134.9633964+477198.8675055*T+.0087414*T*T),F=norm(93.272095+483202.0175233*T-.0036539*T*T);
+const c=6.288774*sd(Mp)+1.274027*sd(2*D-Mp)+.658314*sd(2*D)+.213618*sd(2*Mp)-.185116*sd(M)-.114332*sd(2*F)+.058793*sd(2*D-2*Mp)+.057066*sd(2*D-M-Mp)+.053322*sd(2*D+Mp)+.045758*sd(2*D-M)-.040923*sd(M-Mp)-.03472*sd(D)-.030383*sd(M+Mp)+.015327*sd(2*D-2*F)-.012528*sd(2*F+Mp)+.01098*sd(2*F-Mp)+.010675*sd(4*D-Mp)+.010034*sd(3*Mp);
+return norm(Lp+c)}
+function ayan(d){const y=d.getUTCFullYear()+(d.getUTCMonth()+.5)/12;return 23.8531+.013968*(y-2000)}
+function panchang(d){
+const sl=norm(sunLon(d)-ayan(d)),ml=norm(moonLon(d)-ayan(d)),el=norm(ml-sl),ti=Math.min(29,Math.floor(el/12)),ni=Math.min(26,Math.floor(ml/(360/27))),pak=ti<15?"शुक्लपक्षे":"कृष्णपक्षे";
+const sr=Math.floor(sl/30),am=(sr+12)%12,pu=(am+(ti>=15?1:0))%12;
+const cycleYear=d.getUTCMonth()>=3?d.getUTCFullYear():d.getUTCFullYear()-1;
+const samनामs=["प्रभव","विभव","शुक्ल","प्रमोदूत","प्रजापति","आंगिरस","श्रीमुख","भाव","युव","धाता","ईश्वर","बहुधान्य","प्रमाथी","विक्रम","वृष","चित्रभानु","स्वभानु","तारण","पार्थिव","व्यय","सर्वजित","सर्वधारी","विरोधी","विकृति","खर","नन्दन","विजय","जय","मन्मथ","दुर्मुखी","हेविलम्बी","विलम्बी","विकारी","शार्वरी","प्लव","शुभकृत","शोभन","क्रोधी","विश्वावसु","पराभव","प्लवंग","कीलक","सौम्य","साधारण","विरोधिकृत","परिधावी","प्रमादी","आनन्द","राक्षस","नल","पिंगल","कालयुक्त","सिद्धार्थी","रौद्र","दुर्मति","दुन्दुभि","रुधिरोद्गारी","रक्ताक्षी","क्रोधन","अक्षय"];
+const sam=samनामs[((cycleYear-1987)%60+60)%60];
+const m=d.getUTCMonth(), ay=(d.getUTCMonth()>=0&&d.getUTCMonth()<6)?"उत्तरायण":"दक्षिणायन";
+let r="शिशिर";if([2,3].includes(m))r="वसन्त";else if([4,5].includes(m))r="ग्रीष्म";else if([6,7].includes(m))r="वर्षा";else if([8,9].includes(m))r="शरद";else if([10,11].includes(m))r="हेमन्त";
+return {sl,ml,ti,ni,pak,masa:document.getElementById("monthSystem").value==="amanta"?am:pu,sam,ritu:r,ayana:ay};
+}
+const fam="मम सपरिवारस्य श्रुति-स्मृति-पुराणोक्त-फल-प्राप्त्यर्थं, आयुरारोग्य-ऐश्वर्य-अभिवृद्ध्यर्थं, अहं मम सकल दुरितक्षय द्वारा श्रीपरमेश्वर प्रीत्यर्थं यथा शक्ति देवस्य पूजनं करिष्ये";
+const obs="सर्व-आपद-निवारणार्थं, समस्त-कार्य-सिद्ध्यर्थं, अहं मम सकल दुरितक्षय द्वारा श्रीपरमेश्वर प्रीत्यर्थं यथा शक्ति देवस्य पूजनं करिष्ये";
+function esc(x){return String(x).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function sankRender(){
+const d=new Date(),v=panchang(d),gotra=esc(document.getElementById("gotra").value.trim()||"गौतम"),nama=esc(document.getElementById("nama").value.trim()||"अंकित शर्मा"),place=esc(document.getElementById("place").value.trim()||"रादौर"),purpose=esc(document.getElementById("purpose").value.trim()||fam),D=x=>`<span class="dyn">${x}</span>`;
+const txt=`<b>॥ निष्काम संकल्प ॥</b> ॐ विष्णुर्विष्णुर्विष्णुः, श्रीमद् भगवतो महापुरुषस्य विष्णोराज्ञया प्रवर्त्तमानस्य अद्य श्री ब्रह्मणोऽह्नि द्वितीय परार्धे श्री श्वेत वाराह कल्पै वैवस्वत मन्वन्तरे अष्टाविंशतितमे युगे कलियुगे कलि प्रथमचरणे भूलोके जम्बूद्वीपे भारतवर्षे भरतखंडे आर्यवर्तान्तरगतेदेशे ${D(place+" नगरे")} ${D("अमुक ग्रामे")} ${D(v.sam+" संवत्सरे")} ${D(v.ritu+" ऋतौ")} ${D("मासोत्तममासे")} ${D(MONTHS[v.masa]+" मासे")} ${D(v.pak+"")} ${D(TITHI[v.ti]+" तिथौ")} ${D(DAYS[d.getDay()])} ${D(NAK[v.ni]+" नक्षत्रे")} ${D("अमुक योगे")} ${D("अमुक करणे")} ${D("अमुक राशिस्थिते चन्द्रे")} ${D("अमुक राशिस्थिते सूर्ये")} ${D("शुभ राशि स्थिते देवगुरौ")} ${D("शेषेषु ग्रहेषु च यथा यथा राशि स्थान स्थितेषु सत्सु")} ${D("एवं ग्रह गुणगण विशेषण विशिष्टायाँ")} ${D(nama+" नाम्नोऽहं")} ${D(gotra+" गोत्रोउत्पन्नोऽहम्")} ${D("सपरिवारस्य सकुटुंबस्य")} ${D("श्री अमुक देवता प्रीत्यर्थे")} ${purpose} ॥`;
+document.getElementById("sankalpa").innerHTML=txt;
+const data=[["दिनांक / समय",d.toLocaleString("hi-IN")],["स्थान",place],["तिथि",TITHI[v.ti]],["पक्ष",v.pak],["नक्षत्र",NAK[v.ni]],["मास",MONTHS[v.masa]],["संवत्सर",v.sam],["अयन",v.ayana],["ऋतु",v.ritu]];
+document.getElementById("details").innerHTML=data.map(([a,b])=>`<div class="detail"><small>${a}</small><b>${b}</b></div>`).join("");
+document.getElementById("status").textContent=`अपडेटेड ${d.toLocaleTimeString("hi-IN")} • गतिशील पंचांग मान हरे रंग में दिखाए गए हैं।`;
+}
+document.getElementById("purposePreset").addEventListener("change",e=>{if(e.target.value==="family")document.getElementById("purpose").value=fam;else if(e.target.value==="obstacles")document.getElementById("purpose").value=obs;document.getElementById("purpose").focus();sankRender()});
+["gotra","nama","purpose","place","monthSystem"].forEach(id=>document.getElementById(id).addEventListener("input",sankRender));
+document.getElementById("refresh").addEventListener("click",sankRender);
+document.getElementById("print").addEventListener("click",()=>window.print());
+document.getElementById("copy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(document.getElementById("sankalpa").innerText);document.getElementById("status").textContent="संकल्प copied."}catch(e){document.getElementById("status").textContent="कॉपी permission was not available."}});
+document.getElementById("locate").addEventListener("click",()=>{if(!navigator.geolocation){document.getElementById("status").textContent="Location is not available; Radaur remains the default.";return}document.getElementById("status").textContent="Requesting location…";navigator.geolocation.getCurrentPosition(p=>{state.lat=p.coords.latitude;state.lon=p.coords.longitude;document.getElementById("status").textContent="Location updated. Recalculating…";sankRender()},()=>document.getElementById("status").textContent="Location permission not granted; Radaur remains the default.")});
+sankRender();setInterval(sankRender,60000);
+</script>
+<script>
+(function(){
+ const pages=[...document.querySelectorAll('.page')];
+ const quick=[...document.querySelectorAll('#quick button')];
+ let current=0;
+ function show(i,scroll=true){
+   current=Math.max(0,Math.min(pages.length-1,i));
+   pages.forEach((p,n)=>{p.hidden=n!==current; p.classList.toggle('active',n===current);});
+   quick.forEach(b=>b.classList.toggle('active',Number(b.dataset.page)===current));
+   const progress=document.getElementById('progress');
+   if(progress) progress.style.width=(current/Math.max(1,pages.length-1)*100)+'%';
+   if(scroll) window.scrollTo(0,0);
+ }
+ document.querySelectorAll('.next').forEach(b=>b.addEventListener('click',()=>show(current+1)));
+ document.querySelectorAll('.prev').forEach(b=>b.addEventListener('click',()=>show(current-1)));
+ quick.forEach(b=>b.addEventListener('click',()=>show(Number(b.dataset.page))));
+ const restart=document.getElementById('restart'); if(restart) restart.addEventListener('click',()=>show(0));
+ window.addEventListener('keydown',e=>{if(e.key==='ArrowRight')show(current+1);if(e.key==='ArrowLeft')show(current-1);});
+ show(0,false);
+})();
+</script>
+</body></html>

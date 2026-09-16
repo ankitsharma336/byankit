@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IS 456:2000 RC Structural Design Suite</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        docu: {
+                            primary: '#25c2a0',
+                            primaryDark: '#1fa78a',
+                            primaryDarkest: '#18806a',
+                            bg: '#f8f9fa',
+                            cardBg: '#ffffff',
+                            sidebarBg: '#f6f8fa',
+                            navbar: '#1e1f21',
+                            navbarBorder: '#2d3035',
+                            text: '#1c1e21',
+                            subtext: '#525860',
+                            codeBg: '#f1f3f5',
+                            border: '#e3e8ee'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #f8f9fa;
+            color: #1c1e21;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        math {
+            font-family: 'STIX Two Math', 'Cambria Math', serif;
+            font-size: 1.05em;
+        }
+        math[display="block"] {
+            display: block;
+            margin: 0.3em 0;
+            text-align: center;
+        }
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f3f5;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1fa78a;
+        }
+    </style>
+</head>
+<body id="appBody" class="bg-docu-bg text-docu-text min-h-screen flex flex-col antialiased">
+
+    <!-- Header -->
+    <header class="bg-docu-navbar text-white border-b border-docu-navbarBorder sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 h-12 flex items-center justify-between text-xs">
+            <div class="flex items-center space-x-2.5">
+                <i data-lucide="layers" class="w-4 h-4 text-docu-primary"></i>
+                <h1 class="font-bold tracking-tight text-slate-100">IS 456:2000 Structural Design Suite</h1>
+                <span class="text-slate-500">|</span>
+                <span class="text-slate-400">Beams, One-Way & Two-Way Slabs</span>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <button onclick="openReferenceModal()" class="flex items-center text-docu-primary hover:text-white px-2.5 py-1 rounded bg-docu-primary/10 border border-docu-primary/30 transition font-medium">
+                    <i data-lucide="book-open" class="w-3.5 h-3.5 mr-1.5"></i> Design Theory & Formulas Guide
+                </button>
+                <button onclick="window.print()" class="hidden sm:flex items-center text-slate-300 hover:text-white px-2.5 py-1 rounded bg-slate-800 border border-slate-700 transition">
+                    <i data-lucide="printer" class="w-3.5 h-3.5 mr-1.5"></i> Print Report
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Element Selector Bar -->
+    <div class="bg-docu-sidebarBg border-b border-docu-border px-4 py-2">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-2 text-xs">
+                <span class="font-bold text-docu-text">Select Element:</span>
+                <div class="flex bg-white rounded border border-docu-border p-0.5">
+                    <button id="btnElemBeam" onclick="setElementType('beam')" class="px-3 py-1 rounded text-xs font-bold bg-docu-primary text-slate-900 transition">Beam</button>
+                    <button id="btnElemOneWay" onclick="setElementType('oneway')" class="px-3 py-1 rounded text-xs font-semibold text-docu-subtext hover:text-docu-text transition">One-Way Slab</button>
+                    <button id="btnElemTwoWay" onclick="setElementType('twoway')" class="px-3 py-1 rounded text-xs font-semibold text-docu-subtext hover:text-docu-text transition">Two-Way Slab</button>
+                </div>
+            </div>
+            <span id="elementBadge" class="text-[10px] font-mono bg-docu-codeBg text-docu-primaryDarkest px-2 py-0.5 rounded border border-docu-border">IS 456 Rectangular Beam Engine</span>
+        </div>
+    </div>
+
+    <!-- Main Workspace Grid -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+        <!-- INPUTS PANEL -->
+        <section class="lg:col-span-5 xl:col-span-4 bg-docu-cardBg rounded-lg border border-docu-border overflow-hidden flex flex-col shadow-sm">
+            <div class="px-3.5 py-2.5 bg-docu-sidebarBg border-b border-docu-border flex items-center justify-between">
+                <span class="font-semibold text-docu-text text-xs flex items-center">
+                    <i data-lucide="sliders" class="w-3.5 h-3.5 mr-1.5 text-docu-primaryDark"></i> Input Parameters
+                </span>
+                <button onclick="resetDefaults()" class="text-[11px] text-docu-primaryDark hover:underline font-medium">Reset Defaults</button>
+            </div>
+
+            <form id="designForm" class="p-3.5 space-y-3.5 overflow-y-auto flex-1 text-xs">
+                
+                <!-- 1. Geometry -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center border-b border-docu-border pb-1">
+                        <span class="font-bold text-slate-700 uppercase tracking-wider text-[10px]">1. Geometry & Spans</span>
+                        <span class="text-[10px] text-docu-primaryDark cursor-pointer font-mono hover:underline" onclick="openReferenceModal('theory-beam')">Cl. 22.2</span>
+                    </div>
+                    
+                    <div id="spanGrid" class="grid grid-cols-2 gap-2">
+                        <!-- Dynamic span fields based on element type -->
+                    </div>
+                </div>
+
+                <!-- 2. Materials -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center border-b border-docu-border pb-1">
+                        <span class="font-bold text-slate-700 uppercase tracking-wider text-[10px]">2. Material Strengths</span>
+                        <span class="text-[10px] text-docu-primaryDark cursor-pointer font-mono hover:underline" onclick="openReferenceModal('theory-beam')">Tables 2 & 3</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-docu-subtext text-[11px] mb-0.5">Concrete <math><msub><mi>f</mi><mtext>ck</mtext></msub></math></label>
+                            <select id="fck" onchange="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                                <option value="20" selected>M20 (20 N/mm²)</option>
+                                <option value="25">M25 (25 N/mm²)</option>
+                                <option value="30">M30 (30 N/mm²)</option>
+                                <option value="35">M35 (35 N/mm²)</option>
+                                <option value="40">M40 (40 N/mm²)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-docu-subtext text-[11px]">Steel <math><msub><mi>f</mi><mi>y</mi></msub></math></label>
+                            <select id="fy" onchange="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                                <option value="415" selected>Fe 415</option>
+                                <option value="500">Fe 500</option>
+                                <option value="550">Fe 550</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Loads -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center border-b border-docu-border pb-1">
+                        <span class="font-bold text-slate-700 uppercase tracking-wider text-[10px]">3. Loads & Reinforcement Options</span>
+                        <span class="text-[10px] text-docu-primaryDark cursor-pointer font-mono hover:underline" onclick="openReferenceModal('theory-beam')">Table 18</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-docu-subtext text-[11px] mb-0.5">Live Load <math><msub><mi>q</mi><mi>k</mi></msub></math> (kN/m² or kN/m)</label>
+                            <input type="number" step="0.5" id="liveLoad" value="12" required oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-docu-subtext text-[11px] mb-0.5">Dead Load (excl self)</label>
+                            <input type="number" step="0.5" id="deadLoad" value="6" required oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                        </div>
+                        <div id="barDiaSelectDiv">
+                            <label class="block text-docu-subtext text-[11px] mb-0.5">Main Bar Dia <math><msub><mi>ϕ</mi><mi>t</mi></msub></math></label>
+                            <select id="assumedBarDia" onchange="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                                <option value="8">8 mm</option>
+                                <option value="10">10 mm</option>
+                                <option value="12">12 mm</option>
+                                <option value="16" selected>16 mm</option>
+                                <option value="20">20 mm</option>
+                            </select>
+                        </div>
+                        <div id="shearOrDistSelectDiv">
+                            <!-- Dynamic selector (Stirrups or Distribution Bar Dia) -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Re-calculate Button -->
+                <div class="pt-2">
+                    <button type="button" onclick="performDesign()" class="w-full py-2.5 bg-docu-primary hover:bg-docu-primaryDark text-slate-900 font-bold rounded-lg shadow-sm transition duration-150 flex items-center justify-center space-x-2">
+                        <i data-lucide="play" class="w-4 h-4 fill-slate-900"></i>
+                        <span>Re-calculate & Verify Section</span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- RESULTS & SCHEMATIC PANEL -->
+        <section class="lg:col-span-7 xl:col-span-8 space-y-4 flex flex-col">
+            
+            <!-- Compact Status Banner -->
+            <div id="statusBanner" class="bg-docu-primaryDark text-white px-4 py-3 rounded-lg shadow-sm flex items-center justify-between border border-emerald-600/30">
+                <div class="flex items-center space-x-2.5">
+                    <i id="statusIcon" data-lucide="check-circle-2" class="w-5 h-5 text-white shrink-0"></i>
+                    <div>
+                        <h2 id="statusTitle" class="text-sm font-bold leading-none">Design OK - Safe Section</h2>
+                        <p id="statusSubtitle" class="text-[11px] text-emerald-100 mt-1">Section satisfies IS 456 Flexure, Shear & Deflection limits.</p>
+                    </div>
+                </div>
+                <div class="bg-black/20 px-3 py-1.5 rounded font-mono text-right text-xs">
+                    <span class="text-emerald-100 text-[10px] block leading-none">Moment Utilization</span>
+                    <span id="momentRatioText" class="font-bold text-xs mt-0.5 block">
+                        <math><mrow><msub><mi>M</mi><mi>u</mi></msub><mo>/</mo><msub><mi>M</mi><mtext>u,lim</mtext></msub></mrow><mo>=</mo><mn>0.85</mn></math>
+                    </span>
+                </div>
+            </div>
+
+            <!-- ACTIONABLE MODIFICATION ADVICE PANEL (NEW) -->
+            <div id="modAdviceContainer" class="hidden rounded-lg p-3.5 border text-xs shadow-sm transition-all duration-200">
+                <!-- Populated dynamically when checks fail -->
+            </div>
+
+            <!-- Analysis Tabs Workspace -->
+            <div class="bg-docu-cardBg rounded-lg shadow-sm border border-docu-border overflow-hidden flex-1 flex flex-col">
+                <!-- Tab Controls -->
+                <div class="flex border-b border-docu-border bg-docu-sidebarBg text-xs font-medium text-docu-subtext overflow-x-auto">
+                    <button onclick="switchTab('tab-detailing')" id="btn-tab-detailing" class="tab-btn px-3.5 py-2.5 border-b-2 border-docu-primaryDark text-docu-primaryDark font-semibold flex items-center space-x-1.5 whitespace-nowrap">
+                        <i data-lucide="layers" class="w-3.5 h-3.5"></i><span>Section & Detailing</span>
+                    </button>
+                    <button onclick="switchTab('tab-compliance')" id="btn-tab-compliance" class="tab-btn px-3.5 py-2.5 border-b-2 border-transparent hover:text-docu-text flex items-center space-x-1.5 whitespace-nowrap">
+                        <i data-lucide="clipboard-check" class="w-3.5 h-3.5 text-emerald-600"></i><span>IS 456 Verification Log</span>
+                    </button>
+                    <button onclick="switchTab('tab-flexure')" id="btn-tab-flexure" class="tab-btn px-3.5 py-2.5 border-b-2 border-transparent hover:text-docu-text flex items-center space-x-1.5 whitespace-nowrap">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i><span>Flexure</span>
+                    </button>
+                    <button onclick="switchTab('tab-shear')" id="btn-tab-shear" class="tab-btn px-3.5 py-2.5 border-b-2 border-transparent hover:text-docu-text flex items-center space-x-1.5 whitespace-nowrap">
+                        <i data-lucide="scissors" class="w-3.5 h-3.5"></i><span>Shear</span>
+                    </button>
+                    <button onclick="switchTab('tab-deflection')" id="btn-tab-deflection" class="tab-btn px-3.5 py-2.5 border-b-2 border-transparent hover:text-docu-text flex items-center space-x-1.5 whitespace-nowrap">
+                        <i data-lucide="activity" class="w-3.5 h-3.5"></i><span>Serviceability</span>
+                    </button>
+                </div>
+
+                <!-- Tab Panels -->
+                <div class="p-4 overflow-y-auto flex-1 text-xs space-y-3">
+                    
+                    <!-- TAB 1: DETAILING -->
+                    <div id="tab-detailing" class="tab-content block space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                            <div class="bg-docu-sidebarBg p-3 rounded-lg border border-docu-border flex flex-col items-center justify-center min-h-[240px]">
+                                <span id="svgTitle" class="text-[11px] font-semibold text-docu-subtext mb-2">Cross Section</span>
+                                <svg id="beamSvg" class="w-56 h-56 border border-docu-border rounded bg-white" viewBox="0 0 240 280"></svg>
+                            </div>
+
+                            <div class="space-y-2">
+                                <h3 class="font-bold text-docu-text border-b border-docu-border pb-1 text-xs flex justify-between items-center">
+                                    <span>Reinforcement Schedule</span>
+                                    <span class="text-[10px] text-docu-primaryDark cursor-pointer font-mono font-normal hover:underline" onclick="openReferenceModal('theory-beam')">Ref: SP 34 / IS 456</span>
+                                </h3>
+                                <table class="w-full text-left border-collapse font-mono text-[11px]">
+                                    <tbody id="scheduleTableBody" class="divide-y divide-docu-border">
+                                        <!-- Dynamic schedule via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: COMPLIANCE CHECKLOG -->
+                    <div id="tab-compliance" class="tab-content hidden space-y-3">
+                        <div class="flex items-center justify-between border-b border-docu-border pb-1.5">
+                            <h3 class="font-bold text-docu-text text-xs">IS 456 Verification Log</h3>
+                            <span class="text-[10px] bg-docu-codeBg text-docu-subtext px-2 py-0.5 rounded font-mono border border-docu-border">Clause Verification Audit</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse border border-docu-border font-mono text-[11px]">
+                                <thead>
+                                    <tr class="bg-docu-sidebarBg text-docu-text border-b border-docu-border">
+                                        <th class="p-2 border-r border-docu-border">Clause Ref</th>
+                                        <th class="p-2 border-r border-docu-border font-sans">Check Parameter</th>
+                                        <th class="p-2 border-r border-docu-border">Calculated</th>
+                                        <th class="p-2 border-r border-docu-border">Statutory Limit</th>
+                                        <th class="p-2 text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="complianceLogTable" class="divide-y divide-docu-border"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: FLEXURE -->
+                    <div id="tab-flexure" class="tab-content hidden space-y-3">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="p-3 bg-docu-sidebarBg rounded border border-docu-border">
+                                <span class="text-docu-subtext block text-[11px]">Factored Moment (<math><msub><mi>M</mi><mi>u</mi></msub></math>)</span>
+                                <span id="calcMu" class="text-base font-bold font-mono text-docu-text">-</span>
+                                <div id="flexureFormulaBox1" class="mt-1"></div>
+                            </div>
+                            <div class="p-3 bg-docu-sidebarBg rounded border border-docu-border">
+                                <span class="text-docu-subtext block text-[11px]">Limiting Capacity (<math><msub><mi>M</mi><mtext>u,lim</mtext></msub></math>)</span>
+                                <span id="calcMulim" class="text-base font-bold font-mono text-docu-text">-</span>
+                                <div id="flexureFormulaBox2" class="mt-1"></div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded border border-docu-border bg-white space-y-2">
+                            <h4 class="font-semibold text-docu-text text-xs">Required Reinforcement Calculation</h4>
+                            <div id="astFormulaContainer" class="p-2 bg-docu-codeBg rounded text-center border border-docu-border overflow-x-auto"></div>
+                            <div class="grid grid-cols-3 gap-2 text-center font-mono">
+                                <div class="p-2 bg-docu-sidebarBg rounded border border-docu-border">
+                                    <span class="block text-docu-subtext text-[10px] font-sans">Req. Reinforcement</span>
+                                    <span id="calcAstReq" class="font-bold text-xs">-</span>
+                                </div>
+                                <div class="p-2 bg-docu-sidebarBg rounded border border-docu-border">
+                                    <span class="block text-docu-subtext text-[10px] font-sans">Min. Reinforcement</span>
+                                    <span id="calcAstMin" class="font-bold text-xs">-</span>
+                                </div>
+                                <div class="p-2 bg-docu-sidebarBg rounded border border-docu-border">
+                                    <span class="block text-docu-subtext text-[10px] font-sans">Max. Reinforcement</span>
+                                    <span id="calcAstMax" class="font-bold text-xs">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: SHEAR -->
+                    <div id="tab-shear" class="tab-content hidden space-y-3">
+                        <div class="grid grid-cols-3 gap-2 text-center font-mono">
+                            <div class="p-2.5 bg-docu-sidebarBg rounded border border-docu-border">
+                                <span class="text-docu-subtext block text-[10px] font-sans">Nominal <math><msub><mi>τ</mi><mi>v</mi></msub></math> (Cl. 40.1)</span>
+                                <span id="calcTauV" class="text-sm font-bold text-docu-text">-</span>
+                            </div>
+                            <div class="p-2.5 bg-docu-sidebarBg rounded border border-docu-border">
+                                <span class="text-docu-subtext block text-[10px] font-sans">Concrete <math><msub><mi>τ</mi><mi>c</mi></msub></math> (Table 19)</span>
+                                <span id="calcTauC" class="text-sm font-bold text-docu-text">-</span>
+                            </div>
+                            <div class="p-2.5 bg-docu-sidebarBg rounded border border-docu-border">
+                                <span class="text-docu-subtext block text-[10px] font-sans">Max <math><msub><mi>τ</mi><mtext>c,max</mtext></msub></math> (Table 20)</span>
+                                <span id="calcTauCMax" class="text-sm font-bold text-docu-text">-</span>
+                            </div>
+                        </div>
+
+                        <div id="shearDesignBox" class="p-3 rounded border border-docu-border bg-docu-sidebarBg"></div>
+                    </div>
+
+                    <!-- TAB 5: SERVICEABILITY -->
+                    <div id="tab-deflection" class="tab-content hidden space-y-3">
+                        <div class="grid grid-cols-2 gap-3 text-center font-mono">
+                            <div class="p-3 bg-docu-sidebarBg rounded border border-docu-border">
+                                <span class="text-docu-subtext block text-[10px] font-sans">Actual Span/Depth (<math><msub><mrow><mo>(</mo><mi>l</mi><mo>/</mo><mi>d</mi><mo>)</mo></mrow><mtext>act</mtext></msub></math>)</span>
+                                <span id="calcLdActual" class="text-sm font-bold text-docu-text">-</span>
+                            </div>
+                            <div class="p-3 bg-docu-sidebarBg rounded border border-docu-border">
+                                <span class="text-docu-subtext block text-[10px] font-sans">Max Permissible (<math><mrow><mtext>Basic</mtext><mo>·</mo><msub><mi>K</mi><mi>t</mi></msub></mrow></math>)</span>
+                                <span id="calcLdMax" class="text-sm font-bold text-docu-text">-</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-docu-sidebarBg rounded border border-docu-border space-y-2">
+                            <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                                <div>Service Stress <math><msub><mi>f</mi><mi>s</mi></msub></math> (Cl. 23.2.2): <span id="calcFs" class="font-bold">-</span> N/mm²</div>
+                                <div>Steel Ratio <math><msub><mi>p</mi><mi>t</mi></msub></math>: <span id="calcPt" class="font-bold">-</span> %</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- IS 456 THEORY & DESIGN STEPS REFERENCE MODAL -->
+    <div id="refModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl border border-docu-border max-w-4xl w-full max-h-[88vh] flex flex-col overflow-hidden">
+            <div class="p-3 bg-docu-navbar text-white flex items-center justify-between">
+                <span class="font-bold text-xs flex items-center">
+                    <i data-lucide="book-marked" class="w-4 h-4 mr-1.5 text-docu-primary"></i> IS 456:2000 Theory & Complete Step-by-Step Design Manual
+                </span>
+                <button onclick="closeReferenceModal()" class="text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            
+            <!-- Reference Modal Sub-Tabs -->
+            <div class="flex border-b border-docu-border bg-docu-sidebarBg text-xs font-medium text-docu-subtext">
+                <button onclick="switchRefTab('ref-tab-beam')" id="btn-ref-tab-beam" class="ref-tab-btn px-4 py-2 border-b-2 border-docu-primaryDark text-docu-primaryDark font-semibold">Beam Theory & Steps</button>
+                <button onclick="switchRefTab('ref-tab-oneway')" id="btn-ref-tab-oneway" class="ref-tab-btn px-4 py-2 border-b-2 border-transparent hover:text-docu-text">One-Way Slab Guide</button>
+                <button onclick="switchRefTab('ref-tab-twoway')" id="btn-ref-tab-twoway" class="ref-tab-btn px-4 py-2 border-b-2 border-transparent hover:text-docu-text">Two-Way Slab Guide</button>
+            </div>
+
+            <div class="p-5 overflow-y-auto space-y-5 text-xs text-docu-text leading-relaxed">
+                
+                <!-- REF TAB 1: BEAMS -->
+                <div id="ref-tab-beam" class="ref-tab-content space-y-4">
+                    <div id="theory-beam" class="bg-docu-sidebarBg p-3 rounded border border-docu-border">
+                        <h3 class="font-bold text-docu-primaryDarkest text-xs uppercase tracking-wider mb-1">1. Beams: Design Mechanics & Theory</h3>
+                        <p class="text-[11px] text-docu-subtext">
+                            Beam design under IS 456 follows the Limit State Method (LSM). Flexural strain distribution is assumed parabolic-rectangular with a maximum concrete compressive strain of 0.0035 at the extreme fiber. Steel yields at <math><mrow><mn>0.87</mn><msub><mi>f</mi><mi>y</mi></msub><mo>/</mo><msub><mi>E</mi><mi>s</mi></msub><mo>+</mo><mn>0.002</mn></mrow></math>.
+                        </p>
+                    </div>
+
+                    <div class="space-y-2 border-l-2 border-docu-primaryDark pl-3">
+                        <h4 class="font-bold text-docu-text text-xs">Step 1: Effective Span (<math><msub><mi>l</mi><mtext>eff</mtext></msub></math>) — Cl. 22.2</h4>
+                        <p class="text-[11px] text-docu-subtext">Smaller of <math><mrow><msub><mi>l</mi><mtext>clear</mtext></msub><mo>+</mo><mi>d</mi></mrow></math> or <math><mrow><msub><mi>l</mi><mtext>clear</mtext></msub><mo>+</mo><mi>w</mi></mrow></math>.</p>
+
+                        <h4 class="font-bold text-docu-text text-xs pt-1">Step 2: Factored Load Actions — Cl. 36.4 & Table 18</h4>
+                        <p class="text-[11px] text-docu-subtext">Include self-weight <math><mrow><msub><mi>w</mi><mtext>sw</mtext></msub><mo>=</mo><mi>b</mi><mo>·</mo><mi>D</mi><mo>·</mo><mn>25</mn><msup><mtext>&nbsp;kN/m</mtext><mn>3</mn></msup></mrow></math>. Total factored load <math><mrow><msub><mi>w</mi><mi>u</mi></msub><mo>=</mo><mn>1.5</mn><mrow><mo>(</mo><msub><mi>w</mi><mtext>sw</mtext></msub><mo>+</mo><mtext>DL</mtext><mo>+</mo><mtext>LL</mtext><mo>)</mo></mrow></mrow></math>. Moment <math><mrow><msub><mi>M</mi><mi>u</mi></msub><mo>=</mo><msub><mi>w</mi><mi>u</mi></msub><msubsup><mi>l</mi><mtext>eff</mtext><mn>2</mn></msubsup><mo>/</mo><mn>8</mn></mrow></math>.</p>
+
+                        <h4 class="font-bold text-docu-text text-xs pt-1">Step 3: Flexure Capacity & Tension Steel — Cl. 38.1 & Annex G</h4>
+                        <div class="p-2 bg-docu-codeBg rounded font-mono text-[11px] text-center border border-docu-border">
+                            <math display="block">
+                                <mrow>
+                                    <msub><mi>M</mi><mtext>u,lim</mtext></msub>
+                                    <mo>=</mo>
+                                    <mn>0.36</mn><mo>·</mo>
+                                    <msub><mi>f</mi><mtext>ck</mtext></msub><mo>·</mo>
+                                    <mfrac>
+                                        <msub><mi>x</mi><mtext>u,lim</mtext></msub>
+                                        <mi>d</mi>
+                                    </mfrac>
+                                    <mo>·</mo><mi>b</mi><msup><mi>d</mi><mn>2</mn></msup>
+                                    <mo>·</mo>
+                                    <mrow><mo>(</mo><mn>1</mn><mo>-</mo><mn>0.42</mn>
+                                        <mfrac><msub><mi>x</mi><mtext>u,lim</mtext></msub><mi>d</mi></mfrac>
+                                    <mo>)</mo></mrow>
+                                </mrow>
+                            </math>
+                        </div>
+                        <p class="text-[11px] text-docu-subtext">If <math><mrow><msub><mi>M</mi><mi>u</mi></msub><mo>⩽</mo><msub><mi>M</mi><mtext>u,lim</mtext></msub></mrow></math>, calculate tension steel <math><msub><mi>A</mi><mtext>st</mtext></msub></math> via Annex G quadratic equation.</p>
+
+                        <h4 class="font-bold text-docu-text text-xs pt-1">Step 4: Shear Design Mechanics — Cl. 40</h4>
+                        <p class="text-[11px] text-docu-subtext">Nominal shear <math><mrow><msub><mi>τ</mi><mi>v</mi></msub><mo>=</mo><mfrac><msub><mi>V</mi><mi>u</mi></msub><mrow><mi>b</mi><mo>·</mo><mi>d</mi></mrow></mfrac></mrow></math>. Concrete shear strength <math><msub><mi>τ</mi><mi>c</mi></msub></math> interpolated from Table 19 based on steel percentage <math><msub><mi>p</mi><mi>t</mi></msub></math>. Design stirrups for excess shear <math><mrow><msub><mi>V</mi><mtext>us</mtext></msub><mo>=</mo><msub><mi>V</mi><mi>u</mi></msub><mo>-</mo><msub><mi>τ</mi><mi>c</mi></msub><mi>b</mi><mi>d</mi></mrow></math>.</p>
+
+                        <h4 class="font-bold text-docu-text text-xs pt-1">Step 5: Serviceability (Deflection) — Cl. 23.2.1</h4>
+                        <p class="text-[11px] text-docu-subtext">Check <math><mrow><msub><mrow><mo>(</mo><mi>l</mi><mo>/</mo><mi>d</mi><mo>)</mo></mrow><mtext>act</mtext></msub><mo>⩽</mo><mn>20</mn><mo>·</mo><msub><mi>K</mi><mi>t</mi></msub></mrow></math>, where <math><msub><mi>K</mi><mi>t</mi></msub></math> depends on service stress <math><mrow><msub><mi>f</mi><mi>s</mi></msub><mo>=</mo><mn>0.58</mn><msub><mi>f</mi><mi>y</mi></msub><mo>·</mo><mfrac><msub><mi>A</mi><mtext>st,req</mtext></msub><msub><mi>A</mi><mtext>st,prov</mtext></msub></mfrac></mrow></math>.</p>
+                    </div>
+                </div>
+
+                <!-- REF TAB 2: ONE-WAY SLABS -->
+                <div id="ref-tab-oneway" class="ref-tab-content hidden space-y-4">
+                    <div id="theory-oneway" class="bg-docu-sidebarBg p-3 rounded border border-docu-border">
+                        <h3 class="font-bold text-docu-primaryDarkest text-xs uppercase tracking-wider mb-1">2. One-Way Slabs: Theory & Mechanics</h3>
+                        <p class="text-[11px] text-docu-subtext">
+                            A slab is classified as One-Way when the long-to-short span ratio <math><mrow><msub><mi>l</mi><mi>y</mi></msub><mo>/</mo><msub><mi>l</mi><mi>x</mi></msub><mo>&gt;</mo><mn>2.0</mn></mrow></math>. Loads transfer predominantly along the shorter span direction. One-way slabs are analyzed as a series of 1-meter wide (<math><mrow><mi>b</mi><mo>=</mo><mn>1000</mn><mtext>&nbsp;mm</mtext></mrow></math>) rectangular flexural strips.
+                        </p>
+                    </div>
+
+                    <div class="space-y-2 border-l-2 border-docu-primaryDark pl-3">
+                        <h4 class="font-bold text-docu-text text-xs">Step 1: Effective Depth & Dead Load</h4>
+                        <p class="text-[11px] text-docu-subtext">Assume depth <math><mrow><mi>d</mi><mo>≈</mo><mi>l</mi><mo>/</mo><mn>25</mn><mtext>&nbsp;to&nbsp;</mtext><mi>l</mi><mo>/</mo><mn>30</mn></mrow></math>. Self-weight <math><mrow><msub><mi>w</mi><mtext>sw</mtext></msub><mo>=</mo><mn>1.0</mn><mo>·</mo><mi>D</mi><mo>·</mo><mn>25</mn><msup><mtext>&nbsp;kN/m</mtext><mn>2</mn></msup></mrow></math>. Total factored load <math><mrow><msub><mi>w</mi><mi>u</mi></msub><mo>=</mo><mn>1.5</mn><mrow><mo>(</mo><msub><mi>w</mi><mtext>sw</mtext></msub><mo>+</mo><mtext>DL</mtext><mo>+</mo><mtext>LL</mtext><mo>)</mo></mrow><mtext>&nbsp;kN/m</mtext></mrow></math>.</p>
+
+                        <h4 class="font-bold text-docu-text text-xs pt-1">Step 2: Flexural Design (Main Steel <math><msub><mi>A</mi><mtext>st</mtext></msub></math>) — Cl. 38.1</h4>
+                        <p class="text-[11px] text-docu-subtext">Calculate main reinforcement per meter width (<math><mrow><mi>b</mi><mo>=</mo><mn>1000</mn><mtext>&nbsp;mm</mtext></mrow></math>) using Annex G formula. Spacing of main bars <math><mrow><mi>s</mi><mo>=</mo><mn>1000</mn><mo>·</mo><msub><mi>A</mi><mtext>bar</mtext></msub><mo>/</mo><msub><mi>A</mi><mtext>st</mtext></msub></mrow></math>. Maximum main bar spacing <math><mrow><mi>s</mi><mo>⩽</mo><mo>min</mo><mrow><mo>(</mo><mn>3</mn><mi>d</mi><mo>,</mo><mn>300</mn><mtext>&nbsp;mm</mtext><mo>)</mo></mrow></mrow></math> (Cl. 26.3.3).</p>
+
+                        <h4 class="font-bold text-docu-text text-xs pt-1">Step 3: Minimum & Distribution Steel — Cl. 26.5.2.1</h4>
+                        <p class="text-[11px] text-docu-subtext">Provide temperature/shrinkage steel perpendicular to main steel:</p>
+                        <ul class="list-disc pl-4 text-[11px] font-mono text-slate-800">
+                            <li>Fe 415 / Fe 500: <math><mrow><msub><mi>A</mi><mtext>st,dist</mtext></msub><mo>=</mo><mn>0.0012</mn><mo>·</mo><mi>b</mi><mo>·</mo><mi>D</mi><mo>=</mo><mn>0.12</mn><mo>%</mo><mi>b</mi><mi>D</mi></mrow></math></li>
+                            <li>Mild Steel Fe 250: <math><mrow><msub><mi>A</mi><mtext>st,dist</mtext></msub><mo>=</mo><mn>0.15</mn><mo>%</mo><mi>b</mi><mi>D</mi></mrow></math></li>
+                            <li>Maximum distribution bar spacing <math><mrow><mi>s</mi><mo>⩽</mo><mo>min</mo><mrow><mo>(</mo><mn>5</mn><mi>d</mi><mo>,</mo><mn>450</mn><mtext>&nbsp;mm</mtext><mo>)</mo></mrow></mrow></math>.</li>
+                        </ul>
+
+                        <h4 class="font-bold text-docu-text text-xs pt-1">Step 4: Shear Strength Check — Cl. 40.2.1</h4>
+                        <p class="text-[11px] text-docu-subtext">Solid slabs possess enhanced shear capacity. Permissible shear stress <math><mrow><msub><mi>τ</mi><mi>c</mi></msub><mo>=</mo><mi>k</mi><mo>·</mo><msub><mi>τ</mi><mtext>c,table19</mtext></msub></mrow></math>, where <math><mi>k</mi></math> ranges from 1.3 (for <math><mrow><mi>D</mi><mo>⩽</mo><mn>150</mn><mtext>&nbsp;mm</mtext></mrow></math>) to 1.0. Shear stirrups are generally avoided in slabs by ensuring <math><mrow><msub><mi>τ</mi><mi>v</mi></msub><mo>⩽</mo><mi>k</mi><msub><mi>τ</mi><mi>c</mi></msub></mrow></math>.</p>
+                    </div>
+                </div>
+
+                <!-- REF TAB 3: TWO-WAY SLABS -->
+                <div id="ref-tab-twoway" class="ref-tab-content hidden space-y-4">
+                    <div id="theory-twoway" class="bg-docu-sidebarBg p-3 rounded border border-docu-border">
+                        <h3 class="font-bold text-docu-primaryDarkest text-xs uppercase tracking-wider mb-1">3. Two-Way Slabs: Theory & Mechanics</h3>
+                        <p class="text-[11px] text-docu-subtext">
+                            Slabs with aspect ratio <math><mrow><msub><mi>l</mi><mi>y</mi></msub><mo>/</mo><msub><mi>l</mi><mi>x</mi></msub><mo>⩽</mo><mn>2.0</mn></mrow></math> bend in both orthogonal directions. Bending moments depend on whether corners are free to lift (Simply Supported - Marcus/Rankine-Grashof method) or restrained against lifting (Annex D coefficients).
+                        </p>
+                    </div>
+
+                    <div class="space-y-2 border-l-2 border-docu-primaryDark pl-3">
+                        <h4 class="font-bold text-docu-text text-xs">Step 1: Moment Calculation</h4>
+                        <p class="text-[11px] text-docu-subtext">Design bending moments along short (<math><msub><mi>l</mi><mi>x</mi></msub></math>) and long (<math><msub><mi>l</mi><mi>y</mi></msub></math>) spans:</p>
+                        <div class="p-2 bg-docu-codeBg rounded font-mono text-[11px] text-center border border-docu-border">
+                            <p><math><mrow><msub><mi>M</mi><mtext>ux</mtext></msub><mo>=</mo><msub><mi>α</mi><mi>x</mi></msub><mo>·</mo><msub><mi>w</mi><mi>u</mi></msub><mo>·</mo><msup><msub><mi>l</mi><mi>x</mi></msub><mn>2</mn></msup></mrow></math></p>
+                            <p><math><mrow><msub><mi>M</mi><mtext>uy</mtext></msub><mo>=</mo><msub><mi>α</mi><mi>y</mi></msub><mo>·</mo><msub><mi>w</mi><mi>u</mi></msub><mo>·</mo><msup><msub><mi>l</mi><mi>x</mi></msub><mn>2</mn></msup></mrow></math></p>
+                        </div>
+
+                        <h4 class="font-bold text-docu-text text-xs pt-1">Step 2: Reinforcement Design along Both Directions</h4>
+                        <p class="text-[11px] text-docu-subtext">Main short-span steel <math><msub><mi>A</mi><mtext>st,x</mtext></msub></math> is placed at bottom outer layer (effective depth <math><msub><mi>d</mi><mi>x</mi></msub></math>). Long-span steel <math><msub><mi>A</mi><mtext>st,y</mtext></msub></math> rests on top of short-span steel (effective depth <math><mrow><msub><mi>d</mi><mi>y</mi></msub><mo>=</mo><msub><mi>d</mi><mi>x</mi></msub><mo>-</mo><mfrac><mrow><msub><mi>ϕ</mi><mi>x</mi></msub><mo>+</mo><msub><mi>ϕ</mi><mi>y</mi></msub></mrow><mn>2</mn></mfrac></mrow></math>).</p>
+
+                        <h4 class="font-bold text-docu-text text-xs pt-1">Step 3: Corner Reinforcement — Annex D</h4>
+                        <p class="text-[11px] text-docu-subtext">Corner reinforcement depends on the edge condition. For two discontinuous meeting edges, Annex D-1.8 requires 0.75 of the maximum midspan steel in each of four layers over 0.2 times the shorter span. For Table 26 Case 1 (all four edges continuous), no corner torsion reinforcement is required under D-1.10.</p>
+                        <div class="p-2 bg-docu-codeBg rounded font-mono text-[11px] text-center border border-docu-border">
+                            <math display="block">
+                                <mrow>
+                                    <msub><mi>A</mi><mtext>torsion</mtext></msub>
+                                    <mo>=</mo>
+                                    <mn>0.75</mn><mo>·</mo><msub><mi>A</mi><mtext>st,x,max</mtext></msub>
+                                    <mtext>&nbsp;per layer, over&nbsp;</mtext>
+                                    <mn>0.2</mn><mo>·</mo><msub><mi>l</mi><mi>x</mi></msub>
+                                </mrow>
+                            </math>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="p-3 bg-docu-sidebarBg border-t border-docu-border flex justify-end">
+                <button onclick="closeReferenceModal()" class="px-3 py-1 bg-docu-navbar text-white rounded text-xs font-semibold">Close Guide</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Minimal Footer -->
+    <footer id="mainFooter" class="bg-docu-navbar border-t border-docu-navbarBorder text-slate-500 py-2 text-[10px] text-center">
+        BIS IS 456:2000 Code Compliant Structural Engine
+    </footer>
+
+    <!-- JavaScript Engine -->
+    <script>
+        // Global State
+        let currentElem = 'beam'; // 'beam', 'oneway', 'twoway'
+
+        // =====================================================================
+        // IS 456:2000 CALCULATION ENGINE
+        // Scope retained intentionally: rectangular simply-supported beam,
+        // one-way slab strip, and two-way slab. UI/layout is unchanged.
+        // =====================================================================
+
+        const TABLE_19 = {
+            // IS 456:2000 Table 19, pt = 100 Ast/(b d), percentage
+            pt: [0.15, 0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00, 2.25, 2.50, 2.75, 3.00],
+            20: [0.28, 0.36, 0.48, 0.56, 0.62, 0.67, 0.72, 0.75, 0.79, 0.81, 0.82, 0.82, 0.82],
+            25: [0.29, 0.37, 0.49, 0.57, 0.64, 0.70, 0.74, 0.78, 0.82, 0.85, 0.86, 0.86, 0.86],
+            30: [0.29, 0.37, 0.50, 0.59, 0.66, 0.71, 0.76, 0.80, 0.84, 0.87, 0.90, 0.92, 0.92],
+            35: [0.29, 0.37, 0.50, 0.59, 0.67, 0.73, 0.78, 0.82, 0.86, 0.90, 0.93, 0.96, 0.99],
+            40: [0.30, 0.38, 0.51, 0.60, 0.68, 0.74, 0.79, 0.84, 0.88, 0.92, 0.95, 0.98, 1.01]
+        };
+
+        const TABLE_20 = { 20: 2.8, 25: 3.1, 30: 3.5, 35: 3.7, 40: 4.0 };
+
+        // Annex D / Table 27: simply supported two-way slab coefficients.
+        const TABLE_27 = {
+            r:    [1.00, 1.10, 1.20, 1.30, 1.40, 1.50, 1.75, 2.00],
+            ax:   [0.062,0.074,0.084,0.093,0.099,0.104,0.113,0.118],
+            ay:   [0.062,0.061,0.059,0.055,0.051,0.046,0.037,0.029]
+        };
+
+        // Annex D / Table 26 Case 1: interior panel, all four edges continuous.
+        // The existing UI exposes only "Restrained (Annex D)", so Case 1 is the
+        // only defensible restrained-panel case that can be selected without
+        // changing the layout or inventing edge-condition inputs.
+        const TABLE_26_CASE1 = {
+            r:     [1.00, 1.10, 1.20, 1.30, 1.40, 1.50, 1.75, 2.00],
+            axNeg: [0.032,0.037,0.043,0.047,0.051,0.053,0.060,0.065],
+            axPos: [0.024,0.028,0.032,0.036,0.039,0.041,0.045,0.049],
+            ayNeg: [0.032,0.037,0.040,0.041,0.042,0.043,0.044,0.044],
+            ayPos: [0.024,0.028,0.030,0.031,0.032,0.032,0.033,0.033]
+        };
+
+        function interpolateTable(x, xs, ys) {
+            if (x <= xs[0]) return ys[0];
+            if (x >= xs[xs.length - 1]) return ys[ys.length - 1];
+            for (let i = 0; i < xs.length - 1; i++) {
+                if (x >= xs[i] && x <= xs[i + 1]) {
+                    const t = (x - xs[i]) / (xs[i + 1] - xs[i]);
+                    return ys[i] + t * (ys[i + 1] - ys[i]);
+                }
+            }
+            return ys[ys.length - 1];
+        }
+
+        function getXuLimRatio(fy) {
+            if (fy === 415) return 0.4791;
+            if (fy === 500) return 0.4561;
+            if (fy === 550) return 0.4441;
+            return 0.48;
+        }
+
+        function getRuLim(fck, fy) {
+            const xu_d = getXuLimRatio(fy);
+            return 0.36 * fck * xu_d * (1 - 0.42 * xu_d);
+        }
+
+        function getTauC(fck, pt) {
+            const grade = fck > 40 ? 40 : (fck < 20 ? 20 : fck);
+            const ptArr = TABLE_19.pt;
+            const tauArr = TABLE_19[grade] || TABLE_19[20];
+            return interpolateTable(pt, ptArr, tauArr);
+        }
+
+        // SP:24-style numerical expression corresponding to IS 456 Fig. 4.
+        // fs is service-load steel stress and pt is percent tension steel.
+        function getModificationFactorKt(fs, pt) {
+            // SP:24 expression corresponding to IS 456 Fig. 4.
+            // pt is PROVIDED tension steel percentage and fs is service stress.
+            // IMPORTANT: modification factor may be below 1.0; only the upper limit is 2.0.
+            if (!(pt > 0)) return 1.0;
+            const stress = Math.max(0, fs);
+            const p = Math.max(0.01, pt);
+            const denominator = 0.225 + 0.00322 * stress - 0.625 * Math.log10(1 / p);
+            if (denominator <= 0) return 2.0;
+            return Math.min(Math.max(1 / denominator, 0.10), 2.0);
+        }
+
+        function findSteelForDeflection(AstBase, AstReq, b, d, fy, basicRatio, actualLd, AstMax, spanM) {
+            // Find the smallest total provided Ast that satisfies the simplified span/depth check.
+            // This prevents recommending arbitrary extra steel when extra steel alone cannot pass.
+            const spanFactor = spanM > 10 ? 10 / spanM : 1;
+            const start = Math.max(AstBase, AstReq);
+            for (let Ast = start; Ast <= AstMax; Ast += 1) {
+                const pt = 100 * Ast / (b * d);
+                const fs = 0.58 * fy * AstReq / Ast;
+                const limit = basicRatio * getModificationFactorKt(fs, pt) * spanFactor;
+                if (actualLd <= limit) return { possible:true, totalAst:Ast, extraAst:Math.max(0,Ast-AstBase), limit, fs, pt };
+            }
+            return { possible:false };
+        }
+
+        function getBaseLdRatio(memberType) {
+            // IS 456 Cl. 23.2.1(a): simply supported = 20.
+            // The current UI represents simply-supported members only.
+            return 20;
+        }
+
+        function calculateSinglyReinforcedAst(Mu_kNm, b, d, fck, fy) {
+            if (!(Mu_kNm > 0) || !(b > 0) || !(d > 0)) return 0;
+            const Mu = Mu_kNm * 1e6;
+            const x = 4.6 * Mu / (fck * b * d * d);
+            if (x >= 1) return Infinity;
+            return (0.5 * fck / fy) * (1 - Math.sqrt(Math.max(0, 1 - x))) * b * d;
+        }
+
+        function selectBarsForArea(requiredAst, barDia, maxSpacing, minSpacing = 50) {
+            const area = Math.PI * barDia * barDia / 4;
+            if (!(requiredAst > 0) || !(area > 0)) return { spacing: 0, Ast: 0 };
+            const theoretical = (1000 * area) / requiredAst;
+            let spacing = Math.floor(Math.min(theoretical, maxSpacing) / 5) * 5;
+            spacing = Math.max(minSpacing, spacing);
+            const Ast = 1000 * area / spacing;
+            return { spacing, Ast };
+        }
+
+        function validateCommonGeometry(d, D, cover, barDia) {
+            return d > 0 && D > 0 && cover >= 0 && barDia > 0 && d < D;
+        }
+
+        function performDesign() {
+            if (currentElem === 'beam') performBeamDesign();
+            else if (currentElem === 'oneway') performOneWaySlabDesign();
+            else if (currentElem === 'twoway') performTwoWaySlabDesign();
+        }
+
+        function setElementType(type) {
+            currentElem = type;
+            const bBeam = document.getElementById('btnElemBeam');
+            const bOne = document.getElementById('btnElemOneWay');
+            const bTwo = document.getElementById('btnElemTwoWay');
+            const badge = document.getElementById('elementBadge');
+
+            [bBeam, bOne, bTwo].forEach(b => {
+                b.className = "px-3 py-1 rounded text-xs font-semibold text-docu-subtext hover:text-docu-text transition";
+            });
+
+            if (type === 'beam') {
+                bBeam.className = "px-3 py-1 rounded text-xs font-bold bg-docu-primary text-slate-900 transition";
+                badge.innerText = "IS 456 Rectangular Beam Engine";
+            } else if (type === 'oneway') {
+                bOne.className = "px-3 py-1 rounded text-xs font-bold bg-docu-primary text-slate-900 transition";
+                badge.innerText = "IS 456 One-Way Slab Strip Engine (b = 1000mm)";
+            } else if (type === 'twoway') {
+                bTwo.className = "px-3 py-1 rounded text-xs font-bold bg-docu-primary text-slate-900 transition";
+                badge.innerText = "IS 456 Two-Way Slab Bending Engine";
+            }
+
+            renderInputFields();
+            performDesign();
+        }
+
+        function renderInputFields() {
+            const spanGrid = document.getElementById('spanGrid');
+            const shearOrDistDiv = document.getElementById('shearOrDistSelectDiv');
+
+            if (currentElem === 'beam') {
+                spanGrid.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-docu-subtext text-[11px]">Clear Span <math><msub><mi>l</mi><mtext>clear</mtext></msub></math> (m)</label>
+                            <span class="text-[9px] font-mono text-docu-primaryDark cursor-pointer" onclick="openReferenceModal('theory-beam')">Cl. 22.2</span>
+                        </div>
+                        <input type="number" step="0.05" id="clearSpan" value="4.5" required oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-docu-subtext text-[11px]">Support Width <math><mi>w</mi></math> (mm)</label>
+                            <span class="text-[9px] font-mono text-docu-primaryDark cursor-pointer" onclick="openReferenceModal('theory-beam')">Cl. 22.2</span>
+                        </div>
+                        <input type="number" step="5" id="supportWidth" value="230" required oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-docu-subtext text-[11px]">Beam Width <math><mi>b</mi></math> (mm)</label>
+                            <span class="text-[9px] font-mono text-docu-subtext">Width</span>
+                        </div>
+                        <input type="number" step="5" id="width" value="230" required oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-docu-subtext text-[11px]">Overall Depth <math><mi>D</mi></math> (mm)</label>
+                            <span class="text-[9px] font-mono text-docu-subtext">Depth</span>
+                        </div>
+                        <input type="number" step="5" id="overallDepth" value="450" required oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-docu-subtext text-[11px]">Nominal Cover <math><msub><mi>c</mi><mtext>nom</mtext></msub></math></label>
+                            <span class="text-[9px] font-mono text-docu-primaryDark cursor-pointer" onclick="openReferenceModal('theory-beam')">Table 16</span>
+                        </div>
+                        <select id="nominalCover" onchange="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                            <option value="20">20 mm (Mild)</option>
+                            <option value="30" selected>30 mm (Moderate)</option>
+                            <option value="45">45 mm (Severe)</option>
+                        </select>
+                    </div>
+                `;
+
+                shearOrDistDiv.innerHTML = `
+                    <label class="block text-docu-subtext text-[11px] mb-0.5">Stirrups Dia <math><msub><mi>ϕ</mi><mi>v</mi></msub></math></label>
+                    <select id="stirrupDia" onchange="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                        <option value="8" selected>8 mm (2-leg)</option>
+                        <option value="10">10 mm (2-leg)</option>
+                    </select>
+                    <label class="block text-docu-subtext text-[11px] mb-0.5 mt-1.5">Additional Tension <math><msub><mi>A</mi><mtext>st</mtext></msub></math> (mm²)</label>
+                    <input type="number" min="0" step="10" id="additionalAst" value="0" oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                `;
+            } else if (currentElem === 'oneway') {
+                spanGrid.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-docu-subtext text-[11px]">Short Span <math><msub><mi>l</mi><mi>x</mi></msub></math> (m)</label>
+                            <span class="text-[9px] font-mono text-docu-primaryDark cursor-pointer" onclick="openReferenceModal('theory-oneway')">Cl. 24.1</span>
+                        </div>
+                        <input type="number" step="0.05" id="clearSpan" value="3.5" required oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-docu-subtext text-[11px]">Long Span <math><msub><mi>l</mi><mi>y</mi></msub></math> (m)</label>
+                            <span class="text-[9px] font-mono text-docu-primaryDark cursor-pointer" onclick="openReferenceModal('theory-oneway')">> 2.0 lx</span>
+                        </div>
+                        <input type="number" step="0.05" id="longSpan" value="8.0" required oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-docu-subtext text-[11px]">Support Width <math><mi>w</mi></math> (mm)</label>
+                        </div>
+                        <input type="number" step="5" id="supportWidth" value="230" required oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-docu-subtext text-[11px]">Slab Thickness <math><mi>D</mi></math> (mm)</label>
+                        </div>
+                        <input type="number" step="5" id="overallDepth" value="150" required oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-docu-subtext text-[11px]">Nominal Cover <math><msub><mi>c</mi><mtext>nom</mtext></msub></math></label>
+                        </div>
+                        <select id="nominalCover" onchange="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                            <option value="15">15 mm (Table 16)</option>
+                            <option value="20" selected>20 mm (Standard)</option>
+                        </select>
+                    </div>
+                `;
+
+                shearOrDistDiv.innerHTML = `
+                    <label class="block text-docu-subtext text-[11px] mb-0.5">Dist. Bar Dia <math><msub><mi>ϕ</mi><mtext>dist</mtext></msub></math></label>
+                    <select id="distBarDia" onchange="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                        <option value="8" selected>8 mm</option>
+                        <option value="10">10 mm</option>
+                    </select>
+                    <label class="block text-docu-subtext text-[11px] mb-0.5 mt-1.5">Additional Tension <math><msub><mi>A</mi><mtext>st</mtext></msub></math> (mm²/m)</label>
+                    <input type="number" min="0" step="10" id="additionalAst" value="0" oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                `;
+            } else if (currentElem === 'twoway') {
+                spanGrid.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-docu-subtext text-[11px]">Short Span <math><msub><mi>l</mi><mi>x</mi></msub></math> (m)</label>
+                            <span class="text-[9px] font-mono text-docu-primaryDark cursor-pointer" onclick="openReferenceModal('theory-twoway')">Annex D</span>
+                        </div>
+                        <input type="number" step="0.05" id="clearSpan" value="4.0" required oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-docu-subtext text-[11px]">Long Span <math><msub><mi>l</mi><mi>y</mi></msub></math> (m)</label>
+                            <span class="text-[9px] font-mono text-docu-primaryDark cursor-pointer" onclick="openReferenceModal('theory-twoway')">≤ 2.0 lx</span>
+                        </div>
+                        <input type="number" step="0.05" id="longSpan" value="5.0" required oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-docu-subtext text-[11px]">Support Width <math><mi>w</mi></math> (mm)</label>
+                        </div>
+                        <input type="number" step="5" id="supportWidth" value="230" required oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-docu-subtext text-[11px]">Slab Thickness <math><mi>D</mi></math> (mm)</label>
+                        </div>
+                        <input type="number" step="5" id="overallDepth" value="150" required oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="text-docu-subtext text-[11px]">Corner Condition</label>
+                        </div>
+                        <select id="cornerRestrained" onchange="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                            <option value="restrained" selected>Restrained (Annex D)</option>
+                            <option value="simply">Simply Supported</option>
+                        </select>
+                    </div>
+                `;
+
+                shearOrDistDiv.innerHTML = `
+                    <label class="block text-docu-subtext text-[11px] mb-0.5">Long Span Dia <math><msub><mi>ϕ</mi><mi>y</mi></msub></math></label>
+                    <select id="distBarDia" onchange="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                        <option value="8" selected>8 mm</option>
+                        <option value="10">10 mm</option>
+                    </select>
+                    <label class="block text-docu-subtext text-[11px] mb-0.5 mt-1.5">Additional Tension <math><msub><mi>A</mi><mtext>st,x</mtext></msub></math> (mm²/m)</label>
+                    <input type="number" min="0" step="10" id="additionalAstX" value="0" oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                    <label class="block text-docu-subtext text-[11px] mb-0.5 mt-1.5">Additional Tension <math><msub><mi>A</mi><mtext>st,y</mtext></msub></math> (mm²/m)</label>
+                    <input type="number" min="0" step="10" id="additionalAstY" value="0" oninput="performDesign()" class="w-full p-1.5 border border-docu-border rounded focus:ring-1 focus:ring-docu-primary focus:outline-none bg-white font-mono">
+                `;
+            }
+        }
+
+
+        // =====================================================================
+        // COMPLETE IS 456:2000 DESIGN ENGINE — UI/LAYOUT UNCHANGED
+        // Scope: rectangular simply-supported beam under UDL, 1 m one-way slab
+        // strip, and two-way slab using Annex D Tables 26/27.
+        // =====================================================================
+
+        const TAU_BD_MILD = {20:1.2,25:1.4,30:1.5,35:1.7,40:1.9};
+
+        function getTauBd(fck, deformed=true, compression=false) {
+            const grade = fck >= 40 ? 40 : (fck <= 20 ? 20 : (fck <= 25 ? 25 : (fck <= 30 ? 30 : 35)));
+            let tau = TAU_BD_MILD[grade] || 1.2;
+            if (deformed) tau *= 1.60;
+            if (compression) tau *= 1.25;
+            return tau;
+        }
+
+        function calculateLd(phi, fy, fck, deformed=true, compression=false) {
+            const tau_bd = getTauBd(fck, deformed, compression);
+            return phi * 0.87 * fy / (4 * tau_bd);
+        }
+
+        function getSteelStressAtStrain(strain, fy) {
+            const Es = 200000;
+            const designYield = 0.87 * fy;
+            return Math.min(designYield, Math.max(0, Es * Math.max(0, strain)));
+        }
+
+        function calculateFlexure(Mu_kNm, b, d, D, cover, stirrupDia, fck, fy, barDia) {
+            const xuLim = getXuLimRatio(fy) * d;
+            const Mulim = 0.36 * fck * b * xuLim * (d - 0.42 * xuLim) / 1e6;
+            if (!(Mu_kNm > 0)) return {doubly:false, Ast1:0, Ast2:0, AstReq:0, AscReq:0, Mulim, xuLim, fsc:0, dp:cover+stirrupDia+barDia/2};
+
+            if (Mu_kNm <= Mulim) {
+                const Ast = calculateSinglyReinforcedAst(Mu_kNm, b, d, fck, fy);
+                return {doubly:false, Ast1:Ast, Ast2:0, AstReq:Ast, AscReq:0, Mulim, xuLim, fsc:0, dp:cover+stirrupDia+barDia/2};
+            }
+
+            const dp = cover + stirrupDia + barDia / 2;
+            if (dp >= xuLim) {
+                return {doubly:true, Ast1:calculateSinglyReinforcedAst(Mulim,b,d,fck,fy), Ast2:Infinity, AstReq:Infinity, AscReq:Infinity, Mulim, xuLim, fsc:0, dp};
+            }
+
+            const strainSc = 0.0035 * (xuLim - dp) / xuLim;
+            const fsc = getSteelStressAtStrain(strainSc, fy);
+            const Mu2 = (Mu_kNm - Mulim) * 1e6;
+            const AscReq = Mu2 / Math.max(fsc * (d - dp), 1);
+            const Ast2 = AscReq * fsc / (0.87 * fy);
+            const Ast1 = calculateSinglyReinforcedAst(Mulim, b, d, fck, fy);
+            return {doubly:true, Ast1, Ast2, AstReq:Ast1+Ast2, AscReq, Mulim, xuLim, fsc, dp};
+        }
+
+        function selectBarsForArea(requiredAst, barDia, maxSpacing, minSpacing = 50) {
+            const area = Math.PI * barDia * barDia / 4;
+            if (!(requiredAst > 0) || !(area > 0) || !Number.isFinite(requiredAst) || !(maxSpacing > 0)) return {spacing:0, Ast:0, adequate:false};
+            const theoretical = (1000 * area) / requiredAst;
+            if (theoretical < minSpacing) {
+                const AstAtMinSpacing = 1000 * area / minSpacing;
+                return {spacing:minSpacing, Ast:AstAtMinSpacing, adequate:false};
+            }
+            let spacing = Math.floor(Math.min(theoretical, maxSpacing) / 5) * 5;
+            spacing = Math.max(minSpacing, spacing);
+            const Ast = 1000 * area / spacing;
+            return {spacing, Ast, adequate:Ast >= requiredAst};
+        }
+
+        function getBeamBarClearSpacing(b, cover, stirrupDia, barDia, numBars) {
+            if (numBars <= 1) return Infinity;
+            const insideWidth = b - 2 * (cover + stirrupDia);
+            return (insideWidth - numBars * barDia) / (numBars - 1);
+        }
+
+        function getModificationFactorKt(fs, pt) {
+            // SP:24 expression corresponding to IS 456 Fig. 4.
+            // pt is PROVIDED tension steel percentage and fs is service stress.
+            // IMPORTANT: modification factor may be below 1.0; only the upper limit is 2.0.
+            if (!(pt > 0)) return 1.0;
+            const stress = Math.max(0, fs);
+            const p = Math.max(0.01, pt);
+            const denominator = 0.225 + 0.00322 * stress - 0.625 * Math.log10(1 / p);
+            if (denominator <= 0) return 2.0;
+            return Math.min(Math.max(1 / denominator, 0.10), 2.0);
+        }
+
+        function findSteelForDeflection(AstBase, AstReq, b, d, fy, basicRatio, actualLd, AstMax, spanM) {
+            // Find the smallest total provided Ast that satisfies the simplified span/depth check.
+            // This prevents recommending arbitrary extra steel when extra steel alone cannot pass.
+            const spanFactor = spanM > 10 ? 10 / spanM : 1;
+            const start = Math.max(AstBase, AstReq);
+            for (let Ast = start; Ast <= AstMax; Ast += 1) {
+                const pt = 100 * Ast / (b * d);
+                const fs = 0.58 * fy * AstReq / Ast;
+                const limit = basicRatio * getModificationFactorKt(fs, pt) * spanFactor;
+                if (actualLd <= limit) return { possible:true, totalAst:Ast, extraAst:Math.max(0,Ast-AstBase), limit, fs, pt };
+            }
+            return { possible:false };
+        }
+
+        function performDesign() {
+            if (currentElem === 'beam') performBeamDesign();
+            else if (currentElem === 'oneway') performOneWaySlabDesign();
+            else performTwoWaySlabDesign();
+        }
+
+        // =====================================================================
+        // 1. BEAM — simply supported rectangular beam under UDL
+        // =====================================================================
+        function performBeamDesign() {
+            const l_clear = parseFloat(document.getElementById('clearSpan').value) || 0;
+            const w_supp = (parseFloat(document.getElementById('supportWidth').value) || 0) / 1000;
+            const b = parseFloat(document.getElementById('width').value) || 0;
+            const D = parseFloat(document.getElementById('overallDepth').value) || 0;
+            const c_nom = parseFloat(document.getElementById('nominalCover').value) || 0;
+            const phi_t = parseFloat(document.getElementById('assumedBarDia').value) || 0;
+            const fck = parseFloat(document.getElementById('fck').value) || 20;
+            const fy = parseFloat(document.getElementById('fy').value) || 415;
+            const q_k = parseFloat(document.getElementById('liveLoad').value) || 0;
+            const g_k_extra = parseFloat(document.getElementById('deadLoad').value) || 0;
+            const phi_v = parseFloat(document.getElementById('stirrupDia')?.value) || 8;
+            const additionalAst = Math.max(0, parseFloat(document.getElementById('additionalAst')?.value) || 0);
+            const fyv = Math.min(fy, 415);
+            const d = D - c_nom - phi_v - phi_t / 2;
+            const l_eff = Math.min(l_clear + d / 1000, l_clear + w_supp);
+            const geometryOK = d > 0 && D > 0 && b > 0 && l_clear > 0 && l_eff > 0 && c_nom >= 0 && phi_t >= 12 && phi_v >= Math.max(6, phi_t/4);
+            if (!geometryOK) {
+                updateStatusBanner(false,1,true);
+                generateModificationAdvice({isDoublyReinforced:true,isShearExceeded:true,isDeflectionOK:false,Mu:0,Mulim:0,tauV:0,tauCMax:0,actualLd:0,maxLd:0,b,D,d,fck,fy});
+                return;
+            }
+
+            const selfWeight = b/1000 * D/1000 * 25;
+            const w_service = selfWeight + g_k_extra + q_k;
+            const w_u = 1.5 * w_service;
+            const M_u = w_u * l_eff*l_eff/8;
+            const V_support = w_u*l_eff/2;
+            const flex = calculateFlexure(M_u,b,d,D,c_nom,phi_v,fck,fy,phi_t);
+            const Ast_min = 0.85*b*d/fy;
+            const Ast_max = 0.04*b*D;
+            const tensionBars = Number.isFinite(flex.AstReq) ? Math.max(2,Math.ceil(Math.max(flex.AstReq,Ast_min)/(Math.PI*phi_t*phi_t/4))) : 999;
+            const Ast_selected = Number.isFinite(flex.AstReq) ? tensionBars*Math.PI*phi_t*phi_t/4 : Infinity;
+            const Ast_provided = Number.isFinite(Ast_selected) ? Ast_selected + additionalAst : Infinity;
+            const tensionBarLimitOK = Ast_provided <= Ast_max;
+            const clearSpacing = getBeamBarClearSpacing(b,c_nom,phi_v,phi_t,tensionBars);
+            const additionalAstOK = additionalAst >= 0;
+            const clearSpacingOK = clearSpacing >= Math.max(25, phi_t);
+            const compressionBars = flex.doubly && Number.isFinite(flex.AscReq) ? Math.max(2,Math.ceil(flex.AscReq/(Math.PI*phi_t*phi_t/4))) : 2;
+            const Asc_provided = flex.doubly && Number.isFinite(flex.AscReq) ? compressionBars*Math.PI*phi_t*phi_t/4 : 0;
+
+            const pt = 100*Ast_provided/(b*d);
+            const Vu_critical = Math.max(0,V_support - w_u*d/1000);
+            const tau_v = Vu_critical*1000/(b*d);
+            const tau_c = getTauC(fck,pt);
+            const tau_c_max = TABLE_20[Math.min(40,Math.max(20,fck))] || 2.8;
+            const shearMaxOK = tau_v <= tau_c_max;
+            const shearConcreteOK = tau_v <= tau_c;
+            const Asv = 2*Math.PI*phi_v*phi_v/4;
+            const svMin = (0.87*fyv*Asv)/(0.4*b);
+            const svMax = Math.min(0.75*d,300);
+            const svCode = Math.min(svMin,svMax);
+            let svEnd = Math.max(50,Math.floor(svCode/10)*10);
+            let shearReinfRequired = !shearConcreteOK;
+            let VusReq = 0;
+            if (shearReinfRequired && shearMaxOK) {
+                VusReq = Math.max(0,Vu_critical*1000-tau_c*b*d);
+                const sReq = VusReq > 0 ? (0.87*fyv*Asv*d)/VusReq : svMax;
+                svEnd = Math.max(10,Math.floor(Math.min(sReq,svMax)/10)*10);
+                // Do not silently relax a code-required spacing below a practical 10 mm.
+                svEnd = Math.min(svEnd,svMax);
+            }
+            const VusProv = (0.87*fyv*Asv*d)/Math.max(svEnd,1);
+            const shearReinfOK = !shearReinfRequired || (!shearMaxOK ? false : (tau_c*b*d + VusProv >= Vu_critical*1000));
+            let shearText;
+            if (!shearMaxOK) shearText=`CRITICAL: τv=${tau_v.toFixed(3)} > τc,max=${tau_c_max.toFixed(2)} N/mm².`;
+            else if (shearReinfRequired) shearText=`2-leg ${phi_v}mm stirrups @ ${svEnd}mm c/c near supports; fyv=${fyv} MPa. Vus,prov=${(VusProv/1000).toFixed(1)} kN.`;
+            else shearText=`Minimum 2-leg ${phi_v}mm stirrups @ ${svEnd}mm c/c; fyv=${fyv} MPa.`;
+
+            // Service-load steel stress for IS 456 Fig. 4 / Cl. 23.2.1.
+            const M_service = w_service*l_eff*l_eff/8;
+            const Ast_service = calculateSinglyReinforcedAst(Math.min(M_service,flex.Mulim),b,d,fck,fy);
+            const fs = Ast_provided > 0 ? 0.58*fy*(Ast_service/Ast_provided) : 0;
+            const Kt = getModificationFactorKt(fs,pt);
+            const maxLd = 20*Kt*(l_eff>10 ? 10/l_eff : 1);
+            const actualLd = l_eff*1000/d;
+            const deflectionOK = actualLd <= maxLd;
+            const Ld_tension = calculateLd(phi_t,fy,fck,true,false);
+            const Ld_compression = calculateLd(phi_t,fy,fck,true,true);
+            const compressionSteelOK = !flex.doubly || (Number.isFinite(flex.AscReq) && Asc_provided >= flex.AscReq);
+            const tensionCapacityOK = !flex.doubly || (Number.isFinite(flex.AstReq) && Ast_provided >= flex.AstReq);
+            const flexCapacityOK = tensionCapacityOK && compressionSteelOK;
+            const allSafe = flexCapacityOK && tensionBarLimitOK && clearSpacingOK && shearMaxOK && shearReinfOK && deflectionOK;
+
+            updateStatusBanner(allSafe,M_u/(flex.Mulim||1),flex.doubly && !flexCapacityOK);
+            generateModificationAdvice({isDoublyReinforced:flex.doubly && !flexCapacityOK,isShearExceeded:!shearMaxOK,isShearReinfRequired:shearReinfRequired,isShearReinfOK:shearReinfOK,isDeflectionOK:deflectionOK,Mu:M_u,Mulim:flex.Mulim,tauV:tau_v,tauCMax:tau_c_max,actualLd,maxLd,b,D,d,fck,fy});
+            document.getElementById('scheduleTableBody').innerHTML=`
+                <tr><td class="py-1 text-docu-subtext font-sans">Effective Span</td><td class="text-right">${l_eff.toFixed(3)} m</td></tr>
+                <tr><td class="py-1 text-docu-subtext font-sans">Factored Load</td><td class="text-right">${w_u.toFixed(2)} kN/m</td></tr>
+                <tr><td class="py-1 text-docu-subtext font-sans">Mu / Mu,lim</td><td class="text-right">${M_u.toFixed(2)} / ${flex.Mulim.toFixed(2)} kN·m</td></tr>
+                <tr><td class="py-1 text-docu-subtext font-sans">Tension Steel</td><td class="font-bold text-right">${phi_t}mm × ${tensionBars} + ${Math.round(additionalAst)} mm² extra (${Math.round(Ast_provided)} mm² total)</td></tr>
+                ${flex.doubly ? `<tr><td class="py-1 text-docu-subtext font-sans">Compression Steel</td><td class="font-bold text-right">${phi_t}mm × ${compressionBars} (${Math.round(Asc_provided)} mm²)</td></tr>` : ''}
+                <tr><td class="py-1 text-docu-subtext font-sans">Stirrups</td><td class="text-right">2-leg ${phi_v}mm @ ${svEnd}mm c/c (support zone)</td></tr>
+                <tr><td class="py-1 text-docu-subtext font-sans">Development Length, tension</td><td class="text-right">${Ld_tension.toFixed(0)} mm</td></tr>
+                ${flex.doubly ? `<tr><td class="py-1 text-docu-subtext font-sans">Development Length, compression</td><td class="text-right">${Ld_compression.toFixed(0)} mm</td></tr>` : ''}
+            `;
+            updateFlexureTab(M_u,flex.Mulim,flex.AstReq,Ast_min,Ast_max,`<div>Mu = wu leff²/8 = ${M_u.toFixed(2)} kN·m</div>`,`<div>${flex.doubly?'Doubly reinforced required; ':'Singly reinforced. '}xu,lim/d=${(flex.xuLim/d).toFixed(4)}; Ast,req=${Number.isFinite(flex.AstReq)?Math.round(flex.AstReq):'—'} mm²</div>`);
+            updateShearTab(tau_v,tau_c,tau_c_max,shearText);
+            updateDeflectionTab(actualLd,maxLd,fs,pt);
+            generateComplianceLog([
+                {clause:'Cl. 22.2',param:'Effective Span',calc:`${l_eff.toFixed(3)} m`,limit:'min(clear+d, clear+support width)',pass:true},
+                {clause:'Cl. 38.1 / Annex G',param:'Flexural Capacity',calc:`Mu=${M_u.toFixed(1)} kNm`,limit:`Mu,lim=${flex.Mulim.toFixed(1)} kNm`,pass:flexCapacityOK},
+                {clause:'Cl. 26.5.1.1',param:'Minimum Tension Steel',calc:`${Math.round(Ast_provided)} mm²`,limit:`≥ ${Math.round(Ast_min)} mm²`,pass:Ast_provided>=Ast_min},
+                {clause:'Cl. 26.5.1.1',param:'Maximum Tension Steel',calc:`${Math.round(Ast_provided)} mm²`,limit:`≤ ${Math.round(Ast_max)} mm²`,pass:tensionBarLimitOK},
+                {clause:'Cl. 26.5.1.1(a)',param:'Longitudinal Bar Diameter',calc:`${phi_t} mm`,limit:'≥ 12 mm',pass:phi_t>=12},
+                {clause:'Cl. 26.5.1.6',param:'Stirrup Diameter',calc:`${phi_v} mm`,limit:`≥ ${Math.max(6,phi_t/4).toFixed(1)} mm`,pass:phi_v>=Math.max(6,phi_t/4)},
+                {clause:'Cl. 26.5.1.5',param:'Longitudinal Clear Spacing',calc:`${clearSpacing.toFixed(1)} mm`,limit:`≥ ${Math.max(25,phi_t)} mm`,pass:clearSpacingOK},
+                {clause:'Cl. 40.2.3',param:'Maximum Shear Stress',calc:`τv=${tau_v.toFixed(3)}`,limit:`≤ ${tau_c_max.toFixed(2)}`,pass:shearMaxOK},
+                {clause:'Cl. 40.2.1',param:'Concrete Shear Strength',calc:`τv=${tau_v.toFixed(3)}`,limit:`≤ τc=${tau_c.toFixed(3)}`,pass:shearConcreteOK || shearReinfOK},
+                {clause:'Cl. 26.5.1.6',param:'Shear Reinforcement',calc:`sv=${svEnd} mm; Vus,prov=${(VusProv/1000).toFixed(1)} kN`,limit:`≤ ${svMax.toFixed(0)} mm and adequate Vus`,pass:svEnd<=svMax&&shearReinfOK},
+                {clause:'Cl. 26.2.1',param:'Tension Development Length',calc:`Ld=${Ld_tension.toFixed(0)} mm`,limit:'Calculate and provide anchorage',pass:true},
+                {clause:'Cl. 23.2.1',param:'Deflection',calc:`l/d=${actualLd.toFixed(1)}`,limit:`≤ ${maxLd.toFixed(1)}`,pass:deflectionOK}
+            ]);
+            drawBeamCrossSection(b,D,c_nom,tensionBars,phi_t,phi_v);
+        }
+
+        // =====================================================================
+        // 2. ONE-WAY SLAB — 1 m strip, simply supported
+        // =====================================================================
+        function performOneWaySlabDesign() {
+            const lx=parseFloat(document.getElementById('clearSpan').value)||0;
+            const ly=parseFloat(document.getElementById('longSpan')?.value)||0;
+            const w_supp=(parseFloat(document.getElementById('supportWidth').value)||0)/1000;
+            const D=parseFloat(document.getElementById('overallDepth').value)||0;
+            const c_nom=parseFloat(document.getElementById('nominalCover').value)||0;
+            const phi_t=parseFloat(document.getElementById('assumedBarDia').value)||0;
+            const phi_dist=parseFloat(document.getElementById('distBarDia')?.value)||8;
+            const additionalAst=Math.max(0,parseFloat(document.getElementById('additionalAst')?.value)||0);
+            const fck=parseFloat(document.getElementById('fck').value)||20;
+            const fy=parseFloat(document.getElementById('fy').value)||415;
+            const q_k=parseFloat(document.getElementById('liveLoad').value)||0;
+            const g_k_extra=parseFloat(document.getElementById('deadLoad').value)||0;
+            const b=1000;
+            const d=D-c_nom-phi_t/2;
+            const l_eff=Math.min(lx+d/1000,lx+w_supp);
+            const ly_eff=Math.min(ly+d/1000,ly+w_supp);
+            const classificationOK=lx>0&&ly>0&&ly_eff/l_eff>2;
+            const geomOK=d>0&&D>0&&phi_t>0&&c_nom>=0&&l_eff>0;
+            if(!classificationOK||!geomOK){
+                updateStatusBanner(false,1,true);
+                generateModificationAdvice({isDoublyReinforced:true,isShearExceeded:false,isDeflectionOK:false,Mu:0,Mulim:0,tauV:0,tauCMax:0,actualLd:0,maxLd:0,b,D,d,fck,fy});
+                document.getElementById('scheduleTableBody').innerHTML=`<tr><td class="py-1 text-docu-subtext font-sans">Classification / Geometry</td><td class="text-right">One-way engine requires ly/lx &gt; 2.0 and valid geometry.</td></tr>`;
+                return;
+            }
+            const selfWeight=D/1000*25;
+            const w_service=selfWeight+g_k_extra+q_k;
+            const w_u=1.5*w_service;
+            const M_u=w_u*l_eff*l_eff/8;
+            const V_support=w_u*l_eff/2;
+            const Vu_critical=V_support;
+            const flex=calculateFlexure(M_u,b,d,D,c_nom,0,fck,fy,phi_t);
+            const Ast_min=(fy>=415?0.0012:0.0015)*b*D;
+            const Ast_max=0.04*b*D;
+            const Ast_design=Math.max(flex.AstReq,Ast_min);
+            const main=selectBarsForArea(Ast_design,phi_t,Math.min(3*d,300));
+            const mainTotalAst=main.Ast+additionalAst;
+            const mainAdequate=mainTotalAst>=Ast_design;
+            const distReq=Ast_min;
+            const dist=selectBarsForArea(distReq,phi_dist,Math.min(5*d,450));
+            const pt=100*mainTotalAst/(b*d);
+            const tau_v=Vu_critical*1000/(b*d);
+            const tau_c=getTauC(fck,pt);
+            const k=D<=150?1.30:(D>=300?1.00:1.30-(D-150)*0.30/150);
+            const tau_slab=k*tau_c;
+            const tau_max=TABLE_20[Math.min(40,Math.max(20,fck))]||2.8;
+            const shearAllow=Math.min(tau_slab,tau_max);
+            const shearOK=tau_v<=shearAllow;
+            const barDiaOK=phi_t<=D/8;
+            const distBarDiaOK=phi_dist<=D/8;
+            const mainSpacingOK=main.spacing<=Math.min(3*d,300);
+            const distSpacingOK=dist.spacing<=Math.min(5*d,450);
+            const steelMaxOK=mainTotalAst<=Ast_max;
+            // IS 456 Fig. 4: fs = 0.58 fy (Ast required / Ast provided).
+            // Use strength-required Ast (not a second Ast derived from service moment).
+            const Ast_required_for_fs=Math.max(flex.AstReq,Ast_min);
+            const fs=mainTotalAst>0?0.58*fy*(Ast_required_for_fs/mainTotalAst):0;
+            const Kt=getModificationFactorKt(fs,pt);
+            const maxLd=20*Kt*(l_eff>10?10/l_eff:1);
+            const actualLd=l_eff*1000/d;
+            const deflectionOK=actualLd<=maxLd;
+            const deflectionSteelSuggestion=findSteelForDeflection(main.Ast,Ast_required_for_fs,b,d,fy,20,actualLd,Ast_max,l_eff);
+            const Ld=calculateLd(phi_t,fy,fck,true,false);
+            const allSafe=!flex.doubly&&mainAdequate&&dist.adequate&&barDiaOK&&distBarDiaOK&&mainSpacingOK&&distSpacingOK&&steelMaxOK&&shearOK&&deflectionOK;
+            updateStatusBanner(allSafe,M_u/(flex.Mulim||1),flex.doubly);
+            const reqDForShear=Math.ceil((Vu_critical*1000/(b*Math.max(shearAllow,0.001)))+c_nom+phi_t/2);
+            generateModificationAdvice({memberType:'slab',isDoublyReinforced:flex.doubly,isBarDiaExceeded:!barDiaOK||!distBarDiaOK,isShearExceeded:!shearOK,isDeflectionOK:deflectionOK,deflectionSteelSuggestion,Mu:M_u,Mulim:flex.Mulim,tauV:tau_v,tauCMax:shearAllow,requiredDForShear:reqDForShear,actualLd,maxLd,b,D,d,fck,fy});
+            document.getElementById('scheduleTableBody').innerHTML=`
+                <tr><td class="py-1 text-docu-subtext font-sans">Effective Span</td><td class="text-right">${l_eff.toFixed(3)} m</td></tr>
+                <tr><td class="py-1 text-docu-subtext font-sans">Factored Load</td><td class="text-right">${w_u.toFixed(2)} kN/m²</td></tr>
+                <tr><td class="py-1 text-docu-subtext font-sans">Main Bottom Steel</td><td class="font-bold text-right">${phi_t}mm @ ${main.spacing}mm c/c (${Math.round(main.Ast)} + ${Math.round(additionalAst)} = ${Math.round(mainTotalAst)} mm²/m)</td></tr>
+                <tr><td class="py-1 text-docu-subtext font-sans">Distribution Steel</td><td class="text-right">${phi_dist}mm @ ${dist.spacing}mm c/c (${Math.round(dist.Ast)} mm²/m)</td></tr>
+                <tr><td class="py-1 text-docu-subtext font-sans">Development Length</td><td class="text-right">${Ld.toFixed(0)} mm</td></tr>
+            `;
+            updateFlexureTab(M_u,flex.Mulim,flex.AstReq,Ast_min,Ast_max,`<div>Mu=wu leff²/8 = ${M_u.toFixed(2)} kN·m/m</div>`,`<div>Ast,req=${Math.round(flex.AstReq)} mm²/m; Ast,selected=${Math.round(main.Ast)}; Ast,extra=${Math.round(additionalAst)}; Ast,total=${Math.round(mainTotalAst)} mm²/m</div>`);
+            const shearText=shearOK?`τv=${tau_v.toFixed(3)} ≤ τallow=${shearAllow.toFixed(3)} N/mm²; no slab shear reinforcement required.`:`CRITICAL: τv=${tau_v.toFixed(3)} > τallow=${shearAllow.toFixed(3)} N/mm².`;
+            updateShearTab(tau_v,tau_slab,tau_max,shearText);
+            updateDeflectionTab(actualLd,maxLd,fs,pt);
+            generateComplianceLog([
+                {clause:'Cl. 24.1',param:'One-Way Action',calc:`le,y/le,x=${(ly_eff/l_eff).toFixed(2)}`,limit:'> 2.0',pass:true},
+                {clause:'Cl. 38.1',param:'Flexural Capacity',calc:`Mu=${M_u.toFixed(1)} kNm/m`,limit:`≤ ${flex.Mulim.toFixed(1)}`,pass:!flex.doubly},
+                {clause:'Cl. 26.5.2.1',param:'Minimum Main Steel',calc:`${Math.round(mainTotalAst)} mm²/m`,limit:`≥ ${Math.round(Ast_min)}`,pass:mainTotalAst>=Ast_min},
+                {clause:'Cl. 26.5.2.1',param:'Minimum Distribution Steel',calc:`${Math.round(dist.Ast)} mm²/m`,limit:`≥ ${Math.round(Ast_min)}`,pass:dist.Ast>=Ast_min},
+                {clause:'Cl. 26.5.2.2',param:'Main Bar Diameter',calc:`${phi_t} mm`,limit:`≤ D/8=${(D/8).toFixed(1)} mm`,pass:barDiaOK},
+                {clause:'Cl. 26.5.2.2',param:'Distribution Bar Diameter',calc:`${phi_dist} mm`,limit:`≤ D/8=${(D/8).toFixed(1)} mm`,pass:distBarDiaOK},
+                {clause:'Cl. 26.3.3',param:'Main Spacing',calc:`${main.spacing} mm`,limit:`≤ ${Math.min(3*d,300).toFixed(0)} mm`,pass:mainSpacingOK},
+                {clause:'Cl. 26.3.3',param:'Distribution Spacing',calc:`${dist.spacing} mm`,limit:`≤ ${Math.min(5*d,450).toFixed(0)} mm`,pass:distSpacingOK},
+                {clause:'Cl. 40.2',param:'Shear',calc:`τv=${tau_v.toFixed(3)}`,limit:`≤ τallow=${shearAllow.toFixed(3)}`,pass:shearOK},
+                {clause:'Cl. 26.2.1',param:'Development Length',calc:`Ld=${Ld.toFixed(0)} mm`,limit:'Calculate and provide anchorage',pass:true},
+                {clause:'Cl. 23.2.1',param:'Deflection',calc:`l/d=${actualLd.toFixed(1)}`,limit:`≤ ${maxLd.toFixed(1)}`,pass:deflectionOK}
+            ]);
+            drawSlabCrossSection(D,c_nom,phi_t,main.spacing,phi_dist,dist.spacing);
+        }
+
+        // =====================================================================
+        // 3. TWO-WAY SLAB — Annex D Table 26 Case 1 / Table 27
+        // =====================================================================
+        function performTwoWaySlabDesign() {
+            const lx=parseFloat(document.getElementById('clearSpan').value)||0;
+            const ly=parseFloat(document.getElementById('longSpan')?.value)||0;
+            const w_supp=(parseFloat(document.getElementById('supportWidth').value)||0)/1000;
+            const D=parseFloat(document.getElementById('overallDepth').value)||0;
+            const c_nom=parseFloat(document.getElementById('nominalCover')?.value)||20;
+            const phi_x=parseFloat(document.getElementById('assumedBarDia').value)||0;
+            const phi_y=parseFloat(document.getElementById('distBarDia')?.value)||8;
+            const additionalAstX=Math.max(0,parseFloat(document.getElementById('additionalAstX')?.value)||0);
+            const additionalAstY=Math.max(0,parseFloat(document.getElementById('additionalAstY')?.value)||0);
+            const fck=parseFloat(document.getElementById('fck').value)||20;
+            const fy=parseFloat(document.getElementById('fy').value)||415;
+            const q_k=parseFloat(document.getElementById('liveLoad').value)||0;
+            const g_k_extra=parseFloat(document.getElementById('deadLoad').value)||0;
+            const cornerCond=document.getElementById('cornerRestrained')?.value||'restrained';
+            const b=1000;
+            const dx=D-c_nom-phi_x/2;
+            const dy=D-c_nom-phi_x-phi_y/2;
+            const lex=Math.min(lx+dx/1000,lx+w_supp);
+            const ley=Math.min(ly+dy/1000,ly+w_supp);
+            const r=ley/lex;
+            if(!(lx>0&&ly>0&&r>=1&&r<=2&&dx>0&&dy>0&&lex>0)){
+                updateStatusBanner(false,1,true);
+                document.getElementById('scheduleTableBody').innerHTML=`<tr><td class="py-1 text-docu-subtext font-sans">Classification / Geometry</td><td class="text-right">Two-way engine requires 1.0 ≤ ly/lx ≤ 2.0 and valid effective depths.</td></tr>`;
+                return;
+            }
+            const selfWeight=D/1000*25;
+            const w_service=selfWeight+g_k_extra+q_k;
+            const w_u=1.5*w_service;
+            let axPos,ayPos,axNeg=0,ayNeg=0,coeffSource;
+            if(cornerCond==='simply'){
+                axPos=interpolateTable(r,TABLE_27.r,TABLE_27.ax); ayPos=interpolateTable(r,TABLE_27.r,TABLE_27.ay);
+                coeffSource='Annex D Table 27 — simply supported';
+            }else{
+                axNeg=interpolateTable(r,TABLE_26_CASE1.r,TABLE_26_CASE1.axNeg); axPos=interpolateTable(r,TABLE_26_CASE1.r,TABLE_26_CASE1.axPos);
+                ayNeg=interpolateTable(r,TABLE_26_CASE1.r,TABLE_26_CASE1.ayNeg); ayPos=interpolateTable(r,TABLE_26_CASE1.r,TABLE_26_CASE1.ayPos);
+                coeffSource='Annex D Table 26 Case 1 — interior panel, all edges continuous';
+            }
+            const MuxPos=axPos*w_u*lex*lex, MuyPos=ayPos*w_u*lex*lex, MuxNeg=axNeg*w_u*lex*lex, MuyNeg=ayNeg*w_u*lex*lex;
+            const flexXPos=calculateFlexure(MuxPos,b,dx,D,c_nom,0,fck,fy,phi_x);
+            const flexYPos=calculateFlexure(MuyPos,b,dy,D,c_nom,0,fck,fy,phi_y);
+            const flexXNeg=cornerCond==='restrained'?calculateFlexure(MuxNeg,b,dx,D,c_nom,0,fck,fy,phi_x):null;
+            const flexYNeg=cornerCond==='restrained'?calculateFlexure(MuyNeg,b,dy,D,c_nom,0,fck,fy,phi_y):null;
+            const AstMin=(fy>=415?0.0012:0.0015)*b*D;
+            const maxAst=0.04*b*D;
+            const xPos=selectBarsForArea(Math.max(AstMin,flexXPos.AstReq),phi_x,Math.min(3*dx,300));
+            const yPos=selectBarsForArea(Math.max(AstMin,flexYPos.AstReq),phi_y,Math.min(3*dy,300));
+            const xTotalAst=xPos.Ast+additionalAstX;
+            const yTotalAst=yPos.Ast+additionalAstY;
+            const xAdequate=xTotalAst>=Math.max(AstMin,flexXPos.AstReq);
+            const yAdequate=yTotalAst>=Math.max(AstMin,flexYPos.AstReq);
+            const xNeg=flexXNeg?selectBarsForArea(Math.max(AstMin,flexXNeg.AstReq),phi_x,Math.min(3*dx,300)):null;
+            const yNeg=flexYNeg?selectBarsForArea(Math.max(AstMin,flexYNeg.AstReq),phi_y,Math.min(3*dy,300)):null;
+            const xPosOK=!flexXPos.doubly&&xAdequate&&xTotalAst<=maxAst;
+            const yPosOK=!flexYPos.doubly&&yAdequate&&yTotalAst<=maxAst;
+            const xNegOK=!flexXNeg||(!flexXNeg.doubly&&xNeg.Ast<=maxAst);
+            const yNegOK=!flexYNeg||(!flexYNeg.doubly&&yNeg.Ast<=maxAst);
+            const diaXOK=phi_x<=D/8, diaYOK=phi_y<=D/8;
+            const spXOK=xPos.spacing<=Math.min(3*dx,300), spYOK=yPos.spacing<=Math.min(3*dy,300);
+            const negSpXOK=!xNeg||xNeg.spacing<=Math.min(3*dx,300), negSpYOK=!yNeg||yNeg.spacing<=Math.min(3*dy,300);
+
+            // One-way shear check on a metre strip in each principal direction.
+            const Vx=w_u*lex/2, Vy=w_u*lex/2;
+            const tauVx=Vx*1000/(b*dx), tauVy=Vy*1000/(b*dy);
+            const ptX=100*xTotalAst/(b*dx), ptY=100*yTotalAst/(b*dy);
+            const k=D<=150?1.30:(D>=300?1.00:1.30-(D-150)*0.30/150);
+            const tauCx=k*getTauC(fck,ptX), tauCy=k*getTauC(fck,ptY);
+            const tauMax=TABLE_20[Math.min(40,Math.max(20,fck))]||2.8;
+            const shearAllowX=Math.min(tauCx,tauMax), shearAllowY=Math.min(tauCy,tauMax);
+            const shearXOK=tauVx<=shearAllowX, shearYOK=tauVy<=shearAllowY;
+            const governingShearAllow=Math.min(shearAllowX,shearAllowY);
+            const reqDxForShear=Vx*1000/(b*Math.max(shearAllowX,0.001));
+            const reqDyForShear=Vy*1000/(b*Math.max(shearAllowY,0.001));
+            const reqDForShear=Math.ceil(Math.max(reqDxForShear+c_nom+phi_x/2,reqDyForShear+c_nom+phi_x+phi_y/2));
+            const Mservice=w_service*lex*lex;
+            const fs=0.58*fy*(calculateSinglyReinforcedAst(Math.min(axPos*Mservice,flexXPos.Mulim),b,dx,fck,fy)/Math.max(xTotalAst,1));
+            const Kt=getModificationFactorKt(fs,ptX);
+            const maxLd=(cornerCond==='restrained'?26:20)*Kt*(lex>10?10/lex:1);
+            const actualLd=lex*1000/dx;
+            const deflectionOK=actualLd<=maxLd;
+            const LdX=calculateLd(phi_x,fy,fck,true,false), LdY=calculateLd(phi_y,fy,fck,true,false);
+            const allSafe=xAdequate&&yAdequate&&(!xNeg||xNeg.adequate)&&(!yNeg||yNeg.adequate)&&xPosOK&&yPosOK&&xNegOK&&yNegOK&&diaXOK&&diaYOK&&spXOK&&spYOK&&negSpXOK&&negSpYOK&&shearXOK&&shearYOK&&deflectionOK;
+            const flexureFailure=flexXPos.doubly||flexYPos.doubly||!!flexXNeg?.doubly||!!flexYNeg?.doubly||!xPosOK||!yPosOK||!xNegOK||!yNegOK;
+            updateStatusBanner(allSafe,Math.max(MuxPos/(flexXPos.Mulim||1),MuyPos/(flexYPos.Mulim||1),MuxNeg/(flexXNeg?.Mulim||1),MuyNeg/(flexYNeg?.Mulim||1)),!allSafe&&flexureFailure);
+            generateModificationAdvice({memberType:'slab',isDoublyReinforced:flexureFailure,isBarDiaExceeded:!diaXOK||!diaYOK,isShearExceeded:!shearXOK||!shearYOK,isDeflectionOK:deflectionOK,Mu:Math.max(MuxPos,MuyPos,MuxNeg,MuyNeg),Mulim:Math.min(flexXPos.Mulim,flexYPos.Mulim),tauV:Math.max(tauVx,tauVy),tauCMax:governingShearAllow,requiredDForShear:reqDForShear,actualLd,maxLd,b,D,d:dx,fck,fy});
+            const torsionText=cornerCond==='restrained'?'No corner torsion for Table 26 Case 1: both meeting edges continuous (D-1.10).':'Use D-2.1.1 support extension rule; Annex D-1.8 torsion mesh is not assumed without explicit discontinuous-edge input.';
+            document.getElementById('scheduleTableBody').innerHTML=`
+                <tr><td class="py-1 text-docu-subtext font-sans">Coefficient Basis</td><td class="font-bold text-right">${coeffSource}</td></tr>
+                <tr><td class="py-1 text-docu-subtext font-sans">Effective Short Span</td><td class="text-right">${lex.toFixed(3)} m</td></tr>
+                <tr><td class="py-1 text-docu-subtext font-sans">+Mx / +My</td><td class="text-right">${MuxPos.toFixed(2)} / ${MuyPos.toFixed(2)} kNm/m</td></tr>
+                <tr><td class="py-1 text-docu-subtext font-sans">Bottom X Steel</td><td class="font-bold text-right">${phi_x}mm @ ${xPos.spacing}mm (${Math.round(xPos.Ast)} + ${Math.round(additionalAstX)} = ${Math.round(xTotalAst)} mm²/m), Ld=${LdX.toFixed(0)}mm</td></tr>
+                <tr><td class="py-1 text-docu-subtext font-sans">Bottom Y Steel</td><td class="font-bold text-right">${phi_y}mm @ ${yPos.spacing}mm (${Math.round(yPos.Ast)} + ${Math.round(additionalAstY)} = ${Math.round(yTotalAst)} mm²/m), Ld=${LdY.toFixed(0)}mm</td></tr>
+                ${cornerCond==='restrained'?`<tr><td class="py-1 text-docu-subtext font-sans">Top X / Y Steel</td><td class="text-right">${phi_x}mm @ ${xNeg.spacing}mm / ${phi_y}mm @ ${yNeg.spacing}mm c/c</td></tr>`:''}
+                <tr><td class="py-1 text-docu-subtext font-sans">Corner / Torsion</td><td class="text-right">${torsionText}</td></tr>
+            `;
+            updateFlexureTab(Math.max(MuxPos,MuyPos,MuxNeg,MuyNeg),Math.min(flexXPos.Mulim,flexYPos.Mulim),Math.max(flexXPos.AstReq,flexYPos.AstReq,flexXNeg?.AstReq||0,flexYNeg?.AstReq||0),AstMin,maxAst,`<div>${coeffSource}</div>`,`<div>+Mx=${MuxPos.toFixed(2)}, +My=${MuyPos.toFixed(2)}, -Mx=${MuxNeg.toFixed(2)}, -My=${MuyNeg.toFixed(2)} kNm/m</div>`);
+            updateShearTab(Math.max(tauVx,tauVy),Math.min(shearAllowX,shearAllowY),tauMax,`X: τv=${tauVx.toFixed(3)} ≤ τallow=${shearAllowX.toFixed(3)}; Y: τv=${tauVy.toFixed(3)} ≤ τallow=${shearAllowY.toFixed(3)} N/mm².`);
+            updateDeflectionTab(actualLd,maxLd,fs,ptX);
+            generateComplianceLog([
+                {clause:'Annex D',param:'Moment Coefficients',calc:coeffSource,limit:'Applicable table',pass:true},
+                {clause:'Cl. 38.1',param:'+Mx Flexure',calc:`${MuxPos.toFixed(1)} kNm/m`,limit:`≤ ${flexXPos.Mulim.toFixed(1)}`,pass:xPosOK},
+                {clause:'Cl. 38.1',param:'+My Flexure',calc:`${MuyPos.toFixed(1)} kNm/m`,limit:`≤ ${flexYPos.Mulim.toFixed(1)}`,pass:yPosOK},
+                {clause:'Annex D',param:'-Mx Support Steel',calc:`${MuxNeg.toFixed(1)} kNm/m`,limit:'Case 1 top steel',pass:xNegOK},
+                {clause:'Annex D',param:'-My Support Steel',calc:`${MuyNeg.toFixed(1)} kNm/m`,limit:'Case 1 top steel',pass:yNegOK},
+                {clause:'Cl. 26.5.2.1',param:'Minimum Steel X/Y',calc:`${Math.round(xTotalAst)} / ${Math.round(yTotalAst)} mm²/m`,limit:`≥ ${Math.round(AstMin)}`,pass:xTotalAst>=AstMin&&yTotalAst>=AstMin},
+                {clause:'Cl. 26.5.2.2',param:'Bar Diameter X/Y',calc:`${phi_x} / ${phi_y} mm`,limit:`≤ D/8=${(D/8).toFixed(1)} mm`,pass:diaXOK&&diaYOK},
+                {clause:'Cl. 26.3.3',param:'Spacing X/Y',calc:`${xPos.spacing} / ${yPos.spacing} mm`,limit:`≤ 3d`,pass:spXOK&&spYOK},
+                {clause:'Cl. 40.2',param:'Shear X/Y',calc:`${tauVx.toFixed(3)} / ${tauVy.toFixed(3)}`,limit:`≤ ${shearAllowX.toFixed(3)} / ${shearAllowY.toFixed(3)} N/mm²`,pass:shearXOK&&shearYOK},
+                {clause:'Cl. 26.2.1',param:'Development Length X/Y',calc:`${LdX.toFixed(0)} / ${LdY.toFixed(0)} mm`,limit:'Calculate and provide anchorage',pass:true},
+                {clause:'Cl. 23.2.1',param:'Deflection',calc:`l/d=${actualLd.toFixed(1)}`,limit:`≤ ${maxLd.toFixed(1)}`,pass:deflectionOK},
+                {clause:'Annex D-1.10 / D-2.1.1',param:'Corner Rule',calc:torsionText,limit:'Applicable edge condition',pass:true}
+            ]);
+            drawSlabCrossSection(D,c_nom,phi_x,xPos.spacing,phi_y,yPos.spacing);
+        }
+
+        // ACTIONABLE MODIFICATION RECOMMENDATION ENGINE
+        function generateModificationAdvice(params) {
+            const container = document.getElementById('modAdviceContainer');
+            const { memberType='beam', isDoublyReinforced, isBarDiaExceeded=false, isShearExceeded, isShearReinfRequired=false, isShearReinfOK=true, isDeflectionOK, deflectionSteelSuggestion=null, Mu, Mulim, tauV, tauCMax, requiredDForShear=0, actualLd, maxLd, b, D, d, fck, fy } = params;
+
+            const isAllSafe = !isDoublyReinforced && !isShearExceeded && (!isShearReinfRequired || isShearReinfOK) && isDeflectionOK;
+
+            if (isAllSafe) {
+                container.className = "hidden";
+                container.innerHTML = "";
+                return;
+            }
+
+            container.className = "block bg-rose-50 rounded-lg p-3.5 border border-rose-200 text-xs shadow-sm space-y-2";
+
+            let adviceList = [];
+
+            // 1. Flexure Failure Recommendations
+            if (isDoublyReinforced) {
+                const reqDepthForFlexure = Math.ceil(Math.sqrt((Mu * 1e6) / (getRuLim(fck, fy) * b)));
+                const addDepth = reqDepthForFlexure - d;
+                const nextFck = fck < 40 ? fck + 5 : 40;
+                adviceList.push(`
+                    <li class="flex items-start space-x-1.5 text-rose-800">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-600 shrink-0 mt-0.5"></i>
+                        <div>
+                            <strong>Flexure Failure (<math><mrow><msub><mi>M</mi><mi>u</mi></msub><mo>&gt;</mo><msub><mi>M</mi><mtext>u,lim</mtext></msub></mrow></math>):</strong> Factored moment (${Mu.toFixed(1)} kNm) exceeds limiting capacity (${Mulim.toFixed(1)} kNm).
+                            <ul class="list-disc pl-4 mt-1 space-y-0.5 text-[11px] text-rose-900 font-mono">
+                                <li><strong>Option 1 (Increase Depth):</strong> Increase overall depth <math><mi>D</mi></math> from ${D} mm to <strong>at least ${D + addDepth} mm</strong> (effective depth <math><mi>d</mi><mo>⩾</mo><mn>${reqDepthForFlexure}</mn><mtext>&nbsp;mm</mtext></math>).</li>
+                                <li><strong>Option 2:</strong> For slab strips, do not treat the 1000 mm design strip as a physical width change; increase slab thickness or revise the load/supporting system and re-check the design strip.</li>
+                                ${fck < 40 ? `<li><strong>Option 3 (Higher Grade Concrete):</strong> Upgrade concrete grade from M${fck} to <strong>M${nextFck}</strong> to boost <math><msub><mi>M</mi><mtext>u,lim</mtext></msub></math>.</li>` : ''}
+                            </ul>
+                        </div>
+                    </li>
+                `);
+            }
+
+            // 1A. Slab bar-diameter detailing recommendation
+            if (isBarDiaExceeded) {
+                adviceList.push(`
+                    <li class="flex items-start space-x-1.5 text-rose-800">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-600 shrink-0 mt-0.5"></i>
+                        <div><strong>Slab Bar Diameter Failure:</strong> selected slab bar diameter exceeds <math><mrow><mi>D</mi><mo>/</mo><mn>8</mn></mrow></math> permitted by Cl. 26.5.2.2. <strong>Use a smaller bar diameter or increase slab thickness.</strong></div>
+                    </li>`);
+            }
+
+            // 2. Shear Failure / Reinforcement Recommendations
+            if (isShearExceeded) {
+                const reqDForShear = Math.ceil((tauV / tauCMax) * d);
+                adviceList.push(`
+                    <li class="flex items-start space-x-1.5 text-rose-800">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-600 shrink-0 mt-0.5"></i>
+                        <div>
+                            <strong>Shear Failure (<math><mrow><msub><mi>τ</mi><mi>v</mi></msub><mo>&gt;</mo><msub><mi>τ</mi><mtext>allow</mtext></msub></mrow></math>):</strong> ${memberType==='slab'?'At least one principal slab direction fails the shear check.':''} Governing shear stress = ${tauV.toFixed(3)} N/mm²; maximum code stress = ${tauCMax.toFixed(3)} N/mm².
+                            <ul class="list-disc pl-4 mt-1 space-y-0.5 text-[11px] text-rose-900 font-mono">
+                                <li><strong>Option 1 (Increase Thickness):</strong> Increase overall depth <math><mi>D</mi></math> from ${D} mm to approximately <strong>${requiredDForShear>0?requiredDForShear:D+20} mm</strong>, then re-check because <math><msub><mi>τ</mi><mi>c</mi></msub></math> and steel percentage change with the new depth.</li>
+                                ${fck < 40 ? `<li><strong>Option 2 (Higher Concrete Grade):</strong> Upgrade concrete from M${fck} to <strong>M${fck+5}</strong>; re-check Table 19/20 shear limits.</li>` : ''}
+                                <li><strong>Option 3:</strong> Re-check the applied load, support condition and effective span before adopting a physical change.</li>
+                            </ul>
+                        </div>
+                    </li>
+                `);
+            }
+
+            if (!isShearExceeded && isShearReinfRequired && !isShearReinfOK) {
+                adviceList.push(`
+                    <li class="flex items-start space-x-1.5 text-rose-800">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-600 shrink-0 mt-0.5"></i>
+                        <div><strong>Shear Reinforcement Inadequate:</strong> concrete shear capacity is exceeded and the selected stirrup arrangement does not provide sufficient shear resistance. Reduce stirrup spacing or increase beam dimensions.</div>
+                    </li>`);
+            }
+
+            // 3. Deflection Failure Recommendations
+            if (!isDeflectionOK) {
+                const minEffD = Math.ceil((actualLd / maxLd) * d);
+                const reqDForDeflection = minEffD + (D - d);
+                adviceList.push(`
+                    <li class="flex items-start space-x-1.5 text-rose-800">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-600 shrink-0 mt-0.5"></i>
+                        <div>
+                            <strong>Deflection Failure (<math><mrow><msub><mrow><mo>(</mo><mi>l</mi><mo>/</mo><mi>d</mi><mo>)</mo></mrow><mtext>act</mtext></msub><mo>&gt;</mo><msub><mrow><mo>(</mo><mi>l</mi><mo>/</mo><mi>d</mi><mo>)</mo></mrow><mtext>max</mtext></msub></mrow></math>):</strong> Actual span/depth ratio (${actualLd.toFixed(1)}) exceeds permissible limit (${maxLd.toFixed(1)}).
+                            <ul class="list-disc pl-4 mt-1 space-y-0.5 text-[11px] text-rose-900 font-mono">
+                                <li><strong>Option 1 (Increase Depth):</strong> Increase overall depth <math><mi>D</mi></math> from ${D} mm to <strong>at least ${reqDForDeflection} mm</strong> and re-check.</li>
+                                ${deflectionSteelSuggestion && deflectionSteelSuggestion.possible
+                                    ? `<li><strong>Option 2 (Additional Steel):</strong> A numerical search of the Fig. 4/SP:24 span-depth expression indicates about <strong>${Math.ceil(deflectionSteelSuggestion.extraAst)} mm²/m additional tension steel</strong> (total ≈ ${Math.ceil(deflectionSteelSuggestion.totalAst)} mm²/m) is the first value that satisfies this simplified deflection check. Re-check spacing and maximum steel.</li>`
+                                    : `<li><strong>Additional steel alone:</strong> No amount of tension steel up to the permitted maximum makes this simplified span/depth check pass. <strong>Increase slab depth</strong> rather than entering an arbitrarily large A<sub>st</sub>.</li>`}
+                            </ul>
+                        </div>
+                    </li>
+                `);
+            }
+
+            container.innerHTML = `
+                <div class="flex items-center space-x-1.5 text-rose-900 font-bold border-b border-rose-200 pb-1 mb-1.5">
+                    <i data-lucide="wrench" class="w-4 h-4 text-rose-700"></i>
+                    <span>Design Modification Checklist to Pass IS 456 Checks:</span>
+                </div>
+                <ul class="space-y-2 font-sans">${adviceList.join('')}</ul>
+            `;
+            lucide.createIcons();
+        }
+
+        // Shared Helper Functions for Results UI
+        function updateStatusBanner(isSafe, flexureRatio, isDoubly) {
+            const banner = document.getElementById('statusBanner');
+            const title = document.getElementById('statusTitle');
+            const sub = document.getElementById('statusSubtitle');
+
+            if (isSafe) {
+                banner.className = "bg-docu-primaryDark text-white px-4 py-3 rounded-lg shadow-sm flex items-center justify-between border border-emerald-600/30";
+                title.innerText = "Design OK - Safe Section";
+                sub.innerText = "Section satisfies all IS 456 Limit State requirements.";
+            } else if (isDoubly) {
+                banner.className = "bg-amber-600 text-white px-4 py-3 rounded-lg shadow-sm flex items-center justify-between border border-amber-500/30";
+                title.innerText = "Section Limit Exceeded / Doubly Reinforced Needed";
+                sub.innerText = "Factored moment exceeds limiting capacity. Review recommendations below.";
+            } else {
+                banner.className = "bg-rose-600 text-white px-4 py-3 rounded-lg shadow-sm flex items-center justify-between border border-rose-500/30";
+                title.innerText = "Design Check Failed";
+                sub.innerText = "Section fails shear or deflection limit check. Review recommendations below.";
+            }
+
+            document.getElementById('momentRatioText').innerHTML = `<math><mrow><msub><mi>M</mi><mi>u</mi></msub><mo>/</mo><msub><mi>M</mi><mtext>u,lim</mtext></msub></mrow><mo>=</mo><mn>${flexureRatio.toFixed(2)}</mn></math>`;
+        }
+
+        function updateFlexureTab(Mu, Mulim, AstReq, AstMin, AstMax, formula1, formula2) {
+            document.getElementById('calcMu').innerText = `${Mu.toFixed(2)} kNm`;
+            document.getElementById('calcMulim').innerText = `${Mulim.toFixed(2)} kNm`;
+            document.getElementById('flexureFormulaBox1').innerHTML = formula1;
+            document.getElementById('flexureFormulaBox2').innerHTML = formula2;
+
+            document.getElementById('astFormulaContainer').innerHTML = `
+                <math display="block">
+                    <msub><mi>A</mi><mtext>st</mtext></msub><mo>=</mo><mfrac><mrow><mn>0.5</mn><msub><mi>f</mi><mtext>ck</mtext></msub></mrow><msub><mi>f</mi><mi>y</mi></msub></mfrac><mfenced open="(" close=")"><mrow><mn>1</mn><mo>-</mo><msqrt><mn>1</mn><mo>-</mo><mfrac><mrow><mn>4.6</mn><msub><mi>M</mi><mi>u</mi></msub></mrow><mrow><msub><mi>f</mi><mtext>ck</mtext></msub><msup><mi>d</mi><mn>2</mn></msup></mrow></mfrac></msqrt></mrow></mfenced><mi>b</mi><mi>d</mi>
+                </math>
+            `;
+
+            document.getElementById('calcAstReq').innerText = `${Math.round(AstReq)} mm²`;
+            document.getElementById('calcAstMin').innerText = `${Math.round(AstMin)} mm²`;
+            document.getElementById('calcAstMax').innerText = `${Math.round(AstMax)} mm²`;
+        }
+
+        function updateShearTab(tauv, tauc, taucmax, statusText) {
+            document.getElementById('calcTauV').innerText = `${tauv.toFixed(3)} N/mm²`;
+            document.getElementById('calcTauC').innerText = `${tauc.toFixed(3)} N/mm²`;
+            document.getElementById('calcTauCMax').innerText = `${taucmax.toFixed(2)} N/mm²`;
+            document.getElementById('shearDesignBox').innerHTML = `<p class="font-semibold text-docu-text text-xs">${statusText}</p>`;
+        }
+
+        function updateDeflectionTab(actLd, maxLd, fs, pt) {
+            document.getElementById('calcLdActual').innerText = actLd.toFixed(2);
+            document.getElementById('calcLdMax').innerText = maxLd.toFixed(2);
+            document.getElementById('calcFs').innerText = fs.toFixed(1);
+            document.getElementById('calcPt').innerText = pt.toFixed(2);
+        }
+
+        function generateComplianceLog(checks) {
+            const tableBody = document.getElementById('complianceLogTable');
+            tableBody.innerHTML = checks.map(c => `
+                <tr class="hover:bg-docu-sidebarBg transition">
+                    <td class="p-1.5 border-r border-docu-border font-bold text-docu-primaryDarkest">${c.clause}</td>
+                    <td class="p-1.5 border-r border-docu-border font-sans">${c.param}</td>
+                    <td class="p-1.5 border-r border-docu-border ${!c.pass ? 'text-rose-600 font-bold' : ''}">${c.calc}</td>
+                    <td class="p-1.5 border-r border-docu-border text-docu-subtext">${c.limit}</td>
+                    <td class="p-1.5 text-center">
+                        <span class="inline-flex px-1.5 py-0.5 rounded text-[9px] font-bold ${c.pass ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                            ${c.pass ? 'PASS' : 'FAIL'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function drawBeamCrossSection(b, D, cover, numBars, barDia, stirrupDia) {
+            document.getElementById('svgTitle').innerText = "Beam Cross Section";
+            const svg = document.getElementById('beamSvg');
+            const scale = Math.min(160 / b, 200 / D);
+            
+            const w = b * scale;
+            const h = D * scale;
+            const x0 = (240 - w) / 2;
+            const y0 = (280 - h) / 2;
+
+            const coverScaled = cover * scale;
+            const stirrupW = w - 2 * coverScaled;
+            const stirrupH = h - 2 * coverScaled;
+
+            let barsHtml = '';
+            const barR = Math.max((barDia * scale) / 2, 3);
+            const stirrupR = (stirrupDia * scale) / 2;
+
+            const barY = y0 + h - coverScaled - stirrupR - barR;
+            const availableW = stirrupW - 2 * stirrupR - 2 * barR;
+            const spacing = numBars > 1 ? availableW / (numBars - 1) : 0;
+
+            for (let i = 0; i < numBars; i++) {
+                const barX = x0 + coverScaled + stirrupR + barR + (numBars > 1 ? i * spacing : availableW / 2);
+                barsHtml += `<circle cx="${barX}" cy="${barY}" r="${barR}" fill="#1fa78a" stroke="#18806a" stroke-width="1.5" />`;
+            }
+
+            const topBarY = y0 + coverScaled + stirrupR + barR;
+            const topBarR = Math.max((10 * scale) / 2, 2.5);
+            barsHtml += `<circle cx="${x0 + coverScaled + stirrupR + topBarR}" cy="${topBarY}" r="${topBarR}" fill="#64748b" />`;
+            barsHtml += `<circle cx="${x0 + w - coverScaled - stirrupR - topBarR}" cy="${topBarY}" r="${topBarR}" fill="#64748b" />`;
+
+            svg.innerHTML = `
+                <rect x="${x0}" y="${y0}" width="${w}" height="${h}" fill="#f8f9fa" stroke="#303846" stroke-width="2" rx="2" />
+                <rect x="${x0 + coverScaled}" y="${y0 + coverScaled}" width="${stirrupW}" height="${stirrupH}" fill="none" stroke="#e11d48" stroke-width="1.5" rx="3" />
+                ${barsHtml}
+                <text x="${x0 + w / 2}" y="${y0 - 6}" text-anchor="middle" font-size="10" fill="#525860" font-weight="600">${b} mm</text>
+                <text x="${x0 - 8}" y="${y0 + h / 2}" text-anchor="middle" font-size="10" fill="#525860" font-weight="600" transform="rotate(-90 ${x0 - 8} ${y0 + h / 2})">${D} mm</text>
+            `;
+        }
+
+        function drawSlabCrossSection(D, cover, mainDia, mainSpacing, distDia, distSpacing) {
+            document.getElementById('svgTitle').innerText = "Slab Cross Section (1m Strip)";
+            const svg = document.getElementById('beamSvg');
+            const scale = Math.min(200 / 1000, 160 / D);
+
+            const w = 200;
+            const h = D * scale;
+            const x0 = 20;
+            const y0 = (280 - h) / 2;
+
+            const coverScaled = cover * scale;
+            const mainR = Math.max((mainDia * scale) / 2, 3.5);
+            const distR = Math.max((distDia * scale) / 2, 2.5);
+
+            let mainBarsHtml = '';
+            const barY = y0 + h - coverScaled - mainR;
+            const numDisplayBars = 5;
+            const barGap = w / numDisplayBars;
+
+            for (let i = 0; i < numDisplayBars; i++) {
+                const barX = x0 + (i + 0.5) * barGap;
+                mainBarsHtml += `<circle cx="${barX}" cy="${barY}" r="${mainR}" fill="#1fa78a" stroke="#18806a" stroke-width="1.5" />`;
+            }
+
+            const distY = barY - mainR - distR;
+            let distBarsHtml = `<line x1="${x0 + 10}" y1="${distY}" x2="${x0 + w - 10}" y2="${distY}" stroke="#64748b" stroke-width="3" rx="1" />`;
+
+            svg.innerHTML = `
+                <rect x="${x0}" y="${y0}" width="${w}" height="${h}" fill="#f8f9fa" stroke="#303846" stroke-width="2" rx="2" />
+                ${distBarsHtml}
+                ${mainBarsHtml}
+                <text x="${x0 + w / 2}" y="${y0 - 6}" text-anchor="middle" font-size="10" fill="#525860" font-weight="600">Main @ ${mainSpacing}mm c/c</text>
+                <text x="${x0 - 8}" y="${y0 + h / 2}" text-anchor="middle" font-size="10" fill="#525860" font-weight="600" transform="rotate(-90 ${x0 - 8} ${y0 + h / 2})">${D} mm</text>
+            `;
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('border-docu-primaryDark', 'text-docu-primaryDark', 'font-semibold');
+                el.classList.add('border-transparent');
+            });
+
+            document.getElementById(tabId).classList.remove('hidden');
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.add('border-docu-primaryDark', 'text-docu-primaryDark', 'font-semibold');
+            activeBtn.classList.remove('border-transparent');
+        }
+
+        function switchRefTab(refTabId) {
+            document.querySelectorAll('.ref-tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.ref-tab-btn').forEach(el => {
+                el.classList.remove('border-docu-primaryDark', 'text-docu-primaryDark', 'font-semibold');
+                el.classList.add('border-transparent');
+            });
+
+            document.getElementById(refTabId).classList.remove('hidden');
+            const activeBtn = document.getElementById('btn-' + refTabId);
+            if (activeBtn) activeBtn.classList.add('border-docu-primaryDark', 'text-docu-primaryDark', 'font-semibold');
+        }
+
+        function openReferenceModal(section) {
+            document.getElementById('refModal').classList.remove('hidden');
+            if (section) {
+                if (section.includes('beam')) switchRefTab('ref-tab-beam');
+                else if (section.includes('oneway')) switchRefTab('ref-tab-oneway');
+                else if (section.includes('twoway')) switchRefTab('ref-tab-twoway');
+
+                const target = document.getElementById(section);
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function closeReferenceModal() {
+            document.getElementById('refModal').classList.add('hidden');
+        }
+
+        function resetDefaults() {
+            setElementType(currentElem);
+        }
+
+        window.onload = function() {
+            lucide.createIcons();
+            setElementType('beam');
+        };
+    </script>
+</body>
+</html>

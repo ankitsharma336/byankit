@@ -132,9 +132,33 @@ const config: Config = {
           label: 'IRC 37 Flexible Pavement Design ',
           to: '/flexible-mix-design',
         },
+          {
+          label: 'IS 456 Structural Design Suite',
+          to: '/IS456-Structural-Design ',
+        },   
         {
           label: 'Aggregate Dry Mix Design ',
           to: '/agg-dry-mix',
+        },
+      ],
+    },
+    {
+      type: 'dropdown',
+      label: 'IS 456 Tools',
+      position: 'left',
+      items: [
+        
+          {
+          label: 'IS 456 Structural Design Suite',
+          to: '/IS456-Structural-Design ',
+        },   
+        {
+          label: 'IS 456 column Design',
+          to: '/IS456-column-design',
+        },
+        {
+          label: 'IS 456 Staircase Design suite ',
+          to: '/IS456-staircase-design',
         },
       ],
     },
@@ -143,6 +167,7 @@ const config: Config = {
       label: 'Resources',
       position: 'left',
       items: [
+        
         {
           label: 'Transportation Engineering Lab',
           to: '/transportation-engineering-manual',
@@ -159,9 +184,28 @@ const config: Config = {
           label: 'IS 456 Checker ',
           to: '/IS456-checker ',
         },  
-             
+         
       ],
-    },
+      },
+
+      {
+      type: 'dropdown',
+      label: 'Pooja',
+      position: 'left',
+      items: [
+        {
+          label: 'Puja Vidhi',
+          to: '/puja-vidhi',
+        },
+        
+        
+        {
+          label: 'Raam Jaap',
+          to: '/raam',
+        },
+                    
+      ],
+      },
 
         {
           href: 'https://github.com/ankitsharma336/byankit',
