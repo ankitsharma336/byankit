@@ -1,0 +1,2178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ByAnkit Engineering | Traffic Signal Design & Webster Optimization</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            /* ByAnkit Engineering palette — forest green / black only */
+            --bg-dark: #f4f8f5;
+            --panel-bg: #ffffff;
+            --panel-border: #c9dbcf;
+            --accent-green: #176b3a;
+            --accent-green-hover: #176b3a;
+            --accent-light: #176b3a;
+            --accent-danger: #a33b3b;
+            --accent-warning: #8a641c;
+            --text-primary: #183526;
+            --text-secondary: #5f7568;
+            --surface-dark: #edf4ef;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Custom ByAnkit Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f4f8f5;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c9dbcf;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #176b3a;
+        }
+
+        .tab-btn {
+            transition: all 0.2s ease;
+            border-bottom: 2px solid transparent;
+            white-space: normal;
+            overflow-wrap: break-word;
+            text-align: center;
+            line-height: 1.25;
+            flex: 1 1 190px;
+            min-width: 150px;
+        }
+        .tab-btn.active {
+            color: var(--accent-green);
+            border-bottom-color: var(--accent-green);
+            background-color: rgba(23, 107, 58, 0.08);
+        }
+
+        .calc-box {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+            border-radius: 8px;
+            background-color: #edf4ef;
+            border: 1px solid var(--panel-border);
+            image-rendering: auto;
+            /* Keep the CSS size independent of the HiDPI backing-store size. */
+            box-sizing: border-box;
+        }
+
+        /* Dedicated aspect ratios prevent browser resampling of the diagrams. */
+        #canvas-intersection { aspect-ratio: 800 / 360; }
+        #canvas-diagram { aspect-ratio: 800 / 180; }
+        #canvas-webster-curve { aspect-ratio: 800 / 320; }
+
+        /* Keep MathJax inline equations from collapsing/wrapping vertically. */
+        mjx-container {
+            white-space: nowrap !important;
+            display: inline-block !important;
+            max-width: 100%;
+        }
+        .math-workbook mjx-container {
+            vertical-align: middle;
+        }
+
+        .doc-badge {
+            background-color: rgba(23, 107, 58, 0.08);
+            border: 1px solid rgba(23, 107, 58, 0.25);
+            color: #176b3a;
+        }
+
+
+        /* ByAnkit Light Theme: force all utility-driven surfaces into the brand palette */
+        body { background:#f4f8f5 !important; color:#183526 !important; }
+        header, footer { background:#ffffff !important; border-color:#c9dbcf !important; }
+        .calc-box { background:#ffffff !important; border-color:#c9dbcf !important; color:#183526 !important; }
+        canvas { background:#edf4ef !important; border-color:#c9dbcf !important; }
+        input, select { background:#f4f8f5 !important; color:#183526 !important; border-color:#c9dbcf !important; }
+        input::placeholder { color:#6f8578; }
+        .tab-btn.active { background:rgba(23,107,58,.08) !important; color:#176b3a !important; }
+        .panel-card, main > div > div, main section { color:#183526; }
+        @media (prefers-color-scheme: dark) { /* intentionally ignored: ByAnkit light theme is the default */ }
+
+        /* Printable report calculation cards: keep all generated content readable. */
+        #report-calc-steps { color: #183526 !important; }
+        #report-calc-steps .report-calc-card {
+            background: #f4f8f5 !important;
+            color: #183526 !important;
+            border-color: #b8cbbd !important;
+            overflow: visible !important;
+        }
+        #report-calc-steps .report-calc-card p {
+            color: #183526 !important;
+            line-height: 1.45 !important;
+            margin: 0.18rem 0 !important;
+        }
+        #report-calc-steps .report-calc-card p.font-bold { color: #176b3a !important; }
+        #report-calc-steps .report-calc-card strong { color: #176b3a !important; }
+        #report-calc-steps .report-calc-card .font-mono {
+            color: #183526 !important;
+            background: #e3eee7 !important;
+            border: 1px solid #c9dbcf !important;
+        }
+
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            .panel-card {
+                border: 1px solid #ccc !important;
+                background: white !important;
+                color: black !important;
+            }
+            #tab-report, #tab-report .print-only {
+                background: white !important;
+                color: #183526 !important;
+            }
+            #report-calc-steps .report-calc-card {
+                background: #f4f8f5 !important;
+                color: #183526 !important;
+                break-inside: avoid;
+            }
+            #report-calc-steps .report-calc-card p { color: #183526 !important; }
+        }
+    </style>
+<script>
+window.MathJax = { tex: { inlineMath: [['$','$'], ['\\(','\\)']], displayMath: [['$$','$$'], ['\\[','\\]']] }, svg: { fontCache: 'global' } };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <header class="bg-[#ffffff]/95 border-b border-[#c9dbcf] sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <span class="text-3xl">🚦</span>
+                <div>
+                    <h1 class="text-xl font-bold text-[#176b3a] leading-tight flex items-center gap-2">
+                        <span>IRC:93-1985 Traffic Signal Design</span>
+                        <span class="text-xs font-normal text-[#5f7568] bg-[#f4f8f5] px-2 py-0.5 rounded border border-[#c9dbcf]"></span>
+                    </h1>
+                    <p class="text-xs text-[#5f7568]">ByAnkit Engineering | Civil & Transportation Design Suite</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2 text-xs">
+                <span class="doc-badge px-2.5 py-1 rounded-md font-semibold">IRC:93-1985</span>
+                <span class="bg-[#176b3a]/10 border border-[#176b3a]/30 text-[#2e8b57] px-2.5 py-1 rounded-md font-semibold">IRC:106-1990 / PCU assumptions</span>
+                <span class="bg-[#176b3a]/10 border border-[#176b3a]/30 text-[#2e8b57] px-2.5 py-1 rounded-md font-semibold">Webster analytical model</span>
+            </div>
+        </div>
+
+        <!-- NAVIGATION TABS -->
+        <div class="max-w-7xl mx-auto px-4 flex flex-wrap items-stretch text-sm font-medium text-[#5f7568] border-t border-[#c9dbcf]">
+            <button onclick="switchTab('sim')" id="tab-btn-sim" class="tab-btn active px-4 py-2.5">🖥️ Interactive Junction & Signal Design</button>
+            <button onclick="switchTab('webster')" id="tab-btn-webster" class="tab-btn px-4 py-2.5">📈 Webster Delay Optimization Curve</button>
+            <button onclick="switchTab('calc')" id="tab-btn-calc" class="tab-btn px-4 py-2.5">📐 Step-by-Step Mathematical Workbook</button>
+            <button onclick="switchTab('field')" id="tab-btn-field" class="tab-btn px-4 py-2.5">👷 Field Engineer Screening & Action Plan</button>
+            <button onclick="switchTab('log')" id="tab-btn-log" class="tab-btn px-4 py-2.5">📝 Signal Optimization Log</button>
+            <button onclick="switchTab('report')" id="tab-btn-report" class="tab-btn px-4 py-2.5">📋 Printable Design Report</button>
+        </div>
+    </header>
+
+    <div class="max-w-7xl w-full mx-auto px-4 md:px-6 pt-4">
+        
+    </div>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
+
+        <!-- TAB 1: INTERACTIVE JUNCTION & SIGNAL DESIGN -->
+        <div id="tab-sim" class="space-y-6">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- LEFT CONTROL PANEL (4 Cols) -->
+                <div class="lg:col-span-4 space-y-5 bg-[#ffffff] p-5 rounded-xl border border-[#c9dbcf]">
+                    
+                    <div class="border-b border-[#c9dbcf] pb-2">
+                        <h2 class="text-sm font-bold text-[#176b3a] uppercase tracking-wider flex items-center gap-2">
+                            <span>⚙️</span> Approach Geometry & Traffic Input
+                        </h2>
+                    </div>
+
+                    <!-- PHASE SELECTOR -->
+                    <div>
+                        <label class="block text-xs font-semibold text-[#3f574a] mb-1">Intersection Signal Phasing System</label>
+                        <select id="numPhases" class="w-full bg-[#f4f8f5] border border-[#c9dbcf] text-[#274637] text-sm rounded-lg p-2 focus:ring-2 focus:ring-[#176b3a] focus:outline-none">
+                            <option value="2" selected>2-Phase System (Phase 1: Major N-S | Phase 2: Minor E-W)</option>
+                            <option value="3">3-Phase System (P1: N-S Straight | P2: N-S Right Turn | P3: E-W Straight)</option>
+                            <option value="4">4-Phase System (P1: N-S Straight | P2: N-S Right Turn | P3: E-W Straight | P4: E-W Right Turn)</option>
+                        </select>
+                    </div>
+
+                    <!-- MIXED TRAFFIC COMPOSITION (IRC:106 PCU) -->
+                    <div class="bg-[#f4f8f5] p-3.5 rounded-lg border border-[#c9dbcf] space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-[#2e8b57] uppercase">🚙 Mixed Traffic PCU Composition — verify against applicable IRC</span>
+                            <button onclick="togglePcuModal()" class="text-[11px] text-[#176b3a] hover:underline">Adjust Factors</button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                                <label class="text-[#5f7568]">Two-Wheelers (%): <span id="pcu-tw-val" class="text-[#176b3a] font-mono">40%</span></label>
+                                <input type="range" id="pcuTW" min="0" max="70" value="40" class="w-full accent-[#176b3a] h-1">
+                            </div>
+                            <div>
+                                <label class="text-[#5f7568]">Cars/Jeeps (%): <span id="pcu-car-val" class="text-[#176b3a] font-mono">40%</span></label>
+                                <input type="range" id="pcuCar" min="10" max="80" value="40" class="w-full accent-[#176b3a] h-1">
+                            </div>
+                            <div>
+                                <label class="text-[#5f7568]">Buses/Trucks (%): <span id="pcu-hv-val" class="text-[#176b3a] font-mono">10%</span></label>
+                                <input type="range" id="pcuHV" min="0" max="30" value="10" class="w-full accent-[#176b3a] h-1">
+                            </div>
+                            <div>
+                                <label class="text-[#5f7568]">Auto-Rickshaws (%): <span id="pcu-auto-val" class="text-[#176b3a] font-mono">10%</span></label>
+                                <input type="range" id="pcuAuto" min="0" max="40" value="10" class="w-full accent-[#176b3a] h-1">
+                            </div>
+                        </div>
+                        <div class="text-[11px] text-[#5f7568] bg-[#ffffff] p-2 rounded flex justify-between border border-[#c9dbcf]">
+                            <span>Composite Weighted PCU Factor:</span>
+                            <span id="weighted-pcu-factor" class="font-bold text-[#176b3a] font-mono">0.900 PCU/veh</span>
+                        </div>
+                        <div class="flex justify-between text-[11px] px-1 pt-1">
+                            <span class="text-[#5f7568]">Vehicle composition total</span>
+                            <span id="pcu-composition-total" class="font-mono text-[#2e8b57]">Composition: 100%</span>
+                        </div>
+                        <div class="text-[10px] text-[#5f7568] font-mono px-1">Factor = (TW×0.50 + Car×1.00 + Bus/Truck×2.20 + Auto×0.80) ÷ composition total</div>
+                    </div>
+
+                    <!-- PHASE 1: MAJOR ROAD -->
+                    <div class="space-y-3 pt-1">
+                        <div class="text-xs font-bold text-[#176b3a] uppercase tracking-wide">Phase 1: Major Road Approach (North-South)</div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-[#3f574a]">Peak Flow Rate (Vehicles/hr)</span>
+                                <span id="val-q1" class="text-[#176b3a] font-bold font-mono">800 veh/h (864 PCU/h)</span>
+                            </div>
+                            <input type="range" id="q1" min="200" max="2200" step="25" value="800" class="w-full accent-[#176b3a]">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-[#3f574a]">Approach Road Width ($W_1$)</span>
+                                <span id="val-w1" class="text-[#176b3a] font-bold font-mono">7.5 m</span>
+                            </div>
+                            <input type="range" id="w1" min="3.5" max="15.0" step="0.5" value="7.5" class="w-full accent-[#176b3a]">
+                        </div>
+                    </div>
+
+                    <!-- PHASE 2: MINOR ROAD -->
+                    <div class="space-y-3 pt-2 border-t border-[#c9dbcf]">
+                        <div class="text-xs font-bold text-[#2e8b57] uppercase tracking-wide">Phase 2: Minor Road Approach (East-West)</div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-[#3f574a]">Peak Flow Rate (Vehicles/hr)</span>
+                                <span id="val-q2" class="text-[#2e8b57] font-bold font-mono">500 veh/h (540 PCU/h)</span>
+                            </div>
+                            <input type="range" id="q2" min="100" max="1500" step="25" value="500" class="w-full accent-[#176b3a]">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-[#3f574a]">Approach Road Width ($W_2$)</span>
+                                <span id="val-w2" class="text-[#2e8b57] font-bold font-mono">5.5 m</span>
+                            </div>
+                            <input type="range" id="w2" min="3.5" max="12.0" step="0.5" value="5.5" class="w-full accent-[#176b3a]">
+                        </div>
+                    </div>
+
+                    <!-- PHASE 3 RIGHT TURN (IF ACTIVE) -->
+                    <div id="group-q3" class="space-y-3 pt-2 border-t border-[#c9dbcf] hidden">
+                        <div class="text-xs font-bold text-[#8a641c] uppercase tracking-wide">Phase 3: Dedicated Right Turn Phase</div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-[#3f574a]">Right Turn Peak Flow (Vehicles/hr)</span>
+                                <span id="val-q3" class="text-[#8a641c] font-bold font-mono">250 veh/h</span>
+                            </div>
+                            <input type="range" id="q3" min="50" max="800" step="25" value="250" class="w-full accent-[#176b3a]">
+                        </div>
+                    </div>
+
+                    <!-- PHASE 4 RIGHT TURN (IF ACTIVE) -->
+                    <div id="group-q4" class="space-y-3 pt-2 border-t border-[#c9dbcf] hidden">
+                        <div class="text-xs font-bold text-[#8a641c] uppercase tracking-wide">Phase 4: Dedicated E-W Right Turn Phase</div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-[#3f574a]">E-W Right Turn Peak Flow (Vehicles/hr)</span>
+                                <span id="val-q4" class="text-[#8a641c] font-bold font-mono">200 veh/h</span>
+                            </div>
+                            <input type="range" id="q4" min="50" max="800" step="25" value="200" class="w-full accent-[#176b3a]">
+                        </div>
+                    </div>
+
+                    <!-- CLEARANCE & AMBER TIMINGS -->
+                    <div class="space-y-3 pt-2 border-t border-[#c9dbcf]">
+                        <div class="text-xs font-bold text-[#176b3a] uppercase tracking-wide">Signal Clearance & Pedestrian Parameters</div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <div class="flex justify-between text-[11px] mb-1">
+                                    <span class="text-[#3f574a]">Amber Time</span>
+                                    <span id="val-amber" class="text-[#176b3a] font-mono">3s</span>
+                                </div>
+                                <input type="range" id="amber" min="3" max="5" step="1" value="3" class="w-full accent-[#176b3a]">
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-[11px] mb-1">
+                                    <span class="text-[#3f574a]">All-Red</span>
+                                    <span id="val-allred" class="text-[#176b3a] font-mono">2s</span>
+                                </div>
+                                <input type="range" id="allred" min="1" max="4" step="1" value="2" class="w-full accent-[#176b3a]">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[11px] mb-1">
+                                <span class="text-[#3f574a]">Pedestrian Crossing Width & Speed</span>
+                                <span id="val-pedwidth" class="text-[#176b3a] font-mono">14m @ 1.2m/s</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <input type="range" id="pedwidth" min="7" max="25" step="1" value="14" class="w-full accent-[#176b3a]">
+                                <select id="walkSpeed" class="bg-[#f4f8f5] border border-[#c9dbcf] text-xs text-[#274637] rounded px-1">
+                                    <option value="1.2" selected>1.2 m/s (Standard)</option>
+                                    <option value="0.9">0.9 m/s (Senior Zone)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT DISPLAY PANEL (8 Cols) -->
+                <div class="lg:col-span-8 space-y-6">
+                    
+                    <!-- KEY PERFORMANCE METRICS GRID -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div class="bg-[#ffffff] border border-[#c9dbcf] p-3.5 rounded-xl flex flex-col justify-between">
+                            <span class="text-[11px] uppercase tracking-wider text-[#5f7568]">Optimal Cycle ($C_o$)</span>
+                            <div class="text-2xl font-black text-[#176b3a] font-mono my-1" id="card-cycle">0s</div>
+                            <div class="text-[11px] text-[#5f7568]" id="card-cycle-sub">Webster $C_o$ Calculation</div>
+                            <span id="badge-cycle" class="mt-2 text-[10px] px-2 py-0.5 rounded font-bold uppercase w-max bg-[#176b3a]/10 text-[#176b3a] border border-[#176b3a]/30">OPTIMAL</span>
+                        </div>
+
+                        <div class="bg-[#ffffff] border border-[#c9dbcf] p-3.5 rounded-xl flex flex-col justify-between">
+                            <span class="text-[11px] uppercase tracking-wider text-[#5f7568]">Capacity Ratio ($Y = \sum y_i$)</span>
+                            <div class="text-2xl font-black text-[#2e8b57] font-mono my-1" id="card-yratio">0.00</div>
+                            <div class="text-[11px] text-[#5f7568]" id="card-yratio-sub">Max Recommended: 0.85</div>
+                            <span id="badge-yratio" class="mt-2 text-[10px] px-2 py-0.5 rounded font-bold uppercase w-max bg-[#176b3a]/10 text-[#176b3a] border border-[#176b3a]/30">UNDER CAP</span>
+                        </div>
+
+                        <div class="bg-[#ffffff] border border-[#c9dbcf] p-3.5 rounded-xl flex flex-col justify-between">
+                            <span class="text-[11px] uppercase tracking-wider text-[#5f7568]">Avg Vehicle Delay</span>
+                            <div class="text-2xl font-black text-[#8a641c] font-mono my-1" id="card-delay">0s</div>
+                            <div class="text-[11px] text-[#5f7568]" id="card-los">Screening LOS: A</div>
+                            <span id="badge-los" class="mt-2 text-[10px] px-2 py-0.5 rounded font-bold uppercase w-max bg-[#176b3a]/10 text-[#176b3a] border border-[#176b3a]/30">LOS A</span>
+                        </div>
+
+                        <div class="bg-[#ffffff] border border-[#c9dbcf] p-3.5 rounded-xl flex flex-col justify-between">
+                            <span class="text-[11px] uppercase tracking-wider text-[#5f7568]">Pedestrian Clear Time</span>
+                            <div class="text-2xl font-black text-[#176b3a] font-mono my-1" id="card-pedtime">0s</div>
+                            <div class="text-[11px] text-[#5f7568]" id="card-ped-sub">Req: $7 + W/v_{walk}$</div>
+                            <span id="badge-ped" class="mt-2 text-[10px] px-2 py-0.5 rounded font-bold uppercase w-max bg-[#176b3a]/10 text-[#176b3a] border border-[#176b3a]/30">SAFE</span>
+                        </div>
+                    </div>
+
+                    <!-- CANVAS 1: INTERACTIVE JUNCTION & ANIMATED FLOW -->
+                    <div class="bg-[#ffffff] border border-[#c9dbcf] p-4 rounded-xl space-y-3">
+                        <div class="flex justify-between items-center flex-wrap gap-2">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-lg">🛣️</span>
+                                <h3 class="text-sm font-bold text-[#274637]">Interactive 4-Arm Junction & Dilemma Zone Simulation</h3>
+                            </div>
+                            <div class="flex items-center gap-4 text-xs">
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#176b3a]"></span> Green Movement</span>
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#8a641c]"></span> Amber Dilemma</span>
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#a33b3b]"></span> Red Hold</span>
+                            </div>
+                        </div>
+                        <canvas id="canvas-intersection" width="800" height="360" class="w-full h-auto"></canvas>
+                    </div>
+
+                    <!-- CANVAS 2: SIGNAL TIMING RING DIAGRAM -->
+                    <div class="bg-[#ffffff] border border-[#c9dbcf] p-4 rounded-xl space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-sm font-bold text-[#274637] flex items-center gap-2">
+                                <span>📊</span> Signal Timing Ring & Clearance Breakdown Diagram
+                            </h3>
+                            <span class="text-xs text-[#5f7568] font-mono" id="cycle-split-summary">Cycle = 60s | G1=28s, G2=18s</span>
+                        </div>
+                        <canvas id="canvas-diagram" width="800" height="180" class="w-full h-auto"></canvas>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 2: WEBSTER DELAY OPTIMIZATION CURVE -->
+        <div id="tab-webster" class="space-y-6 hidden">
+            <div class="bg-[#ffffff] border border-[#c9dbcf] p-5 rounded-xl space-y-4">
+                <div class="flex justify-between items-start flex-wrap gap-4">
+                    <div class="min-w-0 flex-1">
+                        <h2 class="text-base font-bold text-[#176b3a] leading-6">📈 Cycle Length vs. Modelled Intersection Delay Curve (<span class="whitespace-nowrap">$d$ vs $C$</span>)</h2>
+                        <p class="text-xs text-[#5f7568]">Theoretical formulation showing optimal cycle $C_o$ at minimum delay point, lost time penalty for $C < C_o$, and red-delay penalty for $C > C_o$.</p>
+                    </div>
+                    <div class="text-xs bg-[#f4f8f5] p-2 rounded border border-[#c9dbcf] font-mono">
+                        Optimal $C_o$: <span id="webster-opt-val" class="text-[#176b3a] font-bold">54s</span> | Delay @ $C_o$: <span id="webster-delay-val" class="text-[#176b3a] font-bold">18.4 s/PCU</span>
+                    </div>
+                </div>
+
+                <canvas id="canvas-webster-curve" width="800" height="320" class="w-full h-auto"></canvas>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs pt-2">
+                    <div class="bg-[#f4f8f5] p-3 rounded-lg border border-[#c9dbcf]">
+                        <div class="font-bold text-[#a33b3b] mb-1">🛑 Left Zone ($C < C_o$): Lost Time Inefficiency</div>
+                        <p class="text-[#5f7568]">When cycle length is too short, signal changes occur too frequently. Lost time ($L$) consumes a high percentage of cycle time, causing queue spillback and extreme delay exponential surge.</p>
+                    </div>
+                    <div class="bg-[#f4f8f5] p-3 rounded-lg border border-[#c9dbcf]">
+                        <div class="font-bold text-[#176b3a] mb-1">🎯 Center Zone ($C_o \pm 10\text{s}$): Sweet Spot</div>
+                        <p class="text-[#5f7568]">The adopted cycle is constrained by the application's selected practical bounds. Verify any project-specific cycle-length limits against the governing IRC provisions and signal-controller requirements.</p>
+                    </div>
+                    <div class="bg-[#f4f8f5] p-3 rounded-lg border border-[#c9dbcf]">
+                        <div class="font-bold text-[#8a641c] mb-1">⏳ Right Zone ($C > C_o$): Long Red Hold Penalty</div>
+                        <p class="text-[#5f7568]">Excessively long cycles increase uniform delay ($d_1$) because vehicles sit idle during long red intervals. Drivers become impatient, leading to illegal red-light running.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SENSITIVITY MATRIX TABLE -->
+            <div class="bg-[#ffffff] border border-[#c9dbcf] p-5 rounded-xl space-y-3">
+                <h3 class="text-sm font-bold text-[#274637]">📊 5-Scenario Traffic Growth & Peak Hour Sensitivity Matrix</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-center border-collapse">
+                        <thead>
+                            <tr class="bg-[#f4f8f5] text-[#176b3a] border-b border-[#c9dbcf]">
+                                <th class="p-2.5 text-left">Demand Scenario</th>
+                                <th class="p-2.5">Total Vol (PCU/h)</th>
+                                <th class="p-2.5">Y-Ratio ($\sum y_i$)</th>
+                                <th class="p-2.5">Opt Cycle ($C_o$)</th>
+                                <th class="p-2.5">Phase 1 Green</th>
+                                <th class="p-2.5">Phase 2 Green</th>
+                                <th class="p-2.5">Avg Delay</th>
+                                <th class="p-2.5">LOS</th>
+                                <th class="p-2.5">Capacity Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sensitivity-table-body" class="divide-y divide-[#c9dbcf] text-[#3f574a]">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: STEP-BY-STEP MATHEMATICAL WORKBOOK -->
+        <div id="tab-calc" class="math-workbook space-y-6 hidden">
+            <div class="bg-[#ffffff] border border-[#c9dbcf] p-6 rounded-xl space-y-6">
+                <div>
+                    <h2 class="text-base font-bold text-[#176b3a]">📐 Step-by-Step Design Calculation Sheet (IRC:93 Procedure)</h2>
+                    <p class="text-xs text-[#5f7568]">Full mathematical derivation with explicit value substitutions based on current input parameters.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- STEP 1 & 2 -->
+                    <div class="space-y-4">
+                        <div class="calc-box text-xs space-y-2">
+                            <div class="font-bold text-[#176b3a] border-b border-[#c9dbcf] pb-1">STEP 1: Saturation Flow Rates ($S$)</div>
+                            <p class="text-[#3f574a]">Empirical IRC formula: $S = 525 \times W$ PCU/hour</p>
+                            <div id="calc-step1-detail" class="text-[#5f7568] space-y-1">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+
+                        <div class="calc-box text-xs space-y-2">
+                            <div class="font-bold text-[#2e8b57] border-b border-[#c9dbcf] pb-1">STEP 2: Critical Approach Flow Ratios ($y_i = q_i / S_i$)</div>
+                            <p class="text-[#3f574a]">Ratio of peak hourly flow rate to saturation capacity:</p>
+                            <div id="calc-step2-detail" class="text-[#5f7568] space-y-1">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+
+                        <div class="calc-box text-xs space-y-2">
+                            <div class="font-bold text-[#8a641c] border-b border-[#c9dbcf] pb-1">STEP 3: Cycle Lost Time ($L$) & Y-Ratio Calculation</div>
+                            <p class="text-[#3f574a]">$L = n \cdot t_s + n \cdot R = (n \times 2) + (n \times R_{allred})$</p>
+                            <div id="calc-step3-detail" class="text-[#5f7568] space-y-1">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 4 & 5 -->
+                    <div class="space-y-4">
+                        <div class="calc-box text-xs space-y-2">
+                            <div class="font-bold text-[#176b3a] border-b border-[#c9dbcf] pb-1">STEP 4: Webster Optimum Cycle Length ($C_o$) — analytical model</div>
+                            <p class="text-[#3f574a]">Formula: $C_o = \frac{1.5 L + 5}{1 - Y}$</p>
+                            <div id="calc-step4-detail" class="text-[#5f7568] space-y-1">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+
+                        <div class="calc-box text-xs space-y-2">
+                            <div class="font-bold text-[#a33b3b] border-b border-[#c9dbcf] pb-1">STEP 5: Green Time Allocation ($G_i$)</div>
+                            <p class="text-[#3f574a]">Effective Green $G_{eff} = C - L$; $g_i = \frac{y_i}{Y} \times G_{eff}$</p>
+                            <div id="calc-step5-detail" class="text-[#5f7568] space-y-1">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+
+                        <div class="calc-box text-xs space-y-2">
+                            <div class="font-bold text-[#176b3a] border-b border-[#c9dbcf] pb-1">STEP 6: Simplified Webster-inspired Delay Model ($d$)</div>
+                            <p class="text-[#3f574a]">Application delay model: uniform-delay term + simplified overflow term. This is an educational screening model, not a verbatim IRC equation.</p>
+                            <div id="calc-step6-detail" class="text-[#5f7568] space-y-1">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: FIELD ENGINEER WARRANTS & ACTION PLAN -->
+        <div id="tab-field" class="space-y-6 hidden">
+            <div class="bg-[#ffffff] border border-[#c9dbcf] p-6 rounded-xl space-y-5">
+                <div>
+                    <h2 class="text-base font-bold text-[#176b3a]">👷 Field Engineer Warrants & Mitigation Action Plan</h2>
+                    <p class="text-xs text-[#5f7568]">Preliminary engineering screening using IRC:93-1985 context; verify all project-specific provisions before implementation.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    
+                    <div id="warrant-vol-box" class="p-4 rounded-lg border bg-[#f4f8f5] space-y-2 border-[#c9dbcf]">
+                        <div class="font-bold text-xs flex items-center justify-between">
+                            <span>📊 Volume Screening Check</span>
+                            <span id="warrant-vol-badge" class="px-2 py-0.5 rounded text-[10px]">MET</span>
+                        </div>
+                        <p class="text-xs text-[#5f7568]" id="warrant-vol-text">Checking 8-hour vehicular volume requirements...</p>
+                    </div>
+
+                    <div id="warrant-ped-box" class="p-4 rounded-lg border bg-[#f4f8f5] space-y-2 border-[#c9dbcf]">
+                        <div class="font-bold text-xs flex items-center justify-between">
+                            <span>🚶 Pedestrian Clearance Check</span>
+                            <span id="warrant-ped-badge" class="px-2 py-0.5 rounded text-[10px]">SAFE</span>
+                        </div>
+                        <p class="text-xs text-[#5f7568]" id="warrant-ped-text">Checking minimum pedestrian walk time clearance...</p>
+                    </div>
+
+                    <div id="warrant-dilemma-box" class="p-4 rounded-lg border bg-[#f4f8f5] space-y-2 border-[#c9dbcf]">
+                        <div class="font-bold text-xs flex items-center justify-between">
+                            <span>🛑 Amber-Time Screening Check</span>
+                            <span id="warrant-dilemma-badge" class="px-2 py-0.5 rounded text-[10px]">PASS</span>
+                        </div>
+                        <p class="text-xs text-[#5f7568]" id="warrant-dilemma-text">Evaluating 50 km/h approach stopping sight distance...</p>
+                    </div>
+
+                </div>
+
+                <div class="bg-[#f4f8f5] p-5 rounded-lg border border-[#c9dbcf] space-y-3">
+                    <h3 class="text-sm font-bold text-[#2e8b57]">🛠️ Geometric Design Remedies & Capacity Improvements</h3>
+                    <div id="field-remedies-list" class="space-y-2 text-xs text-[#3f574a]">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: SIGNAL OPTIMIZATION LOG -->
+        <div id="tab-log" class="space-y-6 hidden">
+            <div class="bg-[#ffffff] border border-[#c9dbcf] p-6 rounded-xl space-y-5">
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                    <div>
+                        <h2 class="text-base font-bold text-[#176b3a]">📝 Signal Optimization Log & Recommendations</h2>
+                        <p class="text-xs text-[#5f7568] mt-1">
+                            Dynamic screening of the current signal timing using the same inputs and calculation model as the design tabs.
+                            The log tells the engineer what to change, how to test/resolve it, and what to verify before adoption.
+                        </p>
+                    </div>
+                    <div id="opt-log-status" class="px-3 py-1.5 rounded-lg border border-[#c9dbcf] bg-[#f4f8f5] text-xs font-bold text-[#176b3a] whitespace-nowrap">
+                        Updating…
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div class="p-4 rounded-lg border border-[#c9dbcf] bg-[#f4f8f5]">
+                        <div class="text-[10px] uppercase font-bold text-[#5f7568]">Current Cycle</div>
+                        <div id="opt-current-cycle" class="text-xl font-bold text-[#176b3a] mt-1">—</div>
+                    </div>
+                    <div class="p-4 rounded-lg border border-[#c9dbcf] bg-[#f4f8f5]">
+                        <div class="text-[10px] uppercase font-bold text-[#5f7568]">Webster Analytical Cycle</div>
+                        <div id="opt-webster-cycle" class="text-xl font-bold text-[#176b3a] mt-1">—</div>
+                    </div>
+                    <div class="p-4 rounded-lg border border-[#c9dbcf] bg-[#f4f8f5]">
+                        <div class="text-[10px] uppercase font-bold text-[#5f7568]">Y-Ratio</div>
+                        <div id="opt-y-ratio" class="text-xl font-bold text-[#176b3a] mt-1">—</div>
+                    </div>
+                    <div class="p-4 rounded-lg border border-[#c9dbcf] bg-[#f4f8f5]">
+                        <div class="text-[10px] uppercase font-bold text-[#5f7568]">Average Delay</div>
+                        <div id="opt-delay" class="text-xl font-bold text-[#176b3a] mt-1">—</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-bold text-[#2e8b57] mb-2">Recommended Timing Modifications</h3>
+                    <div id="optimization-log-list" class="space-y-2"></div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-bold text-[#2e8b57] mb-2">Phase Allocation Review</h3>
+                    <div class="overflow-x-auto rounded-lg border border-[#c9dbcf]">
+                        <table class="w-full text-xs border-collapse">
+                            <thead class="bg-[#f4f8f5] text-[#274637]">
+                                <tr>
+                                    <th class="p-2.5 text-left">Phase</th>
+                                    <th class="p-2.5 text-right">Flow Ratio y</th>
+                                    <th class="p-2.5 text-right">Green G</th>
+                                    <th class="p-2.5 text-right">Share of Effective Green</th>
+                                    <th class="p-2.5 text-left">Timing Observation</th>
+                                </tr>
+                            </thead>
+                            <tbody id="optimization-phase-body" class="divide-y divide-[#c9dbcf] text-[#3f574a]"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-lg border border-[#c9dbcf] bg-[#f4f8f5] text-xs text-[#5f7568]">
+                    <strong class="text-[#176b3a]">Use note:</strong>
+                    The log compares the adopted cycle and green allocation with the current analytical model.
+                    Before implementation, verify traffic counts, saturation flow, pedestrian requirements, coordination,
+                    detector operation, queue storage, clearance intervals, and applicable IRC provisions for the project.
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: PRINTABLE DESIGN REPORT -->
+        <div id="tab-report" class="space-y-6 hidden">
+            <div class="bg-white text-[#183526] p-8 rounded-xl shadow-2xl space-y-6 border border-[#b8cbbd] font-sans print-only">
+                
+                <div class="border-b-2 border-[#176b3a] pb-4 flex justify-between items-start">
+                    <div>
+                        <h1 class="text-xl font-bold uppercase tracking-tight text-[#176b3a]">IRC:93-1985 Traffic Signal Design & Webster Capacity Report</h1>
+                        <p class="text-xs text-[#5f7568]">IRC:93-1985 context; supplementary calculations are explicitly identified as model assumptions</p>
+                    </div>
+                    <div class="text-right text-xs text-[#7f9187]">
+                        <p>Date: <span id="report-date" class="font-mono">2026-09-17</span></p>
+                        <p>Project ID: <span class="font-mono">IRC-SIG-2026-01</span></p>
+                    </div>
+                </div>
+
+                <!-- DESIGN SUMMARY TABLE -->
+                <div class="space-y-2">
+                    <h3 class="text-sm font-bold text-[#176b3a] uppercase border-b border-[#b8cbbd] pb-1">1. Executive Signal Timing Summary</h3>
+                    <table class="w-full text-xs text-left border-collapse border border-[#b8cbbd]">
+                        <thead class="bg-[#eaf2ec] font-bold">
+                            <tr>
+                                <th class="border border-[#b8cbbd] p-2">Parameter</th>
+                                <th class="border border-[#b8cbbd] p-2">Phase 1 (Major Road)</th>
+                                <th class="border border-[#b8cbbd] p-2">Phase 2 (Minor Road)</th>
+                                <th class="border border-[#b8cbbd] p-2">Phase 3 (Right Turn)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-summary-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- CALCULATION RESULTS TABLE -->
+                <div class="space-y-2">
+                    <h3 class="text-sm font-bold text-[#176b3a] uppercase border-b border-[#b8cbbd] pb-1">2. Capacity & Delay Analysis Parameters</h3>
+                    <div class="grid grid-cols-2 gap-4 text-xs">
+                        <div class="border border-[#b8cbbd] p-3 rounded space-y-1">
+                            <p><strong>Webster Optimum Cycle ($C_o$):</strong> <span id="rep-co">0s</span></p>
+                            <p><strong>Adopted Signal Cycle ($C$):</strong> <span id="rep-c">0s</span></p>
+                            <p><strong>Total Lost Time ($L$):</strong> <span id="rep-l">0s</span></p>
+                        </div>
+                        <div class="border border-[#b8cbbd] p-3 rounded space-y-1">
+                            <p><strong>Intersection Y-Ratio ($\sum y_i$):</strong> <span id="rep-y">0.00</span></p>
+                            <p><strong>Average Vehicle Delay:</strong> <span id="rep-delay">0 s/PCU</span></p>
+                            <p><strong>Level of Service (LOS):</strong> <span id="rep-los">LOS A</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DETAILED MATHEMATICAL CALCULATIONS FOR REPORT -->
+                <div class="space-y-2">
+                    <h3 class="text-sm font-bold text-[#176b3a] uppercase border-b border-[#b8cbbd] pb-1">3. Detailed Recommended Calculations & Mathematical Derivation</h3>
+                    <div id="report-calc-steps" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-[#b8cbbd] text-center">
+                    <button onclick="window.print()" class="no-print bg-[#176b3a] hover:bg-[#2e8b57] text-[#f4f8f5] font-bold py-2.5 px-6 rounded-lg text-xs shadow-lg transition">
+                        🖨️ Print / Save PDF Design Sheet
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // DOM Input Elements
+        const inputs = [
+            'q1', 'w1', 'q2', 'w2', 'q3', 'q4', 'numPhases', 
+            'pcuTW', 'pcuCar', 'pcuHV', 'pcuAuto',
+            'amber', 'allred', 'pedwidth', 'walkSpeed'
+        ];
+        const elem = {};
+        inputs.forEach(id => elem[id] = document.getElementById(id));
+
+        const canvasInt = document.getElementById('canvas-intersection');
+        const ctxInt = canvasInt.getContext('2d');
+
+        const canvasDiag = document.getElementById('canvas-diagram');
+        const ctxDiag = canvasDiag.getContext('2d');
+
+        const canvasWebster = document.getElementById('canvas-webster-curve');
+        const ctxWebster = canvasWebster.getContext('2d');
+
+        let animFrameId = null;
+        let simTime = 0;
+        let lastAnimTimestamp = null;
+        let latestDesign = null;
+
+        // 4× supersampled canvas renderer for every diagram in the application.
+        // The CSS size remains responsive while the backing bitmap is rendered
+        // at four times the CSS resolution for crisp lines, labels and shapes.
+        function fixDPI(canvas, ctx) {
+            const renderScale = 4;
+            const rect = canvas.getBoundingClientRect();
+            const width = Math.max(1, Math.round(rect.width));
+            const height = Math.max(1, Math.round(rect.height));
+            const pixelWidth = Math.max(1, Math.round(width * renderScale));
+            const pixelHeight = Math.max(1, Math.round(height * renderScale));
+
+            if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+                canvas.width = pixelWidth;
+                canvas.height = pixelHeight;
+            }
+
+            ctx.setTransform(renderScale, 0, 0, renderScale, 0, 0);
+            ctx.imageSmoothingEnabled = true;
+            return { width, height, dpr: renderScale };
+        }
+
+        // All canvases use the same 4× supersampling policy. Kept as a separate
+        // helper for the animated junction so its rendering path stays explicit.
+        function fixAnimationDPI(canvas, ctx) {
+            return fixDPI(canvas, ctx);
+        }
+
+        // IRC:106 Weighted PCU Calculation Engine
+        function getPCUComposition() {
+            const tw = parseFloat(elem.pcuTW.value);
+            const car = parseFloat(elem.pcuCar.value);
+            const hv = parseFloat(elem.pcuHV.value);
+            const auto = parseFloat(elem.pcuAuto.value);
+            const total = tw + car + hv + auto;
+            return { tw, car, hv, auto, total };
+        }
+
+        function getWeightedPCUFactor() {
+            const c = getPCUComposition();
+            if (!Number.isFinite(c.total) || c.total <= 0) return 1;
+            const weightedSum = (c.tw * 0.50) + (c.car * 1.00) + (c.hv * 2.20) + (c.auto * 0.80);
+            return weightedSum / c.total;
+        }
+
+        function updatePCUDisplay() {
+            const c = getPCUComposition();
+            const pcuF = getWeightedPCUFactor();
+            document.getElementById('pcu-tw-val').textContent = `${elem.pcuTW.value}%`;
+            document.getElementById('pcu-car-val').textContent = `${elem.pcuCar.value}%`;
+            document.getElementById('pcu-hv-val').textContent = `${elem.pcuHV.value}%`;
+            document.getElementById('pcu-auto-val').textContent = `${elem.pcuAuto.value}%`;
+            document.getElementById('weighted-pcu-factor').textContent = `${pcuF.toFixed(3)} PCU/veh`;
+            const totalEl = document.getElementById('pcu-composition-total');
+            totalEl.textContent = `Composition: ${c.total}%`;
+            totalEl.className = c.total === 100 ? 'font-mono text-[#2e8b57]' : 'font-mono text-[#8a641c]';
+            return pcuF;
+        }
+
+        // Full IRC:93 Signal Design Engine
+        function computeDesign(overrides = {}) {
+            const pcuFactor = getWeightedPCUFactor();
+            const nPhases = parseInt(elem.numPhases.value);
+
+            const rawQ1 = overrides.q1Raw ?? parseFloat(elem.q1.value);
+            const rawQ2 = overrides.q2Raw ?? parseFloat(elem.q2.value);
+            const rawQ3 = overrides.q3Raw ?? parseFloat(elem.q3.value);
+            const rawQ4 = overrides.q4Raw ?? parseFloat(elem.q4.value);
+
+            const q1 = rawQ1 * pcuFactor;
+            const q2 = rawQ2 * pcuFactor;
+            const q3 = nPhases > 2 ? rawQ3 * pcuFactor : 0;
+            const q4 = nPhases > 3 ? rawQ4 * pcuFactor : 0;
+
+            const w1 = parseFloat(elem.w1.value);
+            const w2 = parseFloat(elem.w2.value);
+
+            // Base saturation-flow approximation used by this educational model.
+            // Turning movements use the same application adjustment convention as the existing model.
+            const S1 = 525 * w1;
+            const S2 = 525 * w2;
+            const S3 = 525 * (w1 * 0.55);
+            const S4 = 525 * (w2 * 0.55);
+
+            const y1 = q1 / Math.max(1, S1);
+            const y2 = q2 / Math.max(1, S2);
+            const y3 = nPhases > 2 ? q3 / Math.max(1, S3) : 0;
+            const y4 = nPhases > 3 ? q4 / Math.max(1, S4) : 0;
+            const Y = y1 + y2 + y3 + y4;
+
+            const amber = parseFloat(elem.amber.value);
+            const allred = parseFloat(elem.allred.value);
+            const lostPerPhase = 2;
+            const L = (nPhases * lostPerPhase) + (nPhases * allred);
+
+            let Co = 0;
+            if (Y < 0.98) {
+                Co = (1.5 * L + 5) / Math.max(0.02, 1 - Y);
+            } else {
+                Co = 180;
+            }
+
+            let C = overrides.cycleOverride != null ? Number(overrides.cycleOverride) : Math.round(Co);
+            if (overrides.cycleOverride == null) {
+                if (C < 40) C = 40;
+                if (C > 140) C = 140;
+            }
+
+            const Geff = Math.max(10, C - L);
+            const activeYs = nPhases === 2 ? [y1, y2] : nPhases === 3 ? [y1, y2, y3] : [y1, y2, y3, y4];
+            const minGreens = nPhases === 2 ? [12, 12] : nPhases === 3 ? [12, 12, 10] : [12, 12, 10, 10];
+            const minTotal = minGreens.reduce((a,b) => a+b, 0);
+            let greens = activeYs.map(y => Math.round((y / (Y || 1)) * Geff));
+
+            if (Geff >= minTotal) {
+                greens = greens.map((g, i) => Math.max(g, minGreens[i]));
+                let excess = greens.reduce((a,b) => a+b, 0) - Geff;
+                while (excess > 0) {
+                    const idx = greens.map((g,i) => ({i,g}))
+                        .filter(x => x.g > minGreens[x.i])
+                        .sort((a,b) => b.g-a.g)[0];
+                    if (!idx) break;
+                    greens[idx.i]--; excess--;
+                }
+            } else {
+                const scale = Geff / minTotal;
+                greens = minGreens.map(g => Math.max(1, Math.floor(g * scale)));
+            }
+
+            const g1 = greens[0] || 0;
+            const g2 = greens[1] || 0;
+            const g3 = greens[2] || 0;
+            const g4 = greens[3] || 0;
+
+            const pedW = parseFloat(elem.pedwidth.value);
+            const walkV = parseFloat(elem.walkSpeed.value);
+            const pedClearanceTime = Math.ceil(7 + (pedW / walkV));
+
+            function calcDelay(q_i, s_i, g_i, C_cycle) {
+                const lambda = g_i / Math.max(1, C_cycle);
+                const x_i = q_i / Math.max(1, s_i * lambda);
+                const d1 = (C_cycle * Math.pow(1 - lambda, 2)) /
+                    (2 * Math.max(0.05, 1 - Math.min(0.95, q_i / Math.max(1, s_i))));
+                const d2 = (x_i > 1)
+                    ? (x_i - 1) * 25 + 15
+                    : Math.pow(x_i, 2) /
+                      (2 * Math.max(0.0001, q_i / 3600) * Math.max(0.05, 1 - x_i));
+                return Math.max(4, d1 + d2);
+            }
+
+            const d1 = calcDelay(q1, S1, g1, C);
+            const d2 = calcDelay(q2, S2, g2, C);
+            const d3 = nPhases > 2 ? calcDelay(q3, S3, g3, C) : 0;
+            const d4 = nPhases > 3 ? calcDelay(q4, S4, g4, C) : 0;
+
+            const totalQ = q1 + q2 + q3 + q4;
+            const avgDelay = totalQ > 0
+                ? ((q1*d1) + (q2*d2) + (q3*d3) + (q4*d4)) / totalQ
+                : 0;
+
+            let los = "A";
+            if (avgDelay > 10) los = "B";
+            if (avgDelay > 20) los = "C";
+            if (avgDelay > 35) los = "D";
+            if (avgDelay > 55) los = "E";
+            if (avgDelay > 80 || Y >= 0.95) los = "F";
+
+            return {
+                rawQ1, rawQ2, rawQ3, rawQ4,
+                q1, q2, q3, q4, w1, w2, nPhases, pcuFactor,
+                amber, allred, pedW, walkV,
+                S1, S2, S3, S4,
+                y1, y2, y3, y4, Y, L,
+                Co, C, Geff, g1, g2, g3, g4,
+                pedClearanceTime, avgDelay, los,
+                d1, d2, d3, d4
+            };
+        }
+
+        // Draw Canvas 1: Interactive Animated Junction
+        function drawIntersection(d) {
+            const size = fixAnimationDPI(canvasInt, ctxInt);
+            const w = size.width;
+            const h = size.height;
+            ctxInt.clearRect(0, 0, w, h);
+
+            const cx = w / 2;
+            const cy = h / 2;
+            const rw1 = Math.min(170, Math.max(92, d.w1 * 10));
+            const rw2 = Math.min(170, Math.max(92, d.w2 * 10));
+
+            // Compact signal heads positioned beyond the carriageway edges.
+            const signalW = Math.max(40, Math.min(52, w * 0.052));
+            const signalH = Math.max(78, Math.min(104, h * 0.22));
+            const signalGap = Math.max(30, Math.min(48, Math.min(w, h) * 0.055));
+            const signalX = rw1 / 2 + signalGap + signalW / 2;
+            const signalY = rw2 / 2 + signalGap + signalH / 2;
+
+            const SIGNAL = {
+                green: '#176b3a',
+                greenBright: '#35a866',
+                amber: '#8a641c',
+                amberBright: '#c8942e',
+                red: '#a33b3b',
+                redBright: '#d45a5a',
+                off: '#b6c8bd',
+                housing: '#183526',
+                road: '#c9dbcf',
+                ground: '#edf4ef',
+                marking: '#8a641c',
+                text: '#183526'
+            };
+
+            // Ground and road geometry.
+            ctxInt.fillStyle = SIGNAL.ground;
+            ctxInt.fillRect(0, 0, w, h);
+            ctxInt.fillStyle = SIGNAL.road;
+            ctxInt.fillRect(cx - rw1/2, 0, rw1, h);
+            ctxInt.fillRect(0, cy - rw2/2, w, rw2);
+
+            ctxInt.strokeStyle = SIGNAL.marking;
+            ctxInt.lineWidth = 2;
+            ctxInt.setLineDash([10, 9]);
+            ctxInt.beginPath();
+            ctxInt.moveTo(cx, 0); ctxInt.lineTo(cx, cy-rw2/2);
+            ctxInt.moveTo(cx, cy+rw2/2); ctxInt.lineTo(cx, h);
+            ctxInt.moveTo(0, cy); ctxInt.lineTo(cx-rw1/2, cy);
+            ctxInt.moveTo(cx+rw1/2, cy); ctxInt.lineTo(w, cy);
+            ctxInt.stroke();
+            ctxInt.setLineDash([]);
+
+            // Crosswalks.
+            ctxInt.strokeStyle = SIGNAL.text;
+            ctxInt.lineWidth = 4;
+            ctxInt.setLineDash([6, 6]);
+            ctxInt.beginPath();
+            ctxInt.moveTo(cx-rw1/2, cy-rw2/2-16); ctxInt.lineTo(cx+rw1/2, cy-rw2/2-16);
+            ctxInt.moveTo(cx-rw1/2, cy+rw2/2+16); ctxInt.lineTo(cx+rw1/2, cy+rw2/2+16);
+            ctxInt.moveTo(cx+rw1/2+16, cy-rw2/2); ctxInt.lineTo(cx+rw1/2+16, cy+rw2/2);
+            ctxInt.moveTo(cx-rw1/2-16, cy-rw2/2); ctxInt.lineTo(cx-rw1/2-16, cy+rw2/2);
+            ctxInt.stroke();
+            ctxInt.setLineDash([]);
+
+            const C = Math.max(1, Number(d.C) || 1);
+            const cycleSecond = ((simTime % C) + C) % C;
+            const phaseStarts = [
+                0,
+                d.g1 + d.amber + d.allred,
+                d.g1 + d.amber + d.allred + d.g2 + d.amber + d.allred,
+                d.g1 + d.amber + d.allred + d.g2 + d.amber + d.allred + d.g3 + d.amber + d.allred
+            ];
+            const phaseGreens = [d.g1, d.g2, d.g3, d.g4];
+
+            function getPhaseState(index) {
+                if (index >= d.nPhases) return 'red';
+                const start = phaseStarts[index];
+                const t = cycleSecond - start;
+                if (t >= 0 && t < phaseGreens[index]) return 'green';
+                if (t >= phaseGreens[index] && t < phaseGreens[index] + d.amber) return 'amber';
+                return 'red';
+            }
+            const states = [0,1,2,3].map(getPhaseState);
+
+            function drawLight(centerX, centerY, state, title) {
+                const headW = signalW, headH = signalH;
+                const r = Math.max(8, Math.min(11, headW * 0.21));
+                ctxInt.save();
+                ctxInt.translate(centerX, centerY);
+
+                ctxInt.fillStyle = '#0d3b2a';
+                ctxInt.strokeStyle = SIGNAL.greenBright;
+                ctxInt.lineWidth = 2.5;
+                ctxInt.beginPath();
+                ctxInt.roundRect(-headW/2, -headH/2, headW, headH, 9);
+                ctxInt.fill();
+                ctxInt.stroke();
+
+                ['red','amber','green'].forEach((s,i) => {
+                    const y = -headH/2 + headH * (0.22 + i * 0.28);
+                    const active = state === s;
+                    const color = s === 'red' ? SIGNAL.red :
+                                  s === 'amber' ? SIGNAL.amberBright : SIGNAL.greenBright;
+                    ctxInt.globalAlpha = active ? 1 : 0.24;
+                    ctxInt.fillStyle = color;
+                    ctxInt.beginPath();
+                    ctxInt.arc(0, y, r, 0, Math.PI * 2);
+                    ctxInt.fill();
+                    if (active) {
+                        ctxInt.shadowColor = color;
+                        ctxInt.shadowBlur = 10;
+                        ctxInt.beginPath();
+                        ctxInt.arc(0, y, r * 0.72, 0, Math.PI * 2);
+                        ctxInt.fill();
+                        ctxInt.shadowBlur = 0;
+                    }
+                });
+
+                ctxInt.globalAlpha = 1;
+                if (title) {
+                    ctxInt.fillStyle = SIGNAL.text;
+                    ctxInt.font = '700 10px system-ui, sans-serif';
+                    ctxInt.textAlign = 'center';
+                    ctxInt.textBaseline = 'bottom';
+                    ctxInt.fillText(title, 0, -headH/2 - 7);
+                }
+                ctxInt.restore();
+            }
+
+            // Force safe placement outside the carriageway on responsive canvases.
+            const safeX = Math.min(signalX, w/2 - signalW/2 - 5);
+            const safeY = Math.min(signalY, h/2 - signalH/2 - 5);
+
+            // Large, always-visible signal heads. One head is associated with each phase/movement group.
+            drawLight(cx - safeX, cy - safeY, states[0], 'P1 N-S STRAIGHT');
+            drawLight(cx - safeX, cy + safeY, states[1], d.nPhases > 1 ? 'P2 N-S RIGHT' : '');
+            drawLight(cx + safeX, cy - safeY, states[2], d.nPhases > 2 ? 'P3 E-W STRAIGHT' : '');
+            drawLight(cx + safeX, cy + safeY, states[3], d.nPhases > 3 ? 'P4 E-W RIGHT' : '');
+
+            // Keep only relevant heads prominent in 2/3 phase operation.
+            if (d.nPhases < 4) {
+                // Blank unused heads remain physically present but visually subdued.
+            }
+
+            function movementColor(state) {
+                if (state === 'green') return SIGNAL.greenBright;
+                if (state === 'amber') return SIGNAL.amberBright;
+                return SIGNAL.red;
+            }
+
+            // Draw the permitted movement as a bright, pulsing path.  The
+            // wide glow is intentionally underneath the crisp arrow so the
+            // active route remains obvious even on a 4K canvas.
+            function drawArrow(points, state, label) {
+                const active = state === 'green';
+                const pulse = active
+                    ? (0.72 + 0.28 * (0.5 + 0.5 * Math.sin(simTime * 7)))
+                    : (state === 'amber' ? 0.72 : 0.14);
+                const col = movementColor(state);
+                ctxInt.save();
+                ctxInt.lineCap = 'round';
+                ctxInt.lineJoin = 'round';
+
+                if (active) {
+                    ctxInt.globalAlpha = 0.18 + 0.10 * Math.sin(simTime * 7) ** 2;
+                    ctxInt.strokeStyle = col;
+                    ctxInt.lineWidth = 18;
+                    ctxInt.shadowColor = col;
+                    ctxInt.shadowBlur = 18;
+                    ctxInt.beginPath();
+                    points.forEach((p,i) => i ? ctxInt.lineTo(p[0],p[1]) : ctxInt.moveTo(p[0],p[1]));
+                    ctxInt.stroke();
+                    ctxInt.shadowBlur = 0;
+                }
+
+                ctxInt.globalAlpha = pulse;
+                ctxInt.strokeStyle = col;
+                ctxInt.fillStyle = col;
+                ctxInt.lineWidth = active ? 7 : 5;
+                ctxInt.beginPath();
+                points.forEach((p,i) => i ? ctxInt.lineTo(p[0],p[1]) : ctxInt.moveTo(p[0],p[1]));
+                ctxInt.stroke();
+
+                const a = points[points.length-2], b = points[points.length-1];
+                const ang = Math.atan2(b[1]-a[1], b[0]-a[0]);
+                const len = active ? 19 : 15;
+                ctxInt.beginPath();
+                ctxInt.moveTo(b[0], b[1]);
+                ctxInt.lineTo(b[0]-len*Math.cos(ang-Math.PI/6), b[1]-len*Math.sin(ang-Math.PI/6));
+                ctxInt.lineTo(b[0]-len*Math.cos(ang+Math.PI/6), b[1]-len*Math.sin(ang+Math.PI/6));
+                ctxInt.closePath();
+                ctxInt.fill();
+
+                if (label && active) {
+                    ctxInt.globalAlpha = 0.95;
+                    ctxInt.font = '700 11px system-ui, sans-serif';
+                    ctxInt.textAlign = 'center';
+                    ctxInt.textBaseline = 'middle';
+                    const lx = (a[0] + b[0]) / 2;
+                    const ly = (a[1] + b[1]) / 2 - 15;
+                    ctxInt.fillText(label, lx, ly);
+                }
+                ctxInt.restore();
+            }
+
+            const laneX = Math.max(22, rw1*0.24);
+            const laneY = Math.max(22, rw2*0.24);
+            const northState = states[0];
+            const nsRightState = states[1];
+            const ewState = states[2];
+            const ewRightState = states[3];
+
+            // Shared movement paths.
+            // The very same point arrays are used for both the glowing arrows
+            // and vehicle trajectories, so a vehicle can never "randomly"
+            // diverge from the movement that the signal is permitting.
+            const movementPaths = {
+                nsStraightNorth: [
+                    [cx-laneX,h+28],
+                    [cx-laneX,cy+rw2/2+8],
+                    [cx-laneX,cy-rw2/2-8],
+                    [cx-laneX,-28]
+                ],
+                nsStraightSouth: [
+                    [cx+laneX,-28],
+                    [cx+laneX,cy-rw2/2-8],
+                    [cx+laneX,cy+rw2/2+8],
+                    [cx+laneX,h+28]
+                ],
+                ewStraightEast: [
+                    [-28,cy-laneY],
+                    [cx-rw1/2-8,cy-laneY],
+                    [cx+rw1/2+8,cy-laneY],
+                    [w+28,cy-laneY]
+                ],
+                ewStraightWest: [
+                    [w+28,cy+laneY],
+                    [cx+rw1/2+8,cy+laneY],
+                    [cx-rw1/2-8,cy+laneY],
+                    [-28,cy+laneY]
+                ],
+
+                // P2 N-S right turns.
+                nsRightEast: [
+                    [cx-laneX,cy-rw2/2-8],
+                    [cx-laneX,cy-34],
+                    [cx+rw1/2+30,cy-34]
+                ],
+                nsRightWest: [
+                    [cx+laneX,cy+rw2/2+8],
+                    [cx+laneX,cy+34],
+                    [cx-rw1/2-30,cy+34]
+                ],
+
+                // P4 E-W right turns.
+                ewRightSouth: [
+                    [cx+rw1/2+8,cy-laneY],
+                    [cx+34,cy-laneY],
+                    [cx+34,cy+rw2/2+30]
+                ],
+                ewRightNorth: [
+                    [cx-rw1/2-8,cy+laneY],
+                    [cx-34,cy+laneY],
+                    [cx-34,cy-rw2/2-30]
+                ]
+            };
+
+            // Draw exactly these paths as the visible movement arrows.
+            drawArrow(movementPaths.nsStraightNorth, northState, 'STRAIGHT');
+            drawArrow(movementPaths.nsStraightSouth, northState, 'STRAIGHT');
+            drawArrow(movementPaths.ewStraightEast, ewState, 'STRAIGHT');
+            drawArrow(movementPaths.ewStraightWest, ewState, 'STRAIGHT');
+
+            drawArrow(movementPaths.nsRightEast, nsRightState, 'RIGHT');
+            drawArrow(movementPaths.nsRightWest, nsRightState, 'RIGHT');
+            drawArrow(movementPaths.ewRightSouth, ewRightState, 'RIGHT');
+            drawArrow(movementPaths.ewRightNorth, ewRightState, 'RIGHT');
+
+            // Vehicle renderer.
+            function vehicle(x, y, width, height, angle = 0) {
+                ctxInt.save();
+                ctxInt.translate(x, y);
+                ctxInt.rotate(angle);
+                ctxInt.fillStyle = '#f7fbf8';
+                ctxInt.strokeStyle = SIGNAL.green;
+                ctxInt.lineWidth = 1.5;
+                ctxInt.shadowColor = SIGNAL.greenBright;
+                ctxInt.shadowBlur = 7;
+                ctxInt.beginPath();
+                ctxInt.roundRect(-width/2, -height/2, width, height, 3);
+                ctxInt.fill();
+                ctxInt.stroke();
+                ctxInt.shadowBlur = 0;
+                ctxInt.fillStyle = SIGNAL.greenBright;
+                ctxInt.fillRect(-width*0.28, -height*0.38, width*0.56, height*0.18);
+                ctxInt.restore();
+            }
+
+            // Return the exact position and heading of a vehicle travelling
+            // along a polyline at the supplied distance.
+            function pointOnPath(points, distance) {
+                let total = 0;
+                const segments = [];
+                for (let i = 1; i < points.length; i++) {
+                    const dx = points[i][0] - points[i-1][0];
+                    const dy = points[i][1] - points[i-1][1];
+                    const len = Math.hypot(dx, dy);
+                    segments.push({a:points[i-1], b:points[i], len});
+                    total += len;
+                }
+
+                if (!total) {
+                    return {x:points[0][0], y:points[0][1], angle:0};
+                }
+
+                // Wrap continuously so each green phase contains a smooth,
+                // repeatable stream of vehicles.
+                let dAlong = ((distance % total) + total) % total;
+
+                for (const seg of segments) {
+                    if (dAlong <= seg.len) {
+                        const f = seg.len ? dAlong / seg.len : 0;
+                        return {
+                            x: seg.a[0] + (seg.b[0] - seg.a[0]) * f,
+                            y: seg.a[1] + (seg.b[1] - seg.a[1]) * f,
+                            angle: Math.atan2(seg.b[1] - seg.a[1], seg.b[0] - seg.a[0])
+                        };
+                    }
+                    dAlong -= seg.len;
+                }
+
+                const last = segments[segments.length - 1];
+                return {
+                    x:last.b[0],
+                    y:last.b[1],
+                    angle:Math.atan2(last.b[1]-last.a[1], last.b[0]-last.a[0])
+                };
+            }
+
+            function pathLength(points) {
+                let total = 0;
+                for (let i=1; i<points.length; i++) {
+                    total += Math.hypot(
+                        points[i][0]-points[i-1][0],
+                        points[i][1]-points[i-1][1]
+                    );
+                }
+                return total;
+            }
+
+            function drawVehicleOnPath(points, distance, width, height) {
+                const p = pointOnPath(points, distance);
+                vehicle(p.x, p.y, width, height, p.angle);
+            }
+
+            const vehicleSpeed = 125;
+
+            // Vehicles are shown ONLY on the movement whose corresponding
+            // signal is green. Off-phase vehicles are not drawn.
+            if (northState === 'green') {
+                const lenN = pathLength(movementPaths.nsStraightNorth);
+                const lenS = pathLength(movementPaths.nsStraightSouth);
+                drawVehicleOnPath(movementPaths.nsStraightNorth, simTime*vehicleSpeed, 22, 11);
+                drawVehicleOnPath(movementPaths.nsStraightNorth, simTime*vehicleSpeed + lenN*0.50, 22, 11);
+                drawVehicleOnPath(movementPaths.nsStraightSouth, simTime*vehicleSpeed + lenS*0.25, 22, 11);
+            }
+
+            if (nsRightState === 'green') {
+                const lenNE = pathLength(movementPaths.nsRightEast);
+                const lenNW = pathLength(movementPaths.nsRightWest);
+
+                // These vehicles follow the exact glowing L-shaped arrows,
+                // including the heading change at the corner.
+                drawVehicleOnPath(movementPaths.nsRightEast, simTime*vehicleSpeed*0.82, 20, 11);
+                drawVehicleOnPath(movementPaths.nsRightEast, simTime*vehicleSpeed*0.82 + lenNE*0.52, 20, 11);
+                drawVehicleOnPath(movementPaths.nsRightWest, simTime*vehicleSpeed*0.82 + lenNW*0.25, 20, 11);
+            }
+
+            if (ewState === 'green') {
+                const lenE = pathLength(movementPaths.ewStraightEast);
+                const lenW = pathLength(movementPaths.ewStraightWest);
+                drawVehicleOnPath(movementPaths.ewStraightEast, simTime*vehicleSpeed, 22, 11);
+                drawVehicleOnPath(movementPaths.ewStraightWest, simTime*vehicleSpeed + lenW*0.35, 22, 11);
+            }
+
+            if (ewRightState === 'green') {
+                const lenES = pathLength(movementPaths.ewRightSouth);
+                const lenEN = pathLength(movementPaths.ewRightNorth);
+
+                drawVehicleOnPath(movementPaths.ewRightSouth, simTime*vehicleSpeed*0.82, 20, 11);
+                drawVehicleOnPath(movementPaths.ewRightSouth, simTime*vehicleSpeed*0.82 + lenES*0.52, 20, 11);
+                drawVehicleOnPath(movementPaths.ewRightNorth, simTime*vehicleSpeed*0.82 + lenEN*0.25, 20, 11);
+            }
+
+            // Current-cycle indicator for the animation itself.
+            ctxInt.fillStyle = SIGNAL.text;
+            ctxInt.font = '700 12px system-ui, sans-serif';
+            ctxInt.textAlign = 'left';
+            ctxInt.textBaseline = 'top';
+            ctxInt.fillText(`t = ${cycleSecond.toFixed(1)} s / C = ${C}s`, 12, 10);
+        }
+
+        // Draw Canvas 2: Signal Timing Bar Diagram
+        function drawTimingDiagram(d) {
+            const size = fixDPI(canvasDiag, ctxDiag);
+            const w = size.width, h = size.height;
+            ctxDiag.clearRect(0,0,w,h);
+            const mx = Math.max(86, Math.min(105, w*0.115));
+            const right = 22;
+            const plotW = Math.max(160, w-mx-right);
+            const scaleX = plotW / Math.max(1,d.C);
+            const barH = Math.max(18, Math.min(26,h*0.12));
+            const top = 18;
+            const rows = d.nPhases;
+            const availableH = Math.max(80, h-58);
+            const rowGap = rows > 1 ? Math.min(44, Math.max(30, availableH/(rows+0.6))) : 38;
+
+            const phaseData = [
+                ['Phase 1 (N-S Straight)', d.g1],
+                ['Phase 2 (N-S Right)', d.g2],
+                ['Phase 3 (E-W Straight)', d.g3],
+                ['Phase 4 (E-W Right)', d.g4]
+            ].slice(0,d.nPhases);
+
+            function drawBar(y, green, offset, label) {
+                const C=Math.max(1,Number(d.C)||1);
+                const start=Math.max(0,Math.min(C,offset));
+                const g=Math.max(0,Math.min(green,C-start));
+                const a=Math.max(0,Math.min(d.amber,C-start-g));
+                const r=Math.max(0,Math.min(d.allred,C-start-g-a));
+                ctxDiag.fillStyle='#c9dbcf'; ctxDiag.fillRect(mx,y,plotW,barH);
+                let x=mx+start*scaleX;
+                ctxDiag.fillStyle='#176b3a'; ctxDiag.fillRect(x,y,g*scaleX,barH); x+=g*scaleX;
+                ctxDiag.fillStyle='#8a641c'; ctxDiag.fillRect(x,y,a*scaleX,barH); x+=a*scaleX;
+                ctxDiag.fillStyle='#a33b3b'; ctxDiag.fillRect(x,y,r*scaleX,barH);
+                ctxDiag.strokeStyle='#b8cfc1'; ctxDiag.lineWidth=1; ctxDiag.strokeRect(mx+.5,y+.5,plotW-1,barH-1);
+                ctxDiag.fillStyle='#183526'; ctxDiag.font='600 11px system-ui,sans-serif'; ctxDiag.textAlign='right'; ctxDiag.textBaseline='middle';
+                ctxDiag.fillText(label,mx-10,y+barH/2);
+            }
+            let offset=0;
+            phaseData.forEach((ph,i)=>{ drawBar(top+i*rowGap,ph[1],offset,ph[0]); offset+=ph[1]+d.amber+d.allred; });
+
+            const axisY=h-24;
+            const liveT=((simTime%Math.max(1,d.C))+Math.max(1,d.C))%Math.max(1,d.C);
+            const liveX=Math.max(mx,Math.min(mx+plotW,mx+liveT*scaleX));
+            ctxDiag.save();
+            ctxDiag.strokeStyle='#176b3a'; ctxDiag.lineWidth=2.5; ctxDiag.setLineDash([5,4]);
+            ctxDiag.beginPath(); ctxDiag.moveTo(liveX,top-8); ctxDiag.lineTo(liveX,axisY-3); ctxDiag.stroke(); ctxDiag.setLineDash([]);
+            ctxDiag.fillStyle='#35a866'; ctxDiag.beginPath(); ctxDiag.arc(liveX,top-8,6,0,Math.PI*2); ctxDiag.fill();
+            ctxDiag.font='700 10px system-ui,sans-serif'; ctxDiag.textAlign=liveX>mx+plotW-55?'right':'left'; ctxDiag.fillText(`t = ${liveT.toFixed(1)} s`,liveX>mx+plotW-55?liveX-8:liveX+8,top-12); ctxDiag.restore();
+
+            ctxDiag.strokeStyle='#8aa093'; ctxDiag.lineWidth=1; ctxDiag.beginPath(); ctxDiag.moveTo(mx+.5,axisY+.5); ctxDiag.lineTo(mx+plotW+.5,axisY+.5); ctxDiag.stroke();
+            ctxDiag.fillStyle='#5f7568'; ctxDiag.font='10px system-ui,sans-serif'; ctxDiag.textAlign='center'; ctxDiag.textBaseline='alphabetic';
+            const tickStep=d.C<=60?10:(d.C<=120?20:30);
+            for(let t=0;t<=d.C;t+=tickStep){ const px=mx+t*scaleX; ctxDiag.beginPath();ctxDiag.moveTo(px+.5,axisY);ctxDiag.lineTo(px+.5,axisY+4);ctxDiag.stroke();ctxDiag.fillText(`${Math.round(t)}s`,px,axisY+15); }
+            if(Math.round(d.C/tickStep)*tickStep!==d.C){const px=mx+d.C*scaleX;ctxDiag.fillText(`${Math.round(d.C)}s`,px,axisY+15);}
+        }
+
+        // Draw Canvas 3: Cycle Length vs. Modelled Delay Curve
+        function drawWebsterCurve(d) {
+            const size = fixDPI(canvasWebster, ctxWebster);
+            const w = Math.max(320, size.width);
+            const h = Math.max(260, size.height);
+            ctxWebster.clearRect(0, 0, w, h);
+
+            const padL = 58, padB = 42, padT = 24, padR = 22;
+            const plotW = Math.max(100, w - padL - padR);
+            const plotH = Math.max(100, h - padT - padB);
+            const minC = 30;
+            const maxC = Math.max(130, Math.min(180, Math.ceil((d.Co + 30) / 10) * 10));
+
+            // Use the same design/delay engine as the main calculation.
+            const points = [];
+            for (let cVal = minC; cVal <= maxC; cVal += 1) {
+                const cd = computeDesign({ cycleOverride: cVal });
+                if (Number.isFinite(cd.avgDelay)) points.push({ c: cVal, delay: Math.max(0, cd.avgDelay) });
+            }
+
+            if (!points.length) return;
+
+            const maxObserved = Math.max(...points.map(p => p.delay), 10);
+            const yMax = Math.max(10, Math.min(120, Math.ceil(maxObserved / 10) * 10));
+            const xFor = c => padL + ((c - minC) / (maxC - minC)) * plotW;
+            const yFor = delay => padT + plotH - (Math.min(yMax, Math.max(0, delay)) / yMax) * plotH;
+
+            ctxWebster.save();
+            ctxWebster.lineJoin = 'round';
+            ctxWebster.lineCap = 'round';
+
+            // Clip all plotted geometry to the chart area so markers/curves
+            // cannot bleed into the labels or outside the canvas.
+            ctxWebster.save();
+            ctxWebster.beginPath();
+            ctxWebster.rect(padL, padT, plotW, plotH);
+            ctxWebster.clip();
+
+            // Grid + axes.
+            ctxWebster.strokeStyle = '#c9dbcf';
+            ctxWebster.lineWidth = 1;
+            ctxWebster.setLineDash([]);
+            for (let i = 0; i <= 5; i++) {
+                const delayVal = (yMax / 5) * i;
+                const y = yFor(delayVal);
+                ctxWebster.beginPath();
+                ctxWebster.moveTo(padL, y);
+                ctxWebster.lineTo(padL + plotW, y);
+                ctxWebster.stroke();
+            }
+
+            ctxWebster.strokeStyle = '#8aa093';
+            ctxWebster.beginPath();
+            ctxWebster.moveTo(padL, padT);
+            ctxWebster.lineTo(padL, padT + plotH);
+            ctxWebster.lineTo(padL + plotW, padT + plotH);
+            ctxWebster.stroke();
+
+            // Delay curve.
+            ctxWebster.strokeStyle = '#176b3a';
+            ctxWebster.lineWidth = 2.5;
+            ctxWebster.beginPath();
+            points.forEach((p, i) => {
+                const x = xFor(p.c);
+                const y = yFor(p.delay);
+                if (i === 0) ctxWebster.moveTo(x, y);
+                else ctxWebster.lineTo(x, y);
+            });
+            ctxWebster.stroke();
+
+            // Locate the minimum of the plotted model as an audit cross-check.
+            const modelOpt = points.reduce((best, p) => p.delay < best.delay ? p : best, points[0]);
+            const analyticC = Math.max(minC, Math.min(maxC, d.Co));
+            const analyticX = xFor(analyticC);
+            const modelX = xFor(modelOpt.c);
+            const modelY = yFor(modelOpt.delay);
+
+            // Analytic Webster Co marker.
+            ctxWebster.strokeStyle = '#2e8b57';
+            ctxWebster.lineWidth = 1.5;
+            ctxWebster.setLineDash([5, 4]);
+            ctxWebster.beginPath();
+            ctxWebster.moveTo(analyticX, padT);
+            ctxWebster.lineTo(analyticX, padT + plotH);
+            ctxWebster.stroke();
+            ctxWebster.setLineDash([]);
+
+            ctxWebster.fillStyle = '#176b3a';
+            ctxWebster.beginPath();
+            ctxWebster.arc(modelX, modelY, 4, 0, Math.PI * 2);
+            ctxWebster.fill();
+
+            ctxWebster.font = '600 11px system-ui, sans-serif';
+            ctxWebster.textAlign = 'center';
+            ctxWebster.fillStyle = '#176b3a';
+            ctxWebster.fillText(`Webster Co = ${Math.round(d.Co)} s`, analyticX, padT + 13);
+
+            // End plot clipping before drawing axis labels.
+            ctxWebster.restore();
+
+            ctxWebster.font = '10px system-ui, sans-serif';
+            ctxWebster.fillStyle = '#5f7568';
+            for (let c = 30; c <= maxC; c += 20) {
+                const x = xFor(c);
+                ctxWebster.fillText(`${c}s`, x, padT + plotH + 16);
+            }
+            for (let i = 0; i <= 5; i++) {
+                const delayVal = (yMax / 5) * i;
+                const y = yFor(delayVal);
+                ctxWebster.textAlign = 'right';
+                ctxWebster.fillText(`${Math.round(delayVal)}`, padL - 8, y + 3);
+            }
+
+            ctxWebster.textAlign = 'center';
+            ctxWebster.font = '600 11px system-ui, sans-serif';
+            ctxWebster.fillStyle = '#183526';
+            ctxWebster.fillText('Cycle length, C (s)', padL + plotW / 2, h - 7);
+
+            ctxWebster.save();
+            ctxWebster.translate(14, padT + plotH / 2);
+            ctxWebster.rotate(-Math.PI / 2);
+            ctxWebster.fillText('Modelled average delay (s/PCU)', 0, 0);
+            ctxWebster.restore();
+
+            ctxWebster.restore();
+
+            document.getElementById('webster-opt-val').textContent = `${Math.round(d.Co)}s`;
+            document.getElementById('webster-delay-val').textContent = `${Math.round(d.avgDelay * 10) / 10} s/PCU`;
+        }
+
+        // Update Sensitivity Matrix Table
+        function updateSensitivityTable(d) {
+            const tbody = document.getElementById('sensitivity-table-body');
+            tbody.innerHTML = '';
+            const scenarios = [
+                { name: "Current Peak Flow", factor: 1.0 },
+                { name: "+15% Traffic Growth", factor: 1.15 },
+                { name: "+30% High Growth", factor: 1.30 },
+                { name: "Off-Peak (-25% Flow)", factor: 0.75 },
+                { name: "Pedestrian Priority Mode", factor: 1.0, pedBoost: true }
+            ];
+            scenarios.forEach((scenario, idx) => {
+                const sd = computeDesign({
+                    q1Raw: d.rawQ1 * scenario.factor,
+                    q2Raw: d.rawQ2 * scenario.factor,
+                    q3Raw: d.rawQ3 * scenario.factor,
+                    q4Raw: d.rawQ4 * scenario.factor
+                });
+                const tr = document.createElement('tr');
+                if (idx === 0) tr.className = "bg-[#176b3a]/10 font-bold";
+                let status = "WITHIN CAPACITY";
+                let statusClass = "text-[#2e8b57]";
+                if (sd.Y > 0.85) { status = "HIGH UTILIZATION"; statusClass = "text-[#8a641c]"; }
+                if (sd.Y >= 0.98) { status = "OVERSATURATED"; statusClass = "text-[#a33b3b]"; }
+                tr.innerHTML = `
+                    <td class="p-2.5 text-left">${scenario.name}</td>
+                    <td class="p-2.5">${Math.round(sd.q1 + sd.q2 + sd.q3)}</td>
+                    <td class="p-2.5">${sd.Y.toFixed(2)}</td>
+                    <td class="p-2.5">${Math.round(sd.Co)}s</td>
+                    <td class="p-2.5">${sd.g1}s</td>
+                    <td class="p-2.5">${sd.g2}s</td>
+                    <td class="p-2.5">${Math.round(sd.avgDelay)}s</td>
+                    <td class="p-2.5 font-bold">LOS ${sd.los}</td>
+                    <td class="p-2.5 font-bold ${statusClass}">${status}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Update Mathematical Calculation Workbook Tab
+        function updateMathWorkbook(d) {
+            const y3Line = d.nPhases > 2
+                ? String.raw`<p>$y_3 = \frac{${Math.round(d.q3)}}{${Math.round(d.S3)}} = \mathbf{${d.y3.toFixed(3)}}$</p>`
+                : '';
+            const y4Line = d.nPhases > 3
+                ? String.raw`<p>$y_4 = \frac{${Math.round(d.q4)}}{${Math.round(d.S4)}} = \mathbf{${d.y4.toFixed(3)}}$</p>`
+                : '';
+
+            document.getElementById('calc-step1-detail').innerHTML = String.raw`
+                <p>Phase 1 (N-S): $S_1 = 525 \times ${d.w1}\text{ m} = \mathbf{${Math.round(d.S1)}\text{ PCU/h}}$</p>
+                <p>Phase 2 (E-W): $S_2 = 525 \times ${d.w2}\text{ m} = \mathbf{${Math.round(d.S2)}\text{ PCU/h}}$</p>
+            `;
+
+            document.getElementById('calc-step2-detail').innerHTML = String.raw`
+                <p>$y_1 = \frac{${Math.round(d.q1)}}{${Math.round(d.S1)}} = \mathbf{${d.y1.toFixed(3)}}$</p>
+                <p>$y_2 = \frac{${Math.round(d.q2)}}{${Math.round(d.S2)}} = \mathbf{${d.y2.toFixed(3)}}$</p>
+                ${y3Line}
+                ${y4Line}
+            `;
+
+            document.getElementById('calc-step3-detail').innerHTML = String.raw`
+                <p>Model assumption: 2 s startup loss + all-red interval per phase. Amber is displayed separately and is not added to $L$ in this model.</p>
+                <p>Total Lost Time $L = (${d.nPhases} \times 2) + (${d.nPhases} \times ${d.allred}) = \mathbf{${d.L}\text{ sec}}$</p>
+                <p>Total Capacity Ratio $Y = \sum y_i = \mathbf{${d.Y.toFixed(3)}}$</p>
+            `;
+
+            document.getElementById('calc-step4-detail').innerHTML = String.raw`
+                <p>$C_o = \frac{1.5(${d.L}) + 5}{1 - ${d.Y.toFixed(3)}} = \frac{${(1.5*d.L + 5).toFixed(1)}}{${(1 - d.Y).toFixed(3)}} = \mathbf{${Math.round(d.Co)}\text{ sec}}$</p>
+                <p>Adopted Cycle Length $C = \mathbf{${d.C}\text{ sec}}$</p>
+            `;
+
+            document.getElementById('calc-step5-detail').innerHTML = String.raw`
+                <p>Available Effective Green $G_{eff} = ${d.C} - ${d.L} = ${d.Geff}\text{ s}$</p>
+                <p>Phase 1 Green $G_1 = \frac{${d.y1.toFixed(3)}}{${d.Y.toFixed(3)}} \times ${d.Geff} = \mathbf{${d.g1}\text{ s}}$</p>
+                <p>Phase 2 Green $G_2 = \frac{${d.y2.toFixed(3)}}{${d.Y.toFixed(3)}} \times ${d.Geff} = \mathbf{${d.g2}\text{ s}}$</p>
+                ${d.nPhases > 2 ? String.raw`<p>Phase 3 Green $G_3 = \frac{${d.y3.toFixed(3)}}{${d.Y.toFixed(3)}} \times ${d.Geff} = \mathbf{${d.g3}\text{ s}}$</p>` : ''}
+                ${d.nPhases > 3 ? String.raw`<p>Phase 4 Green $G_4 = \frac{${d.y4.toFixed(3)}}{${d.Y.toFixed(3)}} \times ${d.Geff} = \mathbf{${d.g4}\text{ s}}$</p>` : ''}
+            `;
+
+            document.getElementById('calc-step6-detail').innerHTML = String.raw`
+                <p>Modelled Average Intersection Delay = $\mathbf{${Math.round(d.avgDelay * 10) / 10}\text{ sec/PCU}}$</p>
+                <p>Level of Service = $\mathbf{LOS\ ${d.los}}$</p>
+            `;
+        }
+
+        // Update Field Recommendations Tab
+        function updateFieldWarrants(d) {
+            const totQ = d.rawQ1 + d.rawQ2 + d.rawQ3 + d.rawQ4;
+
+            // Volume screening — NOT a formal IRC warrant determination.
+            const w1Box = document.getElementById('warrant-vol-box');
+            const w1Badge = document.getElementById('warrant-vol-badge');
+            const w1Text = document.getElementById('warrant-vol-text');
+            w1Box.className = "p-4 rounded-lg border border-[#176b3a]/30 bg-[#176b3a]/10 space-y-2";
+            w1Badge.className = "px-2 py-0.5 rounded text-[10px] bg-[#176b3a] text-[#f4f8f5] font-bold";
+            w1Badge.textContent = "SCREENING ONLY";
+            w1Text.innerHTML = `Current peak input = <strong>${totQ} veh/h</strong>. This app does <strong>not</strong> issue an IRC signal warrant conclusion from peak volume alone. Formal evaluation requires the applicable IRC:93-1985 warrant conditions and site-specific major/minor road data.`;
+
+            // Warrant 2
+            const w2Box = document.getElementById('warrant-ped-box');
+            const w2Badge = document.getElementById('warrant-ped-badge');
+            const w2Text = document.getElementById('warrant-ped-text');
+
+            if ([d.g1,d.g2].concat(d.nPhases > 2 ? [d.g3] : []).concat(d.nPhases > 3 ? [d.g4] : []).every(g => g >= d.pedClearanceTime)) {
+                w2Box.className = "p-4 rounded-lg border border-[#176b3a]/30 bg-[#176b3a]/10 space-y-2";
+                w2Badge.className = "px-2 py-0.5 rounded text-[10px] bg-[#176b3a] text-[#f4f8f5] font-bold";
+                w2Badge.textContent = "SAFE";
+                w2Text.innerHTML = `Green timings are ${d.g1}s and ${d.g2}s; the application clearance check is ${d.pedClearanceTime}s. Verify pedestrian timing against IRC:103-2022 and the project crossing arrangement.`;
+            } else {
+                w2Box.className = "p-4 rounded-lg border border-[#a33b3b]/30 bg-[#a33b3b]/10 space-y-2";
+                w2Badge.className = "px-2 py-0.5 rounded text-[10px] bg-[#a33b3b] text-[#f4f8f5] font-bold";
+                w2Badge.textContent = "ACTION REQ";
+                w2Text.innerHTML = `The application clearance check (<strong>${d.pedClearanceTime}s</strong>) exceeds one or more green intervals. Review pedestrian phasing and timing using IRC:103-2022 and site-specific conditions.`;
+            }
+
+            // Warrant 3
+            const w3Box = document.getElementById('warrant-dilemma-box');
+            const w3Badge = document.getElementById('warrant-dilemma-badge');
+            const w3Text = document.getElementById('warrant-dilemma-text');
+
+            if (d.amber >= 3) {
+                w3Box.className = "p-4 rounded-lg border border-[#176b3a]/30 bg-[#176b3a]/10 space-y-2";
+                w3Badge.className = "px-2 py-0.5 rounded text-[10px] bg-[#176b3a] text-[#f4f8f5] font-bold";
+                w3Badge.textContent = "PASS";
+                w3Text.innerHTML = `Amber setting = <strong>${d.amber}s</strong>. This is only a screening value; verify amber and clearance intervals using approach speed, grade, vehicle characteristics and the applicable signal design provisions.`;
+            } else {
+                w3Box.className = "p-4 rounded-lg border border-[#8a641c]/30 bg-[#8a641c]/10 space-y-2";
+                w3Badge.className = "px-2 py-0.5 rounded text-[10px] bg-[#8a641c] text-[#f4f8f5] font-bold";
+                w3Badge.textContent = "WARNING";
+                w3Text.innerHTML = `Amber setting = <strong>${d.amber}s</strong>. No universal minimum is asserted by this app; verify the required interval for the actual approach conditions.`;
+            }
+
+            // Geometric Remedies
+            const remList = document.getElementById('field-remedies-list');
+            remList.innerHTML = '';
+
+            if (d.Y > 0.85) {
+                remList.innerHTML += `<div class="p-2 bg-[#a33b3b]/10 border-l-2 border-[#a33b3b]">⚠️ <strong>Intersection Y-Ratio is ${d.Y.toFixed(2)} (> 0.85):</strong> Capacity is near breakdown. Construct exclusive right/left turn bays (+3.5m width) or introduce grade separation.</div>`;
+            } else {
+                remList.innerHTML += `<div class="p-2 bg-[#176b3a]/10 border-l-2 border-[#176b3a]">✅ <strong>Y-Ratio is ${d.Y.toFixed(2)} (<= 0.85):</strong> Adequate reserve capacity exists for future peak traffic growth.</div>`;
+            }
+
+            remList.innerHTML += `<div class="p-2 bg-[#f4f8f5] border-l-2 border-[#2e8b57]">📐 <strong>Modelled saturation flow:</strong> $S = 525 \times W$ PCU/h is used as an application assumption. Verify lane-group, traffic composition, gradient and other adjustment factors against the applicable IRC methodology before design use.</div>`;
+        }
+
+        // Update Printable Design Report Tab
+        function updateReport(d) {
+            const tbody = document.getElementById('report-summary-body');
+            const phaseCells = [
+                {q:d.q1,S:d.S1,g:d.g1,label:'Phase 1 (N-S Straight)'},
+                {q:d.q2,S:d.S2,g:d.g2,label:'Phase 2 (N-S Right)'},
+                {q:d.q3,S:d.S3,g:d.g3,label:'Phase 3 (E-W Straight)'},
+                {q:d.q4,S:d.S4,g:d.g4,label:'Phase 4 (E-W Right)'}
+            ].slice(0,d.nPhases);
+            const phaseHeader = phaseCells.map(p => `<th class="border border-[#b8cbbd] p-2">${p.label}</th>`).join('');
+            const row = (label, getter) => `<tr><td class="border border-[#b8cbbd] p-2 font-bold">${label}</td>${phaseCells.map(p=>`<td class="border border-[#b8cbbd] p-2">${getter(p)}</td>`).join('')}</tr>`;
+            const table = tbody.closest('table');
+            if (table) {
+                const head = table.querySelector('thead tr');
+                if (head) head.innerHTML = `<th class="border border-[#b8cbbd] p-2">Parameter</th>${phaseHeader}`;
+            }
+            tbody.innerHTML =
+                row('Approach Road Width ($W$)', p => p.label.includes('E-W') ? `${d.w2} m` : `${d.w1} m`) +
+                row('Peak Hourly Volume ($q$)', p => `${Math.round(p.q)} PCU/h`) +
+                row('Saturation Flow Rate ($S$)', p => `${Math.round(p.S)} PCU/h`) +
+                row('Allocated Green Time ($G_i$)', p => `<strong class="text-[#1f6b43]">${p.g} sec</strong>`);
+
+            document.getElementById('rep-co').textContent = `${Math.round(d.Co)} seconds`;
+            document.getElementById('rep-c').textContent = `${d.C} seconds`;
+            document.getElementById('rep-l').textContent = `${d.L} seconds`;
+            document.getElementById('rep-y').textContent = d.Y.toFixed(3);
+            document.getElementById('rep-delay').textContent = `${Math.round(d.avgDelay * 10) / 10} s/PCU`;
+            document.getElementById('rep-los').textContent = `LOS ${d.los}`;
+
+            const calcContainer = document.getElementById('report-calc-steps');
+            if (calcContainer) {
+                calcContainer.innerHTML = `
+                    <div class="report-calc-card border border-[#b8cbbd] p-2.5 rounded bg-[#f4f8f5] text-[#183526] space-y-1">
+                        <p class="font-bold text-[#176b3a] border-b border-[#c9dbcf] pb-0.5">Step 1: Saturation Flow Rates</p>
+                        ${phaseCells.map(p => `<p>${p.label}: S = <strong>${Math.round(p.S)} PCU/h</strong></p>`).join('')}
+                    </div>
+                    <div class="report-calc-card border border-[#b8cbbd] p-2.5 rounded bg-[#f4f8f5] text-[#183526] space-y-1">
+                        <p class="font-bold text-[#176b3a] border-b border-[#c9dbcf] pb-0.5">Step 2: Critical Flow Ratios</p>
+                        ${phaseCells.map((p,i) => `<p>Phase ${i+1}: y = <strong>${[d.y1,d.y2,d.y3,d.y4][i].toFixed(3)}</strong></p>`).join('')}
+                        <p class="pt-1 border-t border-[#c9dbcf]"><strong>Sum of Flow Ratios (Y): ${d.Y.toFixed(3)}</strong></p>
+                    </div>
+                    <div class="report-calc-card border border-[#b8cbbd] p-2.5 rounded bg-[#f4f8f5] text-[#183526] space-y-1">
+                        <p class="font-bold text-[#176b3a] border-b border-[#c9dbcf] pb-0.5">Step 3: Total Lost Time & Webster Formula</p>
+                        <p>Total Lost Time L = (n × 2s) + (n × ${d.allred}s) = <strong>${d.L} seconds</strong></p>
+                        <p class="font-mono text-[11px] bg-[#e3eee7] p-1 rounded my-1">Cₒ = (1.5 × L + 5) / (1 - Y)</p>
+                        <p>Cₒ = <strong>${Math.round(d.Co)} seconds</strong></p>
+                    </div>
+                    <div class="report-calc-card border border-[#b8cbbd] p-2.5 rounded bg-[#f4f8f5] text-[#183526] space-y-1">
+                        <p class="font-bold text-[#176b3a] border-b border-[#c9dbcf] pb-0.5">Step 4: Effective Green Allocation</p>
+                        <p>Gₑff = C - L = <strong>${d.Geff} seconds</strong></p>
+                        ${phaseCells.map((p,i) => `<p>G${i+1} = <strong>${p.g} seconds</strong></p>`).join('')}
+                    </div>
+                    <div class="report-calc-card border border-[#b8cbbd] p-2.5 rounded bg-[#f4f8f5] text-[#183526] space-y-1 md:col-span-2">
+                        <p class="font-bold text-[#176b3a] border-b border-[#c9dbcf] pb-0.5">Step 5: Simplified Delay Model Evaluation & HCM-style LOS (screening)</p>
+                        <p class="font-mono text-[11px] bg-[#e3eee7] p-1 rounded">d = [ C(1 - g/C)² / 2(1 - q/S) ] + [ X² / 2q(1 - X) ]</p>
+                        <p>Average Intersection Delay: <strong>${Math.round(d.avgDelay * 10) / 10} s/PCU</strong> | Screening LOS: <strong>LOS ${d.los}</strong></p>
+                    </div>`;
+            }
+        }
+
+
+        function togglePcuModal(force) {
+            const modal = document.getElementById('pcu-modal');
+            if (!modal) return;
+            const shouldShow = typeof force === 'boolean' ? force : modal.classList.contains('hidden');
+            modal.classList.toggle('hidden', !shouldShow);
+            modal.classList.toggle('flex', shouldShow);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') togglePcuModal(false);
+        });
+
+        // Main App State Update
+        // Dynamic signal-timing optimization log.
+        // This is deliberately a screening/recommendation layer: it does not
+        // overwrite the adopted signal timings automatically.
+        function updateOptimizationLog(d) {
+            const status = document.getElementById('opt-log-status');
+            const list = document.getElementById('optimization-log-list');
+            const body = document.getElementById('optimization-phase-body');
+            if (!status || !list || !body) return;
+
+            document.getElementById('opt-current-cycle').textContent = `${Math.round(d.C)} s`;
+            document.getElementById('opt-webster-cycle').textContent = `${Math.round(d.Co)} s`;
+            document.getElementById('opt-y-ratio').textContent = d.Y.toFixed(3);
+            document.getElementById('opt-delay').textContent = `${Math.round(d.avgDelay * 10) / 10} s/PCU`;
+
+            const recommendations = [];
+            const phaseNames = ['P1 N-S Straight', 'P2 N-S Right', 'P3 E-W Straight', 'P4 E-W Right'];
+            const ys = [d.y1, d.y2, d.y3, d.y4];
+            const gs = [d.g1, d.g2, d.g3, d.g4];
+            const activeCount = Math.max(1, Math.min(4, d.nPhases));
+            const geff = Math.max(1, d.Geff);
+            const activeYs = ys.slice(0, activeCount);
+            const activeGs = gs.slice(0, activeCount);
+            const ySum = activeYs.reduce((a,b) => a+b, 0) || 1;
+
+            // Helper for a clear engineering recommendation card.
+            function addRecommendation(level, title, what, how, check) {
+                recommendations.push({level, title, what, how, check});
+            }
+
+            // 1–2. Operating-result-first recommendation logic.
+            // A Webster cycle is an analytical reference; it is not, by itself,
+            // evidence that the adopted timing is operationally acceptable.
+            const currentCycle = Number(d.C);
+            const currentDelay = Number(d.avgDelay);
+            const analyticalCycle = Number(d.Co);
+            const lowCycleScreen = currentCycle < 40 || analyticalCycle < 40;
+            const delayEThreshold = 55;
+            const delayFThreshold = 80;
+
+            // Screen the same application delay model across the signal-cycle
+            // range. This is an app/model comparison only; it is not an IRC-
+            // prescribed optimum cycle.
+            let bestDelayPoint = { cycle: currentCycle, delay: currentDelay };
+            if (!lowCycleScreen) {
+                for (let cTest = 40; cTest <= 140; cTest++) {
+                    const trial = computeDesign({cycleOverride: cTest});
+                    if (Number.isFinite(trial.avgDelay) && trial.avgDelay < bestDelayPoint.delay) {
+                        bestDelayPoint = { cycle: cTest, delay: Number(trial.avgDelay) };
+                    }
+                }
+            }
+
+            if (lowCycleScreen) {
+                const reason = analyticalCycle < 40
+                    ? `The calculated Webster analytical cycle is ${Math.round(analyticalCycle)} s, below the app's 40 s screening threshold; the adopted cycle is ${Math.round(currentCycle)} s.`
+                    : `The adopted cycle is ${Math.round(currentCycle)} s, below the app's 40 s screening threshold.`;
+                addRecommendation(
+                    'INTERSECTION TREATMENT',
+                    'Reconsider signalisation and evaluate an alternative intersection treatment',
+                    `${reason} Do not use the sub-40 s result as a reason to shorten the signal cycle further.`,
+                    `Stop signal-cycle optimisation in this screening path. Verify peak-hour traffic/PCU inputs, lane configuration, saturation-flow assumptions, pedestrian demand, geometry, sight distance and queue-storage conditions. Then evaluate an appropriate alternative treatment, such as an unsignalised/channelised intersection, roundabout, or another site-suitable junction treatment, using the applicable IRC guidance for that treatment.`,
+                    `Compare feasible alternatives for capacity, delay, queues, pedestrian requirements, conflict/safety considerations, right-of-way and site constraints. Document the comparison and selection basis before implementation. The app does not automatically select the alternative.`
+                );
+            } else if (currentDelay >= delayFThreshold) {
+                addRecommendation(
+                    'ACTION',
+                    'Address LOS F / very high modelled delay before accepting the timing',
+                    `The current ${Math.round(currentCycle)} s cycle produces ${currentDelay.toFixed(1)} s/PCU modelled average delay and LOS ${d.los}. Matching the Webster value (${Math.round(analyticalCycle)} s) does not make the operation acceptable by itself.`,
+                    `First verify traffic/PCU inputs, lane configuration and saturation-flow assumptions. Then use the modelled delay-vs-cycle curve to test the lowest-delay candidate in the screening range (about ${bestDelayPoint.cycle} s if it improves on the current result), followed by green-split and phase-specific queue checks. If acceptable operation cannot be achieved, move to a capacity/intersection-treatment review rather than repeatedly changing C alone.`,
+                    `Compare the baseline with the tested cycle using delay, phase queues, v/c utilisation, pedestrian/clearance constraints and field observations. Do not adopt a timing solely because it equals Co.`
+                );
+            } else if (currentDelay >= delayEThreshold) {
+                addRecommendation(
+                    'ACTION',
+                    'Reduce high modelled delay before retaining the current timing',
+                    `The current ${Math.round(currentCycle)} s cycle produces ${currentDelay.toFixed(1)} s/PCU modelled average delay and LOS ${d.los}. The delay result takes priority over the fact that the cycle may be close to Webster Co.`,
+                    `Verify the traffic and PCU inputs, inspect phase-specific delay/queues, and test the lower-delay region of the modelled cycle curve. If the best tested cycle is about ${bestDelayPoint.cycle} s, use it only as a simulation candidate; then retest green splits and all timing constraints. If the delay remains high, investigate capacity or intersection-treatment changes.`,
+                    `Record the current delay as the baseline and compare every tested cycle/split against it. Confirm minimum green, amber, all-red, pedestrian clearance, queue storage and field conditions before any adoption.`
+                );
+            } else if (currentDelay > 35 && bestDelayPoint.delay + 1 < currentDelay) {
+                addRecommendation(
+                    'REVIEW',
+                    `Test the lower-delay cycle indicated by the model — about ${bestDelayPoint.cycle} s`,
+                    `The current modelled delay is ${currentDelay.toFixed(1)} s/PCU (LOS ${d.los}), and the app's cycle sensitivity check identifies about ${bestDelayPoint.delay.toFixed(1)} s/PCU at C = ${bestDelayPoint.cycle} s.`,
+                    `Run a controlled trial at C ≈ ${bestDelayPoint.cycle} s, recalculate effective green and phase splits, and compare the result with the current setting. Treat Webster Co (${Math.round(analyticalCycle)} s) as a reference rather than the sole selection criterion.`,
+                    `Adopt a changed timing only if the tested setting improves delay/queues while satisfying all applicable signal, pedestrian, clearance and coordination requirements.`
+                );
+            } else if (Math.abs(currentCycle - analyticalCycle) >= 5) {
+                const testCycle = Math.max(40, Math.round(analyticalCycle));
+                addRecommendation(
+                    'REVIEW',
+                    `Test cycle length near the analytical Webster value — about ${testCycle} s`,
+                    `The adopted cycle is ${Math.round(currentCycle)} s and the analytical Webster value is about ${testCycle} s. The current modelled delay is ${currentDelay.toFixed(1)} s/PCU (LOS ${d.los}).`,
+                    `Test C ≈ ${testCycle} s, recalculate effective green and phase splits, and compare the resulting delay and queues with the current setting. Do not select the cycle from Co alone.`,
+                    `Use delay, queues, pedestrian requirements, coordination and field observations to determine whether the tested setting is suitable.`
+                );
+            } else {
+                addRecommendation(
+                    'MAINTAIN / REVIEW',
+                    'Current timing is acceptable in this screening model; verify with field performance',
+                    `The current ${Math.round(currentCycle)} s cycle gives ${currentDelay.toFixed(1)} s/PCU modelled delay (LOS ${d.los}), and the cycle is not materially different from the analytical Webster value of ${Math.round(analyticalCycle)} s.`,
+                    `Keep the current cycle as the baseline. Refine green splits only if phase-specific queues or field observations justify a change; do not change C solely because of the formula.`,
+                    `Compare measured delay and queues with the model and verify all minimum green, amber, all-red, pedestrian, coordination and site requirements before field adoption.`
+                );
+            }
+
+            // Demand / capacity is secondary to the delay/LOS diagnosis.
+            if (!lowCycleScreen && d.Y >= 0.98) {
+                addRecommendation(
+                    'CAPACITY',
+                    'Resolve capacity pressure before fine-tuning signal splits',
+                    `The calculated intersection flow ratio is ${d.Y.toFixed(3)}, indicating very high utilisation in this model.`,
+                    `First verify peak-hour traffic counts, lane assignments, PCU assumptions and saturation flow. Then test capacity measures such as additional effective green, lane utilisation or revised phasing. If demand remains above available capacity, investigate geometric/capacity improvements rather than relying on cycle changes alone.`,
+                    `Confirm the revised model produces acceptable v/c utilisation and queues for every critical phase.`
+                );
+            } else if (!lowCycleScreen && d.Y > 0.85) {
+                addRecommendation(
+                    'CAPACITY',
+                    'Review high utilisation during the peak period',
+                    `The calculated flow ratio is ${d.Y.toFixed(3)}. There is limited spare capacity in the current screening model.`,
+                    `Verify demand and saturation-flow inputs, then test small cycle/split changes. Give additional green to phases with persistent queues while protecting minimum green and clearance requirements.`,
+                    `Use observed queue dissipation and delay—not Y-ratio alone—to select the final timing.`
+                );
+            }
+
+            // 3. Phase allocation: translate the ratio comparison into a concrete
+            // "take green from / give green to" suggestion.
+            const phaseRows = [];
+            let maxNeed = null, maxSurplus = null;
+
+            activeGs.forEach((g, i) => {
+                const y = activeYs[i];
+                const greenShare = (g / geff) * 100;
+                const demandShare = (y / ySum) * 100;
+                const difference = greenShare - demandShare;
+
+                let observation = 'Allocation is broadly aligned with modelled demand.';
+                let action = 'No major split change indicated by this screening.';
+                if (difference < -8) {
+                    observation = 'Green share is below its demand share.';
+                    action = `Test increasing green by about ${Math.min(5, Math.max(1, Math.round(-difference/4)))} s.`;
+                    if (!maxNeed || difference < maxNeed.difference) maxNeed = {i, difference};
+                } else if (difference > 12) {
+                    observation = 'Green share is above its demand share.';
+                    action = 'Test whether part of this green can be reassigned.';
+                    if (!maxSurplus || difference > maxSurplus.difference) maxSurplus = {i, difference};
+                }
+
+                phaseRows.push({i, y, g, greenShare, demandShare, observation, action});
+            });
+
+            if (!lowCycleScreen && maxNeed && maxSurplus) {
+                const give = Math.min(5, Math.max(1, Math.round(maxSurplus.difference / 4)));
+                const take = Math.min(5, Math.max(1, Math.round(-maxNeed.difference / 4)));
+                const seconds = Math.min(give, take);
+                addRecommendation(
+                    'SPLIT',
+                    `Test a ${seconds} s green transfer toward ${phaseNames[maxNeed.i]}`,
+                    `${phaseNames[maxNeed.i]} is comparatively under-allocated, while ${phaseNames[maxSurplus.i]} has comparatively more green than its demand share in this model.`,
+                    `For the next simulation only, reduce ${phaseNames[maxSurplus.i]} by about ${seconds} s and add the same amount to ${phaseNames[maxNeed.i]}. Recalculate delay and queue performance. Keep all required minimum green and clearance intervals intact.`,
+                    `Adopt the redistribution only if it improves operation without creating unacceptable queues or violating applicable signal requirements.`
+                );
+            } else if (!lowCycleScreen && maxNeed) {
+                const seconds = Math.min(5, Math.max(1, Math.round(-maxNeed.difference / 4)));
+                addRecommendation(
+                    'SPLIT',
+                    `Test about ${seconds} s additional green for ${phaseNames[maxNeed.i]}`,
+                    `${phaseNames[maxNeed.i]} has a lower effective-green share than its modelled demand share.`,
+                    `Increase its green in the next simulation by about ${seconds} s. Take that time from an identified lower-demand phase or from available effective-green margin; do not reduce clearance intervals to create green.`,
+                    `Check delay and queue length for all phases after the split change.`
+                );
+            }
+
+            // 4. Clearance / minimum-green safeguard.
+            if (d.Geff < activeCount * 10) {
+                addRecommendation(
+                    'SAFETY',
+                    'Do not shorten the cycle until minimum/clearance requirements are checked',
+                    `Only about ${Math.round(d.Geff)} s is available as effective green after the modelled lost time.`,
+                    `Before reducing C, verify each phase's minimum green, amber and all-red/clearance requirements and pedestrian timing. If these constraints consume the available cycle, timing optimisation must not be achieved by cutting them.`,
+                    `Re-run the timing calculation with every required clearance and pedestrian constraint satisfied.`
+                );
+            }
+
+            // 5. Explicit workflow so the tab answers "what do I do next?"
+            if (lowCycleScreen) {
+                addRecommendation(
+                    'WORKFLOW',
+                    'Recommended next step: compare intersection treatments',
+                    'The cycle screening condition indicates that the signalised treatment should be reconsidered before further signal-timing optimisation.',
+                    `1) Verify traffic/PCU inputs → 2) verify geometry and pedestrian requirements → 3) identify feasible alternative intersection treatments → 4) analyse capacity, delay and queues for each → 5) check applicable IRC provisions and site constraints → 6) document the treatment-selection basis.`,
+                    'Keep the current signal timing as the baseline only. Do not adopt a shorter signal cycle solely because the analytical Webster value is below 40 s.'
+                );
+            } else {
+                addRecommendation(
+                    'WORKFLOW',
+                    'Recommended optimisation sequence',
+                    'Use operating performance first, then the modelled delay-vs-cycle response, with Webster Co as an analytical reference.',
+                    `1) Verify traffic/PCU inputs → 2) check delay and LOS → 3) inspect the modelled delay-vs-cycle curve → 4) test the indicated cycle and green splits → 5) check minimum green/amber/all-red/pedestrian clearance → 6) compare delay and queues → 7) if acceptable operation cannot be achieved, review capacity/intersection treatment → 8) document the selected setting.`,
+                    'Do not retain or change a cycle solely because it matches Webster Co. Record the baseline and every tested alternative with its resulting delay, queues and constraints.'
+                );
+            }
+
+            // Phase table.
+            body.innerHTML = '';
+            phaseRows.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-2.5 font-semibold">${phaseNames[row.i]}</td>
+                    <td class="p-2.5 text-right">${row.y.toFixed(3)}</td>
+                    <td class="p-2.5 text-right">${Math.round(row.g)} s</td>
+                    <td class="p-2.5 text-right">${row.greenShare.toFixed(1)}%</td>
+                    <td class="p-2.5">
+                        <div>${row.observation}</div>
+                        <div class="mt-1 font-semibold text-[#176b3a]">${row.action}</div>
+                    </td>`;
+                body.appendChild(tr);
+            });
+
+            // Render cards with explicit WHAT / HOW TO RESOLVE / CHECK.
+            list.innerHTML = '';
+            const styles = {
+                ACTION: 'border-[#8a641c] bg-[#fffaf0]',
+                'INTERSECTION TREATMENT': 'border-[#a33b3b] bg-[#fff5f5]',
+                CAPACITY: 'border-[#a33b3b] bg-[#fff5f5]',
+                SPLIT: 'border-[#2e8b57] bg-[#f4f8f5]',
+                SAFETY: 'border-[#a33b3b] bg-[#fff5f5]',
+                WORKFLOW: 'border-[#176b3a] bg-[#f4f8f5]',
+                'MAINTAIN / REVIEW': 'border-[#c9dbcf] bg-[#f4f8f5]',
+                REVIEW: 'border-[#c9dbcf] bg-[#f4f8f5]'
+            };
+
+            recommendations.forEach((r, idx) => {
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-lg border ${styles[r.level] || styles.REVIEW}`;
+                card.innerHTML = `
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide">${r.level}</span>
+                        <span class="text-sm font-bold text-[#176b3a]">${idx + 1}. ${r.title}</span>
+                    </div>
+                    <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                        <div>
+                            <div class="font-bold uppercase tracking-wide text-[#5f7568] mb-1">What to do</div>
+                            <p class="text-[#3f574a] leading-5">${r.what}</p>
+                        </div>
+                        <div>
+                            <div class="font-bold uppercase tracking-wide text-[#5f7568] mb-1">How to resolve</div>
+                            <p class="text-[#3f574a] leading-5">${r.how}</p>
+                        </div>
+                        <div>
+                            <div class="font-bold uppercase tracking-wide text-[#5f7568] mb-1">How to verify</div>
+                            <p class="text-[#3f574a] leading-5">${r.check}</p>
+                        </div>
+                    </div>`;
+                list.appendChild(card);
+            });
+
+            status.textContent = `${recommendations.length} actionable review item${recommendations.length === 1 ? '' : 's'}`;
+            status.className = 'px-3 py-1.5 rounded-lg border border-[#c9dbcf] bg-[#f4f8f5] text-xs font-bold text-[#176b3a] whitespace-nowrap';
+        }
+
+        function updateApp() {
+            // Update PCU readouts and weighted factor first; this is the live dependency for all traffic conversions.
+            const pcuF = updatePCUDisplay();
+
+            const nPhases = parseInt(elem.numPhases.value);
+            document.getElementById('group-q3').style.display = nPhases > 2 ? 'block' : 'none';
+            document.getElementById('group-q4').style.display = nPhases > 3 ? 'block' : 'none';
+
+            const rawQ1 = parseFloat(elem.q1.value);
+            const rawQ2 = parseFloat(elem.q2.value);
+            document.getElementById('val-q1').textContent = `${rawQ1} veh/h (${Math.round(rawQ1*pcuF)} PCU/h)`;
+            document.getElementById('val-w1').textContent = `${elem.w1.value} m`;
+            document.getElementById('val-q2').textContent = `${rawQ2} veh/h (${Math.round(rawQ2*pcuF)} PCU/h)`;
+            document.getElementById('val-w2').textContent = `${elem.w2.value} m`;
+            document.getElementById('val-q3').textContent = `${elem.q3.value} veh/h`;
+            document.getElementById('val-q4').textContent = `${elem.q4.value} veh/h`;
+            document.getElementById('val-amber').textContent = `${elem.amber.value}s`;
+            document.getElementById('val-allred').textContent = `${elem.allred.value}s`;
+            document.getElementById('val-pedwidth').textContent = `${elem.pedwidth.value}m @ ${elem.walkSpeed.value}m/s`;
+
+            // Compute math
+            const d = computeDesign();
+            latestDesign = d;
+
+            // Status cards
+            document.getElementById('card-cycle').textContent = `${d.C}s`;
+            document.getElementById('card-cycle-sub').textContent = `Webster Co = ${Math.round(d.Co)}s`;
+
+            document.getElementById('card-yratio').textContent = d.Y.toFixed(2);
+            document.getElementById('card-delay').textContent = `${Math.round(d.avgDelay)}s`;
+            document.getElementById('card-los').textContent = `Level of Service: LOS ${d.los}`;
+            document.getElementById('card-pedtime').textContent = `${d.pedClearanceTime}s`;
+
+            document.getElementById('cycle-split-summary').textContent = `Cycle = ${d.C}s | G1=${d.g1}s, G2=${d.g2}s${d.nPhases>2 ? `, G3=${d.g3}s` : ''}${d.nPhases>3 ? `, G4=${d.g4}s` : ''}`;
+
+            // Render Canvases
+            drawIntersection(d);
+            drawTimingDiagram(d);
+            drawWebsterCurve(d);
+
+            // Update Tabs Data
+            updateSensitivityTable(d);
+            updateMathWorkbook(d);
+            updateFieldWarrants(d);
+            updateOptimizationLog(d);
+            updateReport(d);
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch(() => {});
+            }
+        }
+
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            ['sim', 'webster', 'calc', 'field', 'log', 'report'].forEach(id => {
+                document.getElementById(`tab-${id}`).classList.add('hidden');
+                document.getElementById(`tab-btn-${id}`).classList.remove('active');
+            });
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${tabId}`).classList.add('active');
+
+            // Size only visible canvases after the tab becomes visible.
+            requestAnimationFrame(() => {
+                if (tabId === 'sim') {
+                    fixAnimationDPI(canvasInt, ctxInt);
+                    fixDPI(canvasDiag, ctxDiag);
+                }
+                if (tabId === 'webster') fixDPI(canvasWebster, ctxWebster);
+                updateApp();
+            });
+        }
+
+        // Continuous Animation Render Loop
+        function renderLoop(timestamp) {
+            if (lastAnimTimestamp == null) lastAnimTimestamp = timestamp;
+            const dt = Math.min(0.05, Math.max(0, (timestamp - lastAnimTimestamp) / 1000));
+            lastAnimTimestamp = timestamp;
+            simTime += dt;
+
+            if (latestDesign) {
+                drawIntersection(latestDesign);
+                // Keep the live timing slider synchronized with the animation.
+                if (!document.getElementById('tab-sim').classList.contains('hidden')) {
+                    drawTimingDiagram(latestDesign);
+                }
+            }
+            requestAnimationFrame(renderLoop);
+        }
+
+        // Application Initialization
+        function init() {
+            fixAnimationDPI(canvasInt, ctxInt);
+            requestAnimationFrame(() => {
+                if (!document.getElementById('tab-sim').classList.contains('hidden')) {
+                    fixDPI(canvasDiag, ctxDiag);
+                }
+            });
+
+            inputs.forEach(id => {
+                elem[id].addEventListener('input', updateApp);
+                elem[id].addEventListener('change', updateApp);
+            });
+
+            // Dedicated PCU listeners ensure the factor visibly changes during slider movement.
+            ['pcuTW', 'pcuCar', 'pcuHV', 'pcuAuto'].forEach(id => {
+                elem[id].addEventListener('input', updateApp);
+                elem[id].addEventListener('change', updateApp);
+            });
+
+            let resizeTimer = null;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    const active = document.querySelector('.tab-btn.active')?.id || '';
+                    if (active.includes('sim')) {
+                        fixAnimationDPI(canvasInt, ctxInt);
+                        fixDPI(canvasDiag, ctxDiag);
+                    } else if (active.includes('webster')) {
+                        fixDPI(canvasWebster, ctxWebster);
+                    }
+                    updateApp();
+                }, 100);
+            });
+
+            updateApp();
+
+            if ('ResizeObserver' in window) {
+                const ro = new ResizeObserver(entries => {
+                    for (const entry of entries) {
+                        if (entry.target === canvasInt) fixAnimationDPI(canvasInt, ctxInt);
+                        if (entry.target === canvasDiag) fixDPI(canvasDiag, ctxDiag);
+                        if (entry.target === canvasWebster) fixDPI(canvasWebster, ctxWebster);
+                    }
+                    if (latestDesign) {
+                        drawIntersection(latestDesign);
+                        drawTimingDiagram(latestDesign);
+                        drawWebsterCurve(latestDesign);
+                    }
+                });
+                ro.observe(canvasInt);
+                ro.observe(canvasDiag);
+                ro.observe(canvasWebster);
+            }
+
+            requestAnimationFrame(renderLoop);
+        }
+
+        window.onload = init;
+    </script>
+
+    <!-- ByAnkit PCU Factor Modal -->
+    <div id="pcu-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="pcu-modal-title">
+        <div class="w-full max-w-lg rounded-2xl border border-[#c9dbcf] bg-[#ffffff] p-6 shadow-2xl">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h2 id="pcu-modal-title" class="text-lg font-bold text-[#2e8b57]">PCU Factor Assumptions</h2>
+                    <p class="mt-1 text-xs text-[#5f7568]">Editable assumptions used by this educational calculator.</p>
+                </div>
+                <button onclick="togglePcuModal(false)" class="text-[#5f7568] hover:text-[#183526] text-xl" aria-label="Close">&times;</button>
+            </div>
+            <div class="mt-5 space-y-3 text-sm">
+                <div class="flex justify-between border-b border-[#c9dbcf] pb-2"><span>Two-Wheeler</span><strong>0.50</strong></div>
+                <div class="flex justify-between border-b border-[#c9dbcf] pb-2"><span>Car / Jeep</span><strong>1.00</strong></div>
+                <div class="flex justify-between border-b border-[#c9dbcf] pb-2"><span>Bus / Truck</span><strong>2.20</strong></div>
+                <div class="flex justify-between border-b border-[#c9dbcf] pb-2"><span>Auto-Rickshaw</span><strong>0.80</strong></div>
+            </div>
+            <p class="mt-4 rounded-lg border border-[#c9dbcf] bg-[#f4f8f5] p-3 text-xs leading-5 text-[#5f7568]">These values are application assumptions. Verify the appropriate PCU values and vehicle classification against the governing IRC provisions and project conditions before design use.</p>
+            <button onclick="togglePcuModal(false)" class="mt-5 w-full rounded-lg bg-[#176b3a] px-4 py-2 text-sm font-semibold text-[#f4f8f5] hover:bg-[#2e8b57]">Close</button>
+        </div>
+    </div>
+
+    
+</body>
+</html>

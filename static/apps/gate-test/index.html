@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GATE Practice | ByAnkit — MathML Render Fixed</title>
+<style>
+:root{--green:#166534;--forest:#14532d;--mint:#dcfce7;--bg:#f5f7f6;--card:#fff;--line:#dbe2df;--text:#17211b;--muted:#64746b;--amber:#f59e0b;--red:#dc2626;--blue:#2563eb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+button,input,select{font:inherit}.hidden{display:none!important}
+.topbar{background:#101714;color:#fff;border-bottom:3px solid #166534;position:sticky;top:0;z-index:20}
+.topbar-in{max-width:1280px;margin:auto;padding:13px 22px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.logo{font-weight:800;font-size:19px}.logo b{color:#4ade80}.mode{font-size:13px;color:#d1d5db}
+.wrap{max-width:1280px;margin:0 auto;padding:28px 20px 50px}
+.hero{background:linear-gradient(135deg,#102219,#173c28);color:#fff;border-radius:20px;padding:30px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;width:260px;height:260px;border:1px solid #ffffff18;border-radius:50%;right:-70px;top:-100px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#86efac;font-weight:800}.hero h1{font-size:34px;margin:8px 0}.hero p{margin:0;color:#d1fae5;max-width:700px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 30px #1022190a}
+.setup{margin-top:18px;padding:24px}.section-title{font-size:17px;font-weight:800;margin:0 0 16px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.field label{display:block;font-size:12px;font-weight:800;margin-bottom:7px;color:#33443a}
+select{width:100%;padding:11px 12px;border:1px solid #cfd8d4;border-radius:10px;background:#fff;color:var(--text)}
+.actions{display:flex;align-items:center;gap:10px;margin-top:20px;flex-wrap:wrap}
+.primary{border:0;background:var(--green);color:#fff;padding:12px 20px;border-radius:10px;font-weight:800;cursor:pointer}.primary:hover{background:var(--forest)}
+.secondary{border:1px solid #cfd8d4;background:#fff;padding:11px 16px;border-radius:10px;font-weight:700;cursor:pointer}.secondary:hover{background:#f8faf9}
+.status{font-size:13px;color:var(--muted)}.status.ok{color:var(--green);font-weight:700}.status.bad{color:var(--red)}
+.notice{margin-top:15px;padding:12px 14px;border-radius:10px;background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a;font-size:13px}.error{background:#fef2f2;border-color:#fecaca;color:#991b1b}
+.exam-head{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:15px}.exam-title{font-weight:800}.chips{display:flex;gap:7px;flex-wrap:wrap}.chip{padding:7px 10px;border-radius:20px;background:#eaf1ed;font-size:12px;font-weight:700}
+.timer{background:#111827;color:#fff;border-radius:10px;padding:9px 14px;font-weight:850;min-width:82px;text-align:center}
+.exam-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px}.question-card{padding:25px;min-height:590px}
+.qtop{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:20px}
+.qno{font-size:15px;font-weight:850}.qmeta{font-size:12px;color:var(--muted)}
+.question{font-size:19px;line-height:1.65;margin-bottom:25px;white-space:normal}
+.option{display:flex;gap:12px;align-items:flex-start;padding:15px;border:1px solid var(--line);border-radius:11px;margin:10px 0;cursor:pointer;background:#fff}
+.option:hover{background:#f7faf8;border-color:#aab8b0}.option.selected{background:#effaf2;border-color:#22c55e;box-shadow:inset 3px 0 0 #166534}
+.option input{margin-top:4px;accent-color:#166534}.letter{font-weight:850;min-width:20px}
+.nat{max-width:480px;background:#f8faf9;border:1px solid var(--line);padding:20px;border-radius:12px}.nat input{width:100%;padding:13px;border:1px solid #cfd8d4;border-radius:9px;font-size:19px;font-weight:700}
+.nav{display:flex;justify-content:space-between;gap:8px;margin-top:28px;border-top:1px solid var(--line);padding-top:18px}
+.palette-card{padding:20px;height:max-content;position:sticky;top:85px}.palette-title{font-weight:850;margin-bottom:12px}.palette{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.pbtn{height:40px;border:1px solid #d2dad6;border-radius:8px;background:#fff;font-weight:800;cursor:pointer}.pbtn.current{outline:2px solid #166534;outline-offset:1px}.pbtn.answered{background:#dcfce7;border-color:#86efac}.pbtn.review{background:#fef3c7;border-color:#fbbf24}.pbtn.answered.review{background:linear-gradient(135deg,#dcfce7 50%,#fef3c7 50%)}
+.legend{font-size:11px;color:var(--muted);line-height:1.8;margin-top:13px}.submit{width:100%;margin-top:18px;background:#111827}.submit:hover{background:#020617}
+.result{padding:28px}.score{font-size:44px;font-weight:900;color:var(--green)}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:20px 0}.stat{border:1px solid var(--line);border-radius:11px;padding:14px}.stat b{display:block;font-size:22px}.stat small{color:var(--muted)}
+.table{width:100%;border-collapse:collapse}.table th,.table td{text-align:left;padding:10px;border-bottom:1px solid var(--line);font-size:12px}
+.footer{text-align:center;color:#94a39a;font-size:11px;margin-top:20px}
+@media(max-width:900px){.grid{grid-template-columns:1fr 1fr}.exam-layout{grid-template-columns:1fr}.palette-card{position:static;order:-1}.stats{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.grid{grid-template-columns:1fr}.hero h1{font-size:27px}.question{font-size:17px}.topbar-in{padding:12px 15px}.wrap{padding:18px 12px 35px}}
+
+.solution-review{margin-top:28px;border-top:1px solid var(--line);padding-top:24px}
+.solution-card{border:1px solid var(--line);border-radius:14px;margin:12px 0;background:#fff;overflow:hidden}
+.solution-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;cursor:pointer;background:#f8faf9}
+.solution-head:hover{background:#f1f7f3}
+.solution-title{font-weight:850;font-size:14px}
+.result-badge{font-size:11px;font-weight:850;padding:5px 9px;border-radius:20px}
+.badge-correct{background:#dcfce7;color:#166534}.badge-wrong{background:#fee2e2;color:#991b1b}.badge-skipped{background:#f1f5f9;color:#475569}
+.solution-body{display:none;padding:18px 18px 20px;border-top:1px solid var(--line)}
+.solution-card.open .solution-body{display:block}
+.sol-q{font-size:15px;line-height:1.6;font-weight:700;margin-bottom:15px}
+.sol-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.sol-box{padding:12px 14px;border-radius:10px;background:#f8faf9;border:1px solid var(--line);font-size:13px;line-height:1.55}
+.sol-box b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.explanation{margin-top:14px;padding:15px;border-left:4px solid #166534;background:#f0fdf4;border-radius:0 10px 10px 0;line-height:1.65;font-size:13px}
+.explanation.empty{background:#fff7ed;border-left-color:#f59e0b}
+.sol-options{margin:10px 0 0;padding-left:20px;font-size:13px;line-height:1.7}
+.review-tools{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 0 10px;flex-wrap:wrap}
+@media(max-width:700px){.sol-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="topbar-in"><div class="logo">By <b>Ankit</b> · GATE Practice</div><div class="mode" id="mode"></div></div></header>
+
+<main class="wrap">
+<section id="setup">
+  <div class="hero">
+    <div class="eyebrow">Civil Engineering</div>
+    <h1>GATE Practice Test</h1>
+    <p>Build a focused practice test from the ByAnkit question bank. Select your subject, topic and test pattern, then start the exam.</p>
+  </div>
+
+  <div class="card setup">
+    <div class="section-title">Test Configuration</div>
+    <div class="grid">
+      <div class="field"><label>Subject</label><select id="subject"></select></div>
+      <div class="field"><label>Topic</label><select id="topic"></select></div>
+      <div class="field"><label>Difficulty</label><select id="difficulty"></select></div>
+      <div class="field"><label>Question Type</label><select id="type"></select></div>
+      <div class="field"><label>Source / Year</label><select id="source"></select></div>
+      <div class="field"><label>Number of Questions</label><select id="count"><option>10</option><option>20</option><option>30</option><option>50</option><option>65</option></select></div>
+      <div class="field"><label>Test Duration</label><select id="duration"><option>15</option><option>30</option><option>45</option><option>60</option><option>90</option><option selected>180</option></select></div>
+    </div>
+    <div class="actions">
+      <button class="primary" id="startBtn" disabled>Loading Question Bank…</button>
+      <button class="secondary" id="refreshBtn">↻ Refresh Question Bank</button>
+      <span id="status" class="status">Connecting to Google Sheets…</span>
+    </div>
+    <div id="message"></div>
+    <div class="notice" style="margin-top:10px;font-size:12px">
+      Database endpoint: <span style="word-break:break-all">Google Sheets</span>
+    </div>
+  </div>
+</section>
+
+<section id="exam" class="hidden">
+  <div class="exam-head">
+    <div><div class="exam-title">GATE Practice Test</div><div class="chips"><span class="chip" id="progress">Q 1 / 10</span><span class="chip" id="answered">0 Answered</span><span class="chip" id="marked">0 Marked</span></div></div>
+    <div class="timer" id="timer">180:00</div>
+  </div>
+  <div class="exam-layout">
+    <article class="card question-card">
+      <div class="qtop"><div class="qno" id="qno">Question 1</div><div class="qmeta" id="qmeta">1 Mark</div></div>
+      <div class="question" id="question"></div>
+      <div id="answerArea"></div>
+      <div class="nav"><button class="secondary" id="prev">← Previous</button><button class="secondary" id="mark">Mark for Review</button><button class="primary" id="next">Save & Next →</button></div>
+    </article>
+    <aside class="card palette-card">
+      <div class="palette-title">Question Palette</div>
+      <div class="palette" id="palette"></div>
+      <div class="legend">□ Not answered<br>■ Answered<br>■ Marked for review</div>
+      <button class="primary submit" id="submit">Submit Test</button>
+    </aside>
+  </div>
+</section>
+
+<section id="result" class="card result hidden">
+  <div class="eyebrow">Test Completed</div><h1>Performance Summary</h1><div class="score" id="score">0.00</div>
+  <p id="summary"></p>
+  <div class="stats"><div class="stat"><b id="correct">0</b><small>Correct</small></div><div class="stat"><b id="wrong">0</b><small>Wrong</small></div><div class="stat"><b id="skipped">0</b><small>Not Attempted</small></div><div class="stat"><b id="accuracy">0%</b><small>Accuracy</small></div></div>
+  <div class="review-tools">
+    <div><h3 style="margin:0">Solutions & Explanations</h3>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">Click any question to see the correct answer and the explanation.</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="secondary" id="expandAll">Expand All</button>
+      <button class="secondary" id="collapseAll">Collapse All</button>
+    </div>
+  </div>
+  <div class="solution-review" id="solutionReview"></div>
+  <div class="actions"><button class="primary" id="newTest">Create New Test</button></div>
+</section>
+<div class="footer">ByAnkit · GATE Practice</div>
+</main>
+
+<script>
+const GOOGLE_SHEET_ID="1Ji_n3mKqruzbhQhYdGvWsLU_aM-RgJO92TsBLUQb2MI";
+const GOOGLE_SHEET_GID="0";
+const S={bank:[],test:[],answers:[],review:[],i:0,sec:0,timer:null};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+/* Render ordinary text safely, while allowing only sanitized MathML blocks from the sheet. */
+const MATH_TAGS=new Set([
+  "math","mrow","mi","mn","mo","mfrac","msup","msub","msubsup","msqrt","mroot",
+  "munder","mover","munderover","mtable","mtr","mtd","mlabeledtr","mstyle","mtext","mspace",
+  "mfenced","menclose","mpadded","mphantom","merror","mmultiscripts","mprescripts","none","ms",
+  "maction"
+]);
+const MATH_ATTRS=new Set([
+  "display","mathvariant","mathsize","mathcolor","dir","displaystyle","scriptlevel","scriptminsize",
+  "lspace","rspace","stretchy","symmetric","fence","separator","form","largeop","movablelimits",
+  "accent","accentunder","bevelled","linethickness","numalign","denomalign","open","close",
+  "columnalign","rowalign","columnlines","rowlines","columnspacing","rowspacing","frame","framespacing",
+  "equalcolumns","equalrows","width","height","depth","voffset","href"
+]);
+function sanitizeMathML(markup){
+  const tpl=document.createElement("template");
+  tpl.innerHTML=markup;
+  const root=tpl.content.querySelector("math");
+  if(!root)return "";
+  function clone(node){
+    if(node.nodeType===Node.TEXT_NODE)return document.createTextNode(node.nodeValue||"");
+    if(node.nodeType!==Node.ELEMENT_NODE)return document.createDocumentFragment();
+    const tag=node.tagName.toLowerCase();
+    if(!MATH_TAGS.has(tag)){
+      const f=document.createDocumentFragment();
+      [...node.childNodes].forEach(ch=>f.appendChild(clone(ch)));
+      return f;
+    }
+    const el=document.createElement(tag);
+    [...node.attributes].forEach(a=>{
+      const name=a.name.toLowerCase();
+      const value=a.value;
+      if(MATH_ATTRS.has(name) && !/^javascript:/i.test(value) && !/^data:/i.test(value)) el.setAttribute(name,value);
+    });
+    [...node.childNodes].forEach(ch=>el.appendChild(clone(ch)));
+    return el;
+  }
+  const safe=clone(root), holder=document.createElement("div");
+  holder.appendChild(safe);
+  return holder.innerHTML;
+}
+function renderRich(value){
+  let s=String(value??"");
+  // Google Sheets data can contain HTML-escaped MathML (&lt;math&gt;...&lt;/math&gt;).
+  // Decode entities once before detecting MathML, then escape ordinary text again.
+  const decoder=document.createElement("textarea");
+  decoder.innerHTML=s;
+  s=decoder.value;
+  const re=/<math\b[^>]*>[\s\S]*?<\/math>/gi;
+  let out="",last=0,m;
+  while((m=re.exec(s))){
+    out+=esc(s.slice(last,m.index)).replace(/\r?\n/g,"<br>");
+    out+=sanitizeMathML(m[0]);
+    last=m.index+m[0].length;
+  }
+  out+=esc(s.slice(last)).replace(/\r?\n/g,"<br>");
+  return out;
+}
+function parseCSV(t){
+ let rows=[],row=[],cell="",q=false;
+ for(let i=0;i<t.length;i++){let c=t[i],n=t[i+1];
+  if(c=='"'){if(q&&n=='"'){cell+='"';i++}else q=!q}
+  else if(c==','&&!q){row.push(cell);cell=""}
+  else if((c=='\\n'||c=='\\r')&&!q){if(c=='\\r'&&n=='\\n')i++;row.push(cell);cell="";if(row.some(x=>x.trim()))rows.push(row);row=[]}
+  else cell+=c;
+ }
+ if(cell||row.length){row.push(cell);rows.push(row)} return rows;
+}
+function clean(x){return String(x??"").replace(/^\\uFEFF/,"").trim()}
+
+
+function gvizUrl(callbackName){
+  return "https://docs.google.com/spreadsheets/d/"+GOOGLE_SHEET_ID+
+    "/gviz/tq?gid="+encodeURIComponent(GOOGLE_SHEET_GID)+
+    "&headers=1&tqx="+encodeURIComponent("responseHandler:"+callbackName);
+}
+
+function loadBank(){
+  $("status").textContent="Connecting to Google Sheets…";
+  $("status").className="status";
+  $("message").innerHTML="";
+
+  const callbackName="byAnkitSheet_"+Date.now();
+  const script=document.createElement("script");
+  let finished=false;
+
+  const fail=()=>{
+    if(finished)return;
+    finished=true;
+    cleanup();
+    $("status").textContent="Connection failed";$("startBtn").disabled=true;$("startBtn").textContent="Start GATE Test →";
+    $("status").className="status bad";
+    $("message").innerHTML=
+      '<div class="notice error"><b>Google Sheets did not return the question data.</b><br>'+
+      'The published sheet is reachable in your browser, but this page did not receive the Google data response.'+
+      '<br><br>Check that the spreadsheet is publicly published and that GID 0 is the question-bank sheet.</div>';
+  };
+
+  const timer=setTimeout(fail,12000);
+
+  function cleanup(){
+    clearTimeout(timer);
+    if(script.parentNode)script.parentNode.removeChild(script);
+    try{delete window[callbackName]}catch(e){window[callbackName]=undefined}
+  }
+
+  window[callbackName]=function(response){
+    if(finished)return;
+    finished=true;
+    clearTimeout(timer);
+    try{
+      if(!response || response.status==="error"){
+        throw Error((response && response.errors && response.errors[0] && response.errors[0].detailed_message) || "Google Sheets returned an error.");
+      }
+
+      const table=response.table;
+      if(!table || !table.cols || !table.rows) throw Error("Google Sheets returned no table data.");
+
+      const headers=table.cols.map(c=>clean(c.label||c.id||"").toLowerCase().replace(/[\s_-]+/g,""));
+      const need=["id","subject","topic","difficulty","type","question","answer","marks","negative"];
+      const missing=need.filter(x=>!headers.includes(x));
+      if(missing.length) throw Error("Missing columns: "+missing.join(", "));
+
+      S.bank=table.rows.map(row=>{
+        const o={};
+        headers.forEach((h,i)=>{
+          const cell=row.c && row.c[i];
+          o[h]=cell && cell.v!==null && cell.v!==undefined ? String(cell.v).trim() : "";
+        });
+        return {
+          id:o.id,subject:o.subject,topic:o.topic,difficulty:o.difficulty,
+          type:(o.type||"MCQ").toUpperCase(),question:o.question,
+          options:[o.optiona,o.optionb,o.optionc,o.optiond].filter(Boolean),
+          answer:o.answer,marks:Number(o.marks)||1,negative:Number(o.negative)||0,
+          explanation:o.explanation||"",year:o.year||"",source:o.source||o.year||"",
+          tolerance:o.tolerance||""
+        };
+      }).filter(q=>q.question && q.answer);
+
+      if(!S.bank.length) throw Error("The sheet was reached, but no valid questions were found.");
+
+      populate();
+      $("status").textContent="✓ "+S.bank.length+" questions loaded from Google Sheets";$("startBtn").disabled=false;$("startBtn").textContent="Start GATE Test →";
+      $("status").className="status ok";
+      $("message").innerHTML='<div class="notice">Question bank connected successfully. You can now create a test.</div>';
+    }catch(e){
+      console.error(e);
+      $("status").textContent="Sheet format error";$("startBtn").disabled=true;$("startBtn").textContent="Start GATE Test →";
+      $("status").className="status bad";
+      $("message").innerHTML='<div class="notice error"><b>Question bank format error.</b><br>'+esc(e.message)+'</div>';
+    }finally{
+      cleanup();
+    }
+  };
+
+  script.onerror=fail;
+  script.src=gvizUrl(callbackName);
+  document.head.appendChild(script);
+}
+
+
+function fillSelect(id, values, label){
+  const el=$(id);
+  const unique=[...new Set(values.filter(v=>v!==undefined && v!==null && String(v).trim()!=="").map(v=>String(v).trim()))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+  el.innerHTML='<option value="ALL">'+esc(label)+'</option>'+unique.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join("");
+}
+function populate(){
+  fillSelect("subject",S.bank.map(q=>q.subject),"All Subjects");
+  fillSelect("topic",S.bank.map(q=>q.topic),"All Topics");
+  fillSelect("difficulty",S.bank.map(q=>q.difficulty),"All Difficulties");
+  fillSelect("type",S.bank.map(q=>q.type),"All Types");
+  fillSelect("source",S.bank.map(q=>q.source),"All Sources");
+}
+
+
+function updateDependentFilters(){
+  const subject=$("subject").value;
+  const subset=S.bank.filter(q=>subject==="ALL"||q.subject===subject);
+  fillSelect("topic",subset.map(q=>q.topic),"All Topics");
+  fillSelect("difficulty",subset.map(q=>q.difficulty),"All Difficulties");
+  fillSelect("type",subset.map(q=>q.type),"All Types");
+  fillSelect("source",subset.map(q=>q.source),"All Sources");
+}
+
+function pool(){
+ let s=$("subject").value,t=$("topic").value,d=$("difficulty").value,ty=$("type").value,src=$("source").value;
+ return S.bank.filter(q=>(s=="ALL"||q.subject==s)&&(t=="ALL"||q.topic==t)&&(d=="ALL"||q.difficulty==d)&&(ty=="ALL"||q.type==ty)&&(src=="ALL"||q.source==src));
+}
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function start(){
+ if(!S.bank.length){$("message").innerHTML='<div class="notice error">Question bank is not loaded yet. Click Refresh Question Bank and wait for the green connection message.</div>';return}
+ let p=pool(),n=Number($("count").value);
+ if(!p.length){$("message").innerHTML='<div class="notice error">No questions match the selected filters.</div>';return}
+ if(p.length<n){$("message").innerHTML='<div class="notice error">Only '+p.length+' questions match these filters. Select '+p.length+' or fewer.</div>';return}
+ S.test=shuffle(p).slice(0,n);S.answers=Array(n).fill(null);S.review=Array(n).fill(false);S.i=0;S.sec=Number($("duration").value)*60;
+ $("setup").classList.add("hidden");$("result").classList.add("hidden");$("exam").classList.remove("hidden");$("mode").textContent="Exam Mode";
+ render();palette();startTimer();
+}
+function startTimer(){clearInterval(S.timer);tick();S.timer=setInterval(()=>{S.sec--;tick();if(S.sec<=0){clearInterval(S.timer);finish()}},1000)}
+function tick(){let m=Math.floor(S.sec/60),s=S.sec%60;$("timer").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")}
+function answered(a){return Array.isArray(a)?a.length>0:a!==null&&a!==undefined&&String(a).trim()!==""}
+function render(){
+ let q=S.test[S.i],type=q.type,s=S.answers[S.i];$("progress").textContent="Q "+(S.i+1)+" / "+S.test.length;$("answered").textContent=S.answers.filter(answered).length+" Answered";$("marked").textContent=S.review.filter(Boolean).length+" Marked";
+ $("qno").textContent="Question "+(S.i+1)+" · "+type;$("qmeta").textContent=q.marks+" Mark"+(q.marks==1?"":"s")+(q.negative?" · −"+q.negative:"");$("question").innerHTML=renderRich(q.question);
+ if(type=="NAT"){
+  $("answerArea").innerHTML='<div class="nat"><b>Numerical Answer</b><p style="color:#64746b;font-size:12px">Enter your numerical answer.</p><input id="nat" inputmode="decimal" value="'+esc(s??"")+'" placeholder="e.g. 12.50"></div>';
+  $("nat").oninput=e=>{S.answers[S.i]=e.target.value.trim();palette();renderCounts()}
+ }else{
+  let multi=type=="MSQ";
+  $("answerArea").innerHTML=q.options.map((op,j)=>{let L="ABCD"[j],checked=multi?(Array.isArray(s)&&s.includes(L)):s===L;return '<label class="option '+(checked?"selected":"")+'"><input type="'+(multi?"checkbox":"radio")+'" name="ans" value="'+L+'" '+(checked?"checked":"")+'><span class="letter">'+L+'.</span><span>'+renderRich(op)+'</span></label>'}).join("");
+  document.querySelectorAll('input[name=ans]').forEach(x=>x.onchange=()=>{if(multi){let a=Array.isArray(S.answers[S.i])?[...S.answers[S.i]]:[];x.checked?a.push(x.value):a.splice(a.indexOf(x.value),1);S.answers[S.i]=[...new Set(a)]}else S.answers[S.i]=x.value;render();palette()});
+ }
+ $("mark").textContent=S.review[S.i]?"Remove Review":"Mark for Review";$("prev").disabled=S.i===0;$("next").textContent=S.i===S.test.length-1?"Save":"Save & Next";
+}
+function renderCounts(){$("answered").textContent=S.answers.filter(answered).length+" Answered";$("marked").textContent=S.review.filter(Boolean).length+" Marked"}
+function palette(){$("palette").innerHTML=S.test.map((q,i)=>'<button class="pbtn '+(i===S.i?"current ":"")+(answered(S.answers[i])?"answered ":"")+(S.review[i]?"review":"")+'" onclick="go('+i+')">'+(i+1)+'</button>').join("")}
+function go(i){S.i=i;render();palette()}function next(){if(S.i<S.test.length-1){S.i++;render();palette()}}function prev(){if(S.i>0){S.i--;render();palette()}}
+function correct(q,a){
+ if(!answered(a))return false;let t=q.type;
+ if(t=="MSQ"){let x=String(q.answer).toUpperCase().split(/[\s,;|]+/).filter(Boolean).sort(),y=(Array.isArray(a)?a:[]).map(v=>v.toUpperCase()).sort();return x.length===y.length&&x.every((v,i)=>v===y[i])}
+ if(t=="NAT"){let x=Number(a),y=Number(q.answer),tol=q.tolerance!==""?Number(q.tolerance):0.01;return Number.isFinite(x)&&Number.isFinite(y)&&Math.abs(x-y)<=tol}
+ return String(a).toUpperCase()==String(q.answer).toUpperCase().trim()
+}
+function show(v){return Array.isArray(v)?v.join(", "):answered(v)?v:"—"}
+function finish(){
+ clearInterval(S.timer);let c=0,w=0,sk=0,score=0;
+ S.test.forEach((q,i)=>{let a=S.answers[i];if(!answered(a)){sk++;return}if(correct(q,a)){c++;score+=q.marks}else{w++;score-=q.negative}});
+ score=Math.max(0,score);let att=c+w,acc=att?Math.round(c/att*100):0;
+ $("exam").classList.add("hidden");$("result").classList.remove("hidden");$("mode").textContent="Result";
+ $("score").textContent=score.toFixed(2);$("summary").textContent=c+" correct · "+w+" wrong · "+sk+" not attempted out of "+S.test.length+" questions.";
+ $("correct").textContent=c;$("wrong").textContent=w;$("skipped").textContent=sk;$("accuracy").textContent=acc+"%";
+ $("solutionReview").innerHTML=S.test.map((q,i)=>{
+  const a=S.answers[i], attempted=answered(a), ok=correct(q,a);
+  const cls=attempted?(ok?"badge-correct":"badge-wrong"):"badge-skipped";
+  const label=attempted?(ok?"Correct":"Wrong"):"Not Attempted";
+  const explanation=q.explanation ? renderRich(q.explanation) :
+    '<span style="color:#92400e">No explanation has been added for this question yet. You can add it to the <b>explanation</b> column in the Google Sheet.</span>';
+  const optText=q.options.length ? '<ol class="sol-options">'+q.options.map((o,j)=>'<li><b>'+("ABCD"[j])+'.</b> '+esc(o)+'</li>').join("")+'</ol>' : "";
+  return '<div class="solution-card" data-index="'+i+'">'+
+    '<div class="solution-head" onclick="toggleSolution('+i+')">'+
+      '<div class="solution-title">Question '+(i+1)+' · '+esc(q.topic||"")+'</div>'+
+      '<span class="result-badge '+cls+'">'+label+'</span>'+
+    '</div>'+
+    '<div class="solution-body">'+
+      '<div class="sol-q">'+renderRich(q.question)+'</div>'+
+      '<div class="sol-grid">'+
+        '<div class="sol-box"><b>Your Answer</b>'+esc(show(a))+'</div>'+
+        '<div class="sol-box"><b>Correct Answer</b>'+esc(q.answer)+'</div>'+
+      '</div>'+
+      optText+
+      '<div class="explanation '+(q.explanation?"":"empty")+'"><b>Explanation</b><br>'+explanation+'</div>'+
+    '</div>'+
+  '</div>';
+}).join("");
+
+}
+$("startBtn").onclick=start;$("refreshBtn").onclick=loadBank;$("subject").onchange=updateDependentFilters;$("prev").onclick=prev;$("next").onclick=next;
+$("mark").onclick=()=>{S.review[S.i]=!S.review[S.i];render();palette()};
+$("submit").onclick=()=>{if(confirm("Submit this test?"))finish()};
+function toggleSolution(i){
+  const card=document.querySelector('.solution-card[data-index="'+i+'"]');
+  if(card) card.classList.toggle("open");
+}
+$("expandAll").onclick=()=>document.querySelectorAll(".solution-card").forEach(c=>c.classList.add("open"));
+$("collapseAll").onclick=()=>document.querySelectorAll(".solution-card").forEach(c=>c.classList.remove("open"));
+$("newTest").onclick=()=>{$("result").classList.add("hidden");$("setup").classList.remove("hidden");$("mode").textContent=""};
+loadBank();
+</script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GATE Question Bank Render Checker | ByAnkit</title>
+<style>
+:root{--green:#166534;--forest:#14532d;--mint:#dcfce7;--bg:#f5f7f6;--card:#fff;--line:#dbe2df;--text:#17211b;--muted:#64746b;--red:#dc2626;--blue:#2563eb;--amber:#d97706}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+button,input{font:inherit}.hidden{display:none!important}
+.topbar{background:#101714;color:#fff;border-bottom:3px solid #166534;position:sticky;top:0;z-index:20}
+.topbar-in{max-width:1280px;margin:auto;padding:13px 22px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.logo{font-weight:800;font-size:19px}.logo b{color:#4ade80}.mode{font-size:13px;color:#d1d5db}
+.wrap{max-width:1280px;margin:0 auto;padding:28px 20px 50px}
+.hero{background:linear-gradient(135deg,#102219,#173c28);color:#fff;border-radius:20px;padding:30px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;width:260px;height:260px;border:1px solid #ffffff18;border-radius:50%;right:-70px;top:-100px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#86efac;font-weight:800}.hero h1{font-size:34px;margin:8px 0}.hero p{margin:0;color:#d1fae5;max-width:800px;line-height:1.55}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 30px #1022190a}
+.setup{margin-top:18px;padding:24px}.section-title{font-size:17px;font-weight:800;margin:0 0 16px}
+.field label{display:block;font-size:12px;font-weight:800;margin-bottom:7px;color:#33443a}
+.urlrow{display:flex;gap:10px}.urlrow input{flex:1;min-width:0;padding:12px;border:1px solid #cfd8d4;border-radius:10px}
+.actions{display:flex;align-items:center;gap:10px;margin-top:15px;flex-wrap:wrap}
+.primary{border:0;background:var(--green);color:#fff;padding:12px 18px;border-radius:10px;font-weight:800;cursor:pointer}.primary:hover{background:var(--forest)}
+.secondary{border:1px solid #cfd8d4;background:#fff;padding:11px 16px;border-radius:10px;font-weight:700;cursor:pointer}.secondary:hover{background:#f8faf9}
+.status{font-size:13px;color:var(--muted)}.status.ok{color:var(--green);font-weight:800}.status.bad{color:var(--red);font-weight:700}
+.notice{margin-top:15px;padding:12px 14px;border-radius:10px;background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a;font-size:13px;line-height:1.5}.error{background:#fef2f2;border-color:#fecaca;color:#991b1b}
+.controlbar{margin-top:18px;padding:18px;display:flex;align-items:end;gap:12px;flex-wrap:wrap}.control{min-width:120px}.control input{width:100%;padding:10px;border:1px solid #cfd8d4;border-radius:9px}
+.stats{margin-left:auto;font-size:12px;color:var(--muted)}
+.qcard{margin-top:15px;padding:24px}.qtop{display:flex;justify-content:space-between;align-items:center;gap:15px;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:18px}
+.qno{font-size:16px;font-weight:850}.qmeta{font-size:12px;color:var(--muted)}.badge{background:#eaf1ed;padding:7px 10px;border-radius:20px;font-size:12px;font-weight:800;white-space:nowrap}
+.question{font-size:19px;line-height:1.7;margin-bottom:20px}.option{padding:13px 15px;border:1px solid var(--line);border-radius:11px;margin:9px 0;line-height:1.65}.letter{font-weight:850;margin-right:9px}
+.answer{margin-top:20px;padding:13px 15px;border-left:4px solid var(--green);background:#effaf2;border-radius:0 10px 10px 0;line-height:1.6}
+.explanation{margin-top:12px;padding:15px;border-left:4px solid var(--blue);background:#eff6ff;border-radius:0 10px 10px 0;line-height:1.65}
+.issue-list{margin-top:8px}.issue{padding:7px 0;border-top:1px solid #fecaca}.issue:first-child{border-top:0}.issue-tag{display:inline-block;font-size:10px;font-weight:900;padding:2px 6px;border-radius:5px;margin-right:6px}.issue-tag.err{background:#fee2e2;color:#991b1b}.issue-tag.wrn{background:#ffedd5;color:#9a3412}.issue details{margin-top:7px}.issue summary{cursor:pointer;font-weight:800;color:#7f1d1d}.issue pre{white-space:pre-wrap;word-break:break-word;background:#fff;border:1px solid #fecaca;border-radius:7px;padding:10px;font:11px ui-monospace,SFMono-Regular,Consolas,monospace;max-height:260px;overflow:auto}.fixhint{margin-top:6px;padding:7px;background:#fff7ed;border-radius:6px;color:#7c2d12}.diag{margin-top:14px;padding:11px 13px;border-radius:9px;font-size:12px;line-height:1.5}.good{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}.badbox{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}.warn{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412}
+.summary{margin-top:18px;padding:18px}.summarygrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.statbox{border:1px solid var(--line);border-radius:10px;padding:13px}.statbox b{font-size:22px;display:block}.statbox small{color:var(--muted)}
+math{font-size:1.05em}.footer{text-align:center;color:#94a39a;font-size:11px;margin-top:20px}
+@media(max-width:700px){.urlrow{flex-direction:column}.summarygrid{grid-template-columns:1fr 1fr}.hero h1{font-size:27px}.question{font-size:17px}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="topbar-in"><div class="logo">By <b>Ankit</b> · GATE Render Checker</div><div class="mode">Question Bank QA · MathML XML diagnostics</div></div></header>
+<main class="wrap">
+<section class="hero">
+<div class="eyebrow">Civil Engineering</div>
+<h1>GATE Question Bank Render Checker — MathML QA</h1>
+<p>Uses the same Google Sheets CSV fetching method as the working ByAnkit GATE Practice page, then renders the selected database rows vertically so you can visually check mathematics, symbols, tables, images, answers and explanations.</p>
+</section>
+
+<section class="card setup">
+<div class="section-title">Published Question Bank</div>
+<div class="field"><label>Google Sheets published CSV URL</label>
+<div class="urlrow">
+<input id="url" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vSfvwXA_jkimprRp3yG6Zczog3_-3_RJQ6652qJD9mLEFfJoPjBvCoMumgHsrMKvLkeiEwtodqeDFpt/pub?output=csv">
+<button class="primary" id="load">Load Question Bank</button>
+<button class="secondary" id="open">Open CSV</button>
+</div></div>
+<div id="status" class="status" style="margin-top:10px">Ready.</div>
+<div id="message"></div>
+</section>
+
+<section id="controls" class="card controlbar hidden">
+<div class="control"><label>Start row</label><input id="start" type="number" min="1" value="1"></div>
+<div class="control"><label>End row</label><input id="end" type="number" min="1" value="10"></div>
+<button class="primary" id="selected">Render Selected Rows</button>
+<button class="secondary" id="all">Render All Rows</button>
+<button class="secondary" id="issues">Show Issues Only</button>
+<div class="stats" id="stats"></div>
+</section>
+
+<section id="summary" class="card summary hidden"></section>
+<section id="questions"></section>
+<div class="footer">ByAnkit · GATE Practice · Google Sheets Question Bank</div>
+</main>
+
+<script>
+const QUESTION_BANK_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSfvwXA_jkimprRp3yG6Zczog3_-3_RJQ6652qJD9mLEFfJoPjBvCoMumgHsrMKvLkeiEwtodqeDFpt/pub?output=csv";
+// This is the spreadsheet ID used by the working ByAnkit GATE Practice implementation.
+const FALLBACK_SHEET_ID="1Ji_n3mKqruzbhQhYdGvWsLU_aM-RgJO92TsBLUQb2MI";
+const EXPECTED=["id","subject","topic","difficulty","type","question","optionA","optionB","optionC","optionD","answer","marks","negative","explanation"];
+const CONTENT=["question","optionA","optionB","optionC","optionD","explanation"];
+let BANK=[]; let issueOnly=false;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function clean(x){return String(x??"").replace(/^\uFEFF/,"").trim()}
+function parseCSV(t){
+ let rows=[],row=[],cell="",q=false;
+ for(let i=0;i<t.length;i++){let c=t[i],n=t[i+1];
+  if(c=='"'){if(q&&n=='"'){cell+='"';i++}else q=!q}
+  else if(c==','&&!q){row.push(cell);cell=""}
+  else if((c=='\n'||c=='\r')&&!q){if(c=='\r'&&n=='\n')i++;row.push(cell);cell="";if(row.some(x=>x.trim()))rows.push(row);row=[]}
+  else cell+=c;
+ }
+ if(cell||row.length){row.push(cell);rows.push(row)} return rows;
+}
+function csvUrl(){return $("url").value.trim()+"&_"+Date.now()}
+
+async function loadBank(){
+ $("load").disabled=true;$("status").textContent="Loading Google Sheet…";$("status").className="status";$("message").innerHTML="";
+ try{
+  // EXACT loading pattern used by the working GATE Practice page:
+  const r=await fetch(csvUrl(),{cache:"no-store",mode:"cors",redirect:"follow"});
+  if(!r.ok)throw Error("HTTP "+r.status);
+  const text=await r.text();
+  if(!text.trim())throw Error("The CSV response is empty.");
+  if(/<html|<!doctype/i.test(text.slice(0,300)))throw Error("Google returned HTML instead of CSV. Re-publish the sheet as CSV.");
+  parseBankCSV(text);
+  success();
+ }catch(e){
+  console.warn("Direct published CSV fetch failed:",e);
+  // Local file fallback: use the same Google Visualization method as the working
+  // ByAnkit implementation, using its actual spreadsheet ID.
+  try{
+   await loadGViz(FALLBACK_SHEET_ID,"0");
+   success();
+  }catch(e2){
+   $("status").textContent="Connection failed";$("status").className="status bad";
+   $("message").innerHTML='<div class="notice error"><b>Could not load the question bank.</b><br>'+
+    'Direct CSV fetch failed: '+esc(e.message||e)+'<br>'+
+    'Google Visualization fallback failed: '+esc(e2.message||e2)+
+    '<br><br><b>Important:</b> the original GATE Practice page uses direct <code>fetch()</code> successfully when hosted on a web origin. A double-clicked <code>file://</code> page can be blocked by Chrome CORS rules. If this file is opened from GitHub Pages/localhost, the direct fetch method will work exactly like the working test page.</div>';
+   console.error(e,e2);
+  }
+ }finally{$("load").disabled=false}
+}
+function parseBankCSV(text){
+ const rows=parseCSV(text);
+ if(rows.length<2)throw Error("CSV loaded but no question rows were found.");
+ let h=rows[0].map(x=>clean(x));
+ const norm=h.map(x=>x.toLowerCase().replace(/[\s_-]+/g,""));
+ const missing=EXPECTED.filter(x=>!norm.includes(x.toLowerCase()));
+ if(missing.length)throw Error("Missing columns: "+missing.join(", "));
+ BANK=rows.slice(1).map((r,ri)=>{
+   const o={};norm.forEach((x,j)=>o[x]=clean(r[j]));
+   return EXPECTED.reduce((z,k)=>{z[k]=o[k.toLowerCase().replace(/[\s_-]+/g,"")]??"";return z},{_sourceRow:ri+2});
+ }).filter(r=>r.id||r.question);
+ if(!BANK.length)throw Error("No question rows found.");
+}
+function loadGViz(id,gid){
+ return new Promise((resolve,reject)=>{
+  const cb="byAnkitChecker_"+Date.now()+"_"+Math.random().toString(36).slice(2);
+  const script=document.createElement("script");let done=false;
+  const timer=setTimeout(()=>fail("Timed out waiting for Google Sheets."),15000);
+  function cleanup(){clearTimeout(timer);script.remove();try{delete window[cb]}catch(e){window[cb]=undefined}}
+  function fail(msg){if(done)return;done=true;cleanup();reject(Error(msg))}
+  window[cb]=resp=>{
+   if(done)return;done=true;
+   try{
+    if(!resp||resp.status==="error")throw Error(resp?.errors?.[0]?.detailed_message||"Google returned an error.");
+    const t=resp.table;if(!t?.cols||!t?.rows)throw Error("Google returned no table data.");
+    const headers=t.cols.map(c=>clean(c.label||c.id||"").toLowerCase().replace(/[\s_-]+/g,""));
+    const need=EXPECTED.map(x=>x.toLowerCase().replace(/[\s_-]+/g,""));
+    const missing=need.filter(x=>!headers.includes(x));if(missing.length)throw Error("Missing columns: "+missing.join(", "));
+    BANK=t.rows.map((row,ri)=>{
+      const o={};headers.forEach((h,i)=>{const c=row.c?.[i];o[h]=c?.v==null?"":String(c.v).trim()});
+      return EXPECTED.reduce((z,k)=>{z[k]=o[k.toLowerCase().replace(/[\s_-]+/g,"")]??"";return z},{_sourceRow:ri+2});
+    }).filter(r=>r.id||r.question);
+    if(!BANK.length)throw Error("No question rows found.");
+    cleanup();resolve();
+   }catch(e){cleanup();reject(e)}
+  };
+  script.onerror=()=>fail("Google Sheets response script could not be loaded.");
+  script.src="https://docs.google.com/spreadsheets/d/"+encodeURIComponent(id)+"/gviz/tq?gid="+encodeURIComponent(gid)+"&headers=1&tqx="+encodeURIComponent("responseHandler:"+cb);
+  document.head.appendChild(script);
+ });
+}
+function success(){
+ $("status").textContent="✓ "+BANK.length+" questions loaded";$("status").className="status ok";
+ $("controls").classList.remove("hidden");$("start").max=BANK.length;$("end").max=BANK.length;$("end").value=Math.min(10,BANK.length);
+ $("message").innerHTML='<div class="notice">Question bank loaded. The validator checks rendering and also validates each MathML fragment as XML. For comparison operators, use <code>&amp;lt;</code> inside <code>&lt;mo&gt;</code>, not a raw <code>&lt;</code>.</div>';
+ renderRange(1,Math.min(10,BANK.length));
+}
+const MATH_TAGS=new Set(["math","mrow","mi","mn","mo","mfrac","msup","msub","msubsup","msqrt","mroot","munder","mover","munderover","mtable","mtr","mtd","mlabeledtr","mstyle","mtext","mspace","mfenced","menclose","mpadded","mphantom","merror","mmultiscripts","mprescripts","none","ms","maction"]);
+const MATH_ATTRS=new Set(["display","mathvariant","mathsize","mathcolor","dir","displaystyle","scriptlevel","scriptminsize","lspace","rspace","stretchy","symmetric","fence","separator","form","largeop","movablelimits","accent","accentunder","bevelled","linethickness","numalign","denomalign","open","close","columnalign","rowalign","columnlines","rowlines","columnspacing","rowspacing","frame","framespacing","equalcolumns","equalrows","width","height","depth","voffset","href"]);
+function sanitizeMathML(markup){
+ const tpl=document.createElement("template");tpl.innerHTML=markup;const root=tpl.content.querySelector("math");if(!root)return "";
+ function clone(n){
+  if(n.nodeType===Node.TEXT_NODE)return document.createTextNode(n.nodeValue||"");
+  if(n.nodeType!==Node.ELEMENT_NODE)return document.createDocumentFragment();
+  const tag=n.tagName.toLowerCase();
+  if(!MATH_TAGS.has(tag)){const f=document.createDocumentFragment();[...n.childNodes].forEach(x=>f.appendChild(clone(x)));return f}
+  const el=document.createElement(tag);[...n.attributes].forEach(a=>{if(MATH_ATTRS.has(a.name.toLowerCase())&&!/^javascript:/i.test(a.value)&&!/^data:/i.test(a.value))el.setAttribute(a.name,a.value)});
+  [...n.childNodes].forEach(x=>el.appendChild(clone(x)));return el;
+ }
+ const h=document.createElement("div");h.appendChild(clone(root));return h.innerHTML;
+}
+function renderRich(value){
+ const s=String(value??"");const re=/<math\b[^>]*>[\s\S]*?<\/math\s*>/gi;let out="",last=0,m;
+ while((m=re.exec(s))){out+=esc(s.slice(last,m.index)).replace(/\r?\n/g,"<br>");out+=sanitizeMathML(m[0]);last=m.index+m[0].length}
+ out+=esc(s.slice(last)).replace(/\r?\n/g,"<br>");return out;
+}
+function balanced(v,a,b){return (v.match(new RegExp(a,"gi"))||[]).length===(v.match(new RegExp(b,"gi"))||[]).length}
+function xmlMathCheck(fragment){
+  // Parse the exact MathML fragment as XML. This catches raw '<' characters such as
+  // <mo><</mo>, which can look visually correct in HTML but are invalid XML/MathML.
+  const parser=new DOMParser();
+  const doc=parser.parseFromString(fragment,"application/xml");
+  const pe=doc.querySelector("parsererror");
+  if(!pe)return null;
+
+  const raw=pe.textContent||"";
+  let hint="Malformed MathML XML.";
+  if(/<mo\b[^>]*>\s*</i.test(fragment) || /<mtext\b[^>]*>\s*</i.test(fragment))
+    hint="A raw '<' appears inside a MathML element. Use &lt; inside <mo> or <mtext>.";
+  else if(/<mo\b[^>]*>\s*>/i.test(fragment))
+    hint="Check the comparison/operator token inside <mo>.";
+  else if(/&(?:nbsp|times|divide|minus|alpha|beta|gamma|delta|theta|lambda|mu|pi|rho|sigma|phi|omega);/i.test(fragment))
+    hint="A named HTML entity may not be valid XML MathML. Prefer the Unicode symbol or numeric character reference.";
+  return {hint, parser:raw};
+}
+
+function findMathFragments(v){
+  return String(v||"").match(/<math\b[^>]*>[\s\S]*?<\/math\s*>/gi)||[];
+}
+
+function diagnostics(r){
+  const issues=[];
+  if(Object.keys(r).length<15)issues.push({
+    level:"ERROR",field:"row",message:"Database row structure is incomplete."
+  });
+
+  CONTENT.forEach(c=>{
+    const v=String(r[c]||"");
+
+    if(!balanced(v,"<math\\b","<\\/math\\s*>")){
+      issues.push({level:"ERROR",field:c,message:"Unbalanced <math>...</math> tags."});
+    }
+
+    if(/&lt;\s*math\b|&gt;\s*\/\s*math/i.test(v)){
+      issues.push({level:"ERROR",field:c,message:"MathML is HTML-escaped; the CSV must contain real <math>...</math> tags."});
+    }
+
+    if(/\\(?:frac|sqrt|alpha|beta|gamma|delta|epsilon|phi|theta|lambda|mu|rho|sigma|pi|sum|int|leq|geq)\b|\$\$|\$[^$]+\$/.test(v)){
+      issues.push({level:"WARNING",field:c,message:"LaTeX/Markdown mathematics appears to remain."});
+    }
+
+    const fragments=findMathFragments(v);
+    fragments.forEach((m,index)=>{
+      const bad=xmlMathCheck(m);
+      if(bad){
+        issues.push({
+          level:"ERROR",
+          field:c,
+          message:bad.hint,
+          fragment:m,
+          parser:bad.parser,
+          index:index+1
+        });
+      }
+    });
+  });
+
+  if(!String(r.answer||"").trim())
+    issues.push({level:"WARNING",field:"answer",message:"Answer is empty."});
+  if(!String(r.question||"").trim())
+    issues.push({level:"ERROR",field:"question",message:"Question is empty."});
+
+  return issues;
+}
+
+function issueHTML(issues){
+  if(!issues.length)
+    return '<div class="diag good">✓ No obvious MathML/markup error detected in this row.</div>';
+
+  return '<div class="diag badbox"><b>QA issues:</b><div class="issue-list">'+
+    issues.map((x,i)=>{
+      const detail=x.fragment
+        ? '<details><summary>Show offending MathML fragment</summary><pre>'+esc(x.fragment)+'</pre>'+
+          '<div class="fixhint"><b>Suggested correction:</b> '+esc(
+            /<mo\b[^>]*>\s*</i.test(x.fragment)
+              ? 'Replace a raw < inside MathML with &lt; (for example: <mo>&lt;</mo>).'
+              : 'Correct the malformed XML/MathML shown above.'
+          )+'</div></details>'
+        : '';
+      return '<div class="issue"><span class="issue-tag '+(x.level==="ERROR"?"err":"wrn")+'">'+esc(x.level)+'</span>'+
+        '<b>'+esc(x.field)+':</b> '+esc(x.message)+detail+'</div>';
+    }).join("")+
+    '</div></div>';
+}
+
+function card(r,n){
+  const issues=diagnostics(r);
+  if(issueOnly&&!issues.length)return "";
+
+  const opts=["optionA","optionB","optionC","optionD"].map((k,i)=>
+    r[k]?'<div class="option"><span class="letter">'+("ABCD"[i])+".</span>"+renderRich(r[k])+"</div>":""
+  ).join("");
+
+  return '<article class="card qcard">'+
+    '<div class="qtop"><div><div class="qno">Question '+n+' · ID: '+esc(r.id)+'</div>'+
+    '<div class="qmeta">'+esc(r.subject)+' · '+esc(r.topic)+' · '+esc(r.difficulty)+' · source CSV row '+r._sourceRow+'</div></div>'+
+    '<div class="badge">'+esc(r.type)+' · '+esc(r.marks)+' Mark'+(String(r.marks)==="1"?"":"s")+
+    (r.negative?' · −'+esc(r.negative):"")+'</div></div>'+
+    '<div class="question">'+renderRich(r.question)+'</div>'+
+    opts+
+    '<div class="answer"><b>Correct Answer:</b> '+renderRich(r.answer)+'</div>'+
+    '<div class="explanation"><b>Explanation</b><br>'+renderRich(r.explanation||"(No explanation provided)")+'</div>'+
+    issueHTML(issues)+
+    '</article>';
+}
+
+function renderRange(a,b){
+ a=Math.max(1,parseInt(a)||1);b=Math.min(BANK.length,parseInt(b)||BANK.length);if(a>b){$("questions").innerHTML='<div class="card notice error">Start row must be less than or equal to End row.</div>';return}
+ const arr=BANK.slice(a-1,b);$("questions").innerHTML=arr.map((r,i)=>card(r,a+i)).join("");
+ const shown=[...$("questions").querySelectorAll(".qcard")].length;const issueCount=arr.filter(r=>diagnostics(r).length).length;
+ $("stats").textContent="Rows "+a+"–"+b+" of "+BANK.length+" · Displayed "+shown+" · Issues "+issueCount;
+ $("summary").classList.remove("hidden");
+ $("summary").innerHTML='<div class="section-title">Render QA Summary</div><div class="summarygrid"><div class="statbox"><b>'+BANK.length+'</b><small>Total questions loaded</small></div><div class="statbox"><b>'+arr.length+'</b><small>Rows selected</small></div><div class="statbox"><b>'+issueCount+'</b><small>Rows with detected issues</small></div><div class="statbox"><b>'+shown+'</b><small>Questions rendered</small></div></div>';
+ if(!shown)$("questions").innerHTML='<div class="card notice">No issues found in the selected rows.</div>';
+}
+$("load").onclick=loadBank;
+$("open").onclick=()=>{const u=$("url").value.trim();if(u)window.open(u,"_blank","noopener")};
+$("selected").onclick=()=>renderRange($("start").value,$("end").value);
+$("all").onclick=()=>{$("start").value=1;$("end").value=BANK.length;issueOnly=false;renderRange(1,BANK.length)};
+$("issues").onclick=()=>{issueOnly=!issueOnly;$("issues").textContent=issueOnly?"Show All Rows":"Show Issues Only";renderRange($("start").value,$("end").value)};
+loadBank();
+</script>
+</body>
+</html>

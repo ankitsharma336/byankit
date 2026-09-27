@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRC Highway Geometric Design & Simulation Studio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                            dark: '#14532d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style class="osd-telemetry">
+        body {
+            background-color: #fcfcfb;
+            color: #374151;
+        }
+        /* Custom scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #14532d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #9ca3af;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+        .canvas-bg {
+            background-color: #ffffff;
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+        .glow-active {
+            box-shadow: 0 0 15px rgba(37, 99, 235, 0.35);
+        }
+        input[type=range] {
+            accent-color: #22c55e;
+        }
+    
+        /* BYANKIT DESIGN SYSTEM — authoritative application theme */
+        :root {
+            --by-green-900: #14532D;
+            --by-green-800: #166534;
+            --by-green-700: #15803D;
+            --by-green-600: #16A34A;
+            --by-green-500: #22C55E;
+            --by-bg: #FCFCFB;
+            --by-surface: #FFFFFF;
+            --by-text: #374151;
+            --by-heading: #1F2937;
+            --by-muted: #6B7280;
+            --by-border: #E5E7EB;
+        }
+        body { background:#FCFCFB !important; color:#374151 !important; }
+        header { background:#14532D !important; border-color:#166534 !important; }
+        .canvas-bg { background:#FFFFFF !important; background-image:radial-gradient(#E5E7EB 1px, transparent 1px) !important; background-size:16px 16px !important; }
+        .glass-panel { background:rgba(255,255,255,.96) !important; backdrop-filter:blur(8px); border:1px solid #E5E7EB !important; box-shadow:0 8px 24px rgba(31,41,55,.06); }
+        .glow-active { box-shadow:0 0 0 3px rgba(22,163,74,.12) !important; }
+        input[type=range] { accent-color:#16A34A !important; }
+        ::-webkit-scrollbar-track { background:#F3F4F6 !important; }
+        ::-webkit-scrollbar-thumb { background:#9CA3AF !important; }
+        ::-webkit-scrollbar-thumb:hover { background:#16A34A !important; }
+        button:hover { transition:all .18s ease; }
+        @media (prefers-reduced-motion: reduce) { * { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important; } }
+
+        .manual-value { width: 76px; min-width: 76px; padding: 5px 7px; border: 1px solid #d1d5db; border-radius: 7px; background: #fff; color: #1f2937; font: 600 11px/1.2 Inter, sans-serif; text-align: right; outline: none; }
+        .manual-value:focus { border-color: #166534; box-shadow: 0 0 0 2px rgba(22,101,52,.12); }
+        .animation-heading { padding: 8px 11px; background: #fff; border: 1px solid #d1d5db; border-bottom: 0; border-radius: 10px 10px 0 0; color: #14532d; font: 700 12px/1.2 Inter, sans-serif; }
+        .animation-frame { border-radius: 0 0 10px 10px !important; }
+
+        /* Prevent supersampled canvases from feeding their measured height back into the flex layout.
+           The animation viewport is intentionally fixed; the drawing scales inside it. */
+        #camberCanvas, #sightCanvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+            flex: none;
+        }
+        #camberCanvas { aspect-ratio: auto; }
+        #sightCanvas { aspect-ratio: auto; }
+        #camberCanvasFrame, #sightCanvasFrame {
+            height: 440px !important;
+            min-height: 440px !important;
+            max-height: 440px !important;
+            flex: none !important;
+        }
+        @media (max-width: 767px) {
+            #camberCanvasFrame, #sightCanvasFrame {
+                height: 360px !important;
+                min-height: 360px !important;
+                max-height: 360px !important;
+            }
+        }
+
+/* Keep animation-panel labels inside their own panel; never expand page width. */
+.animation-panel, .animation-panel * { min-width:0; max-width:100%; }
+.animation-panel .animation-heading, .animation-panel .animation-label, .animation-panel .phase-label { white-space:normal; overflow-wrap:anywhere; word-break:normal; line-height:1.25; }
+
+
+/* OSD animation telemetry: keep current-position/distance text inside panel */
+#osd-animation-panel .osd-telemetry,
+#osd-animation-panel .osd-status,
+#osd-animation-panel .animation-status,
+#osd-animation-panel .position-display,
+#osd-animation-panel .distance-display,
+#osd-animation-panel .gap-display,
+#osd-animation-panel [id*="position"],
+#osd-animation-panel [id*="Position"],
+#osd-animation-panel [id*="distance"],
+#osd-animation-panel [id*="Distance"],
+#osd-animation-panel [id*="separation"],
+#osd-animation-panel [id*="Separation"],
+#osd-animation-panel [id*="gap"],
+#osd-animation-panel [id*="Gap"] {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+  line-height: 1.25;
+}
+
+
+/* Keep OSD telemetry text contained inside the animation panel. */
+#osd-animation-panel .osd-telemetry,
+#osd-animation-panel .osd-status,
+#osd-animation-panel .animation-status,
+#osd-animation-panel [id*="position"],
+#osd-animation-panel [id*="Position"],
+#osd-animation-panel [id*="distance"],
+#osd-animation-panel [id*="Distance"],
+#osd-animation-panel [id*="separation"],
+#osd-animation-panel [id*="Separation"],
+#osd-animation-panel [id*="gap"],
+#osd-animation-panel [id*="Gap"] {
+  display:block;
+  max-width:100%;
+  min-width:0;
+  white-space:normal !important;
+  overflow-wrap:anywhere !important;
+  word-break:normal !important;
+  line-height:1.25;
+}
+
+</style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased text-gray-100">
+
+    <header class="bg-gray-950 border-b border-gray-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-green-600 to-green-500 flex items-center justify-center text-white shadow-lg shadow-green-500/20">
+                    <i class="fa-solid fa-road text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                        Highway Geometric Design <span class="text-xs px-2 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30">IRC Suite 2026</span>
+                    </h1>
+                    <p class="text-xs text-gray-400">Indian Road Congress Codes (IRC:73, IRC:86, IRC:66, IRC:38, IRC:SP:23)</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3 text-xs">
+                <button onclick="openReferenceModal()" class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium transition flex items-center gap-1.5 border border-gray-700">
+                    <i class="fa-solid fa-book-bookmark text-amber-400"></i> IRC Data Matrix
+                </button>
+                <button onclick="generatePDFReport()" class="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-500 text-white font-medium transition flex items-center gap-1.5 shadow-md shadow-green-600/30">
+                    <i class="fa-solid fa-file-export"></i> Design Report
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="lg:col-span-3 flex flex-col gap-3">
+            <div class="glass-panel rounded-xl p-3 border border-gray-800">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Design Modules</p>
+                <nav class="space-y-1" id="tabButtons">
+                    <button onclick="switchTab('camber')" id="btn-camber" class="tab-btn active w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition bg-green-600/20 text-green-400 border border-green-500/30">
+                        <span class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-layer-group w-4 text-center"></i> Camber & Cross-Section
+                        </span>
+                        <i class="fa-solid fa-chevron-right text-xs opacity-60"></i>
+                    </button>
+
+                    <button onclick="switchTab('sight')" id="btn-sight" class="tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-400 hover:bg-gray-800/60 hover:text-gray-200">
+                        <span class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-eye w-4 text-center"></i> Sight Distance (SSD/OSD)
+                        </span>
+                        <i class="fa-solid fa-chevron-right text-xs opacity-60"></i>
+                    </button>
+
+                    <button onclick="switchTab('horizontal')" id="btn-horizontal" class="tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-400 hover:bg-gray-800/60 hover:text-gray-200">
+                        <span class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-arrows-split-up-and-left w-4 text-center"></i> Superelevation & Radius
+                        </span>
+                        <i class="fa-solid fa-chevron-right text-xs opacity-60"></i>
+                    </button>
+
+                    <button onclick="switchTab('vertical')" id="btn-vertical" class="tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-400 hover:bg-gray-800/60 hover:text-gray-200">
+                        <span class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-mountain-city w-4 text-center"></i> Vertical Curve Alignment
+                        </span>
+                        <i class="fa-solid fa-chevron-right text-xs opacity-60"></i>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- IRC Global Highway Class Preset selector -->
+            <div class="glass-panel rounded-xl p-4 border border-gray-800 space-y-3">
+                <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-sliders text-green-400"></i> Global Highway Preset
+                </h3>
+                <div>
+                    <label class="text-xs text-gray-300 block mb-1">Terrain & Road Standard</label>
+                    <select id="globalPreset" onchange="applyGlobalPreset()" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-200 focus:outline-none focus:border-green-500">
+                        <option value="plain_nh">Plain Terrain - Expressway / NH (100 km/h)</option>
+                        <option value="rolling_nh" selected>Rolling Terrain - NH / SH (80 km/h)</option>
+                        <option value="mountain_sh">Hilly/Mountain Terrain - SH (50 km/h)</option>
+                        <option value="urban_arterial">Urban Arterial Road (60 km/h)</option>
+                    </select>
+                </div>
+            </div>
+        </aside>
+
+        <main class="lg:col-span-9 flex flex-col gap-6">
+
+            <!-- MODULE 1: CAMBER & CROSS-SECTION -->
+            <section id="tab-camber" class="tab-content space-y-6">
+                <div class="glass-panel rounded-xl p-5 border border-gray-800">
+                    <div class="flex items-center justify-between pb-3 border-b border-gray-800 mb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-layer-group text-green-400"></i> Carriageway Camber & Drainage Analysis
+                            </h2>
+                            <p class="text-xs text-gray-400">Calculates cross-slope, crown rise, and shoulder dimensions per IRC:73-1980.</p>
+                        </div>
+                        <span class="px-2.5 py-1 text-xs rounded-full bg-green-500/10 text-green-400 border border-green-500/30 font-medium">IRC:73 Code</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        <!-- Controls -->
+                        <div class="md:col-span-5 space-y-4">
+                            <div>
+                                <label class="text-xs text-gray-400 font-medium block mb-1">Lane Configuration</label>
+                                <select id="camberLanes" onchange="recalculateCamber()" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-green-500 outline-none">
+                                    <option value="3.75">Single Lane (3.75m)</option>
+                                    <option value="7.0" selected>Two-Lane Intermediate (7.00m)</option>
+                                    <option value="7.5">Two-Lane Standard (7.50m)</option>
+                                    <option value="10.5">Three-Lane (10.50m)</option>
+                                    <option value="14.0">Four-Lane Dual Carriageway (14.00m)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="text-xs text-gray-400 font-medium block mb-1">Pavement Surface Material</label>
+                                <select id="camberSurface" onchange="recalculateCamber()" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-green-500 outline-none">
+                                    <option value="concrete">Cement Concrete / High Bituminous</option>
+                                    <option value="thin_bit">Thin Bituminous Surface</option>
+                                    <option value="wbm">WBM / Water Bound Macadam</option>
+                                    <option value="earthen">Earthen / Gravel Road</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="text-xs text-gray-400 font-medium block mb-1">Rainfall Region</label>
+                                <select id="camberRainfall" onchange="recalculateCamber()" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-green-500 outline-none">
+                                    <option value="heavy" selected>Heavy Rainfall Zone (>1000 mm/yr)</option>
+                                    <option value="light">Light Rainfall Zone (<1000 mm/yr)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-gray-400">Shoulder Width (Each Side)</span>
+                                    <span class="text-green-400 font-mono font-semibold" id="shoulderVal">2.5 m</span>
+                                </div>
+                                <div class="flex items-center gap-2"><div class="flex-1"><input type="range" id="shoulderWidth" min="1.0" max="4.0" step="0.25" value="2.5" oninput="recalculateCamber()" class="w-full"></div><input type="number" id="shoulderWidthManual" class="manual-value" min="1.0" max="4.0" step="0.25" value="2.5" aria-label="Manual value for shoulderWidth" oninput="setSliderFromManual('shoulderWidth', this.value)"></div>
+                            </div>
+
+                            <div class="pt-2 border-t border-gray-800">
+                                <div class="flex items-center justify-between text-xs text-gray-400 mb-2">
+                                    <span>Runoff Water Simulation</span>
+                                    <label class="flex items-center gap-1.5 cursor-pointer text-green-400">
+                                        <input type="checkbox" id="rainSimToggle" checked onchange="toggleRainSim()" class="rounded bg-gray-900 border-gray-700 text-green-600">
+                                        <span>Live Rain Animation</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Canvas & Output Metrics -->
+                        <div class="md:col-span-7 flex flex-col gap-4">
+                            <div id="camberCanvasFrame" class="relative rounded-xl border border-gray-800 canvas-bg overflow-hidden flex-1 min-h-[250px] flex items-center justify-center">
+                                <canvas id="camberCanvas" class="w-full h-full block"></canvas>
+                                <div class="absolute top-3 left-3 bg-gray-950/80 backdrop-blur px-2.5 py-1 rounded border border-gray-800 text-[11px] font-mono text-gray-300">
+                                    Cross-Section Geometry & Water Runoff Flow
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                                <div class="bg-gray-900/90 border border-gray-800 rounded-lg p-2.5">
+                                    <span class="text-[10px] text-gray-400 uppercase font-semibold block">Carriageway</span>
+                                    <span class="text-base font-bold font-mono text-white" id="outCamberWidth">7.00 m</span>
+                                </div>
+                                <div class="bg-gray-900/90 border border-gray-800 rounded-lg p-2.5">
+                                    <span class="text-[10px] text-gray-400 uppercase font-semibold block">IRC Camber</span>
+                                    <span class="text-base font-bold font-mono text-green-400" id="outCamberRate">2.0%</span>
+                                    <span class="text-[10px] text-gray-500 block" id="outCamberSlope">1 in 50</span>
+                                </div>
+                                <div class="bg-gray-900/90 border border-gray-800 rounded-lg p-2.5">
+                                    <span class="text-[10px] text-gray-400 uppercase font-semibold block">Crown Rise ($y$)</span>
+                                    <span class="text-base font-bold font-mono text-green-600" id="outCrownHeight">0.070 m</span>
+                                </div>
+                                <div class="bg-gray-900/90 border border-gray-800 rounded-lg p-2.5">
+                                    <span class="text-[10px] text-gray-400 uppercase font-semibold block">Formation Width</span>
+                                    <span class="text-base font-bold font-mono text-amber-400" id="outFormationWidth">12.00 m</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+<div class="mt-4 rounded-xl border border-emerald-200 bg-white shadow-sm overflow-hidden">
+<button type="button" class="w-full flex items-center justify-between px-4 py-3 text-left bg-emerald-50 hover:bg-emerald-100 transition"
+ onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.calc-chevron').classList.toggle('rotate-180')">
+ <span class="font-semibold text-emerald-800"><i class="fa-solid fa-calculator mr-2"></i>Detailed Camber Calculation & Engineering Explanation</span>
+ <i class="calc-chevron fa-solid fa-chevron-down text-emerald-700 transition-transform"></i>
+</button>
+<div class="p-4 space-y-3">
+<div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">Camber selection</h4>
+<div class="text-sm leading-6">The app selects the crossfall from the surface type and rainfall condition. The displayed rate is expressed as a percentage of horizontal width.</div>
+</div><div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">Crown rise</h4>
+<div class="text-sm leading-6">For a crowned two-way carriageway, <b>crown rise = (carriageway width / 2) × camber rate</b>. Example: W = 7.0 m and e = 2.0% gives 3.5 × 0.02 = <b>0.070 m</b>.</div>
+</div><div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">Slope interpretation</h4>
+<div class="text-sm leading-6">A camber of e% corresponds to approximately <b>1 in (100/e)</b>. Thus 2% corresponds to 1 in 50.</div>
+</div><div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">Formation width</h4>
+<div class="text-sm leading-6"><b>Formation width = carriageway width + 2 × shoulder width</b>. The camber graphic intentionally shows the pavement/cross-section without drawing shoulders, while the width calculation can still include them.</div>
+</div><div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">Animation</h4>
+<div class="text-sm leading-6">The moving water/flow representation is a visualization of drainage direction. It does not alter the selected camber calculation.</div>
+</div>
+<div class="rounded-lg bg-blue-50 border border-blue-200 p-3 text-xs text-gray-700">
+<b>Engineering note:</b> These equations explain the quantities displayed by this app. The numerical design provisions should be verified against the applicable IRC edition and project conditions before construction use.
+</div>
+</div>
+</div>
+</section>
+
+            <section id="tab-sight" class="tab-content hidden space-y-6">
+                <div class="glass-panel rounded-xl p-5 border border-gray-800">
+                    <div class="flex items-center justify-between pb-3 border-b border-gray-800 mb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-eye text-green-600"></i> Stopping & Overtaking Sight Distance (SSD / OSD)
+                            </h2>
+                            <p class="text-xs text-gray-400">Calculates reaction lag, braking distance, and dynamic 3-vehicle overtaking zones per IRC:66-1976.</p>
+                        </div>
+                        <span class="px-2.5 py-1 text-xs rounded-full bg-green-600/10 text-green-600 border border-green-600/30 font-medium">IRC:66 Code</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        <!-- Controls -->
+                        <div class="md:col-span-5 space-y-4">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-gray-400">Design Speed ($V$)</span>
+                                    <span class="text-green-600 font-mono font-semibold" id="sightSpeedVal">80 km/h</span>
+                                </div>
+                                <div class="flex items-center gap-2"><div class="flex-1"><input type="range" id="sightSpeed" min="30" max="120" step="5" value="80" oninput="recalculateSight()" class="w-full"></div><input type="number" id="sightSpeedManual" class="manual-value" min="30" max="120" step="5" value="80" aria-label="Manual value for sightSpeed" oninput="setSliderFromManual('sightSpeed', this.value)"></div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-gray-400">Driver Reaction Time ($t$)</span>
+                                    <span class="text-gray-200 font-mono" id="sightReactVal">2.5 sec</span>
+                                </div>
+                                <div class="flex items-center gap-2"><div class="flex-1"><input type="range" id="sightReact" min="1.5" max="3.5" step="0.1" value="2.5" oninput="recalculateSight()" class="w-full"></div><input type="number" id="sightReactManual" class="manual-value" min="1.5" max="3.5" step="0.1" value="2.5" aria-label="Manual value for sightReact" oninput="setSliderFromManual('sightReact', this.value)"></div>
+                                <p class="text-[10px] text-gray-500 mt-1">IRC standard reaction time t = 2.5s for SSD, 2.0s for OSD.</p>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-gray-400">Longitudinal Friction ($f$)</span>
+                                    <span class="text-gray-200 font-mono" id="sightFrictionVal">0.35</span>
+                                </div>
+                                <div class="flex items-center gap-2"><div class="flex-1"><input type="range" id="sightFriction" min="0.30" max="0.40" step="0.01" value="0.35" oninput="recalculateSight()" class="w-full"></div><input type="number" id="sightFrictionManual" class="manual-value" min="0.30" max="0.40" step="0.01" value="0.35" aria-label="Manual value for sightFriction" oninput="setSliderFromManual('sightFriction', this.value)"></div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-gray-400">Longitudinal Grade ($G\%$)</span>
+                                    <span class="text-amber-400 font-mono" id="sightGradeVal">0% (Level)</span>
+                                </div>
+                                <div class="flex items-center gap-2"><div class="flex-1"><input type="range" id="sightGrade" min="-6" max="6" step="1" value="0" oninput="recalculateSight()" class="w-full"></div><input type="number" id="sightGradeManual" class="manual-value" min="-6" max="6" step="1" value="0" aria-label="Manual value for sightGrade" oninput="setSliderFromManual('sightGrade', this.value)"></div>
+                            </div>
+
+                            <div class="pt-2 border-t border-gray-800 flex gap-2">
+                                <button onclick="triggerBrakeSim()" class="flex-1 py-2 px-3 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-md shadow-red-600/20">
+                                    <i class="fa-solid fa-triangle-exclamation"></i> Emergency Braking Test
+                                </button>
+                                <button onclick="triggerOvertakeSim()" class="flex-1 py-2 px-3 bg-green-700 hover:bg-green-600 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20">
+                                    <i class="fa-solid fa-car-side"></i> OSD Maneuver Test
+                                </button>
+                            </div>
+                            <div class="control-group osd-animation-speed-control mt-2">
+                                <div class="flex justify-between items-center text-xs mb-1">
+                                    <label for="osdAnimSpeed" class="text-gray-400">OSD Animation Speed</label>
+                                    <span id="osdAnimSpeedValue" class="text-green-600 font-mono font-semibold">1.00×</span>
+                                </div>
+                                <input id="osdAnimSpeed" type="range" min="0.25" max="2.5" step="0.25" value="1"
+                                       class="w-full" aria-label="OSD animation speed">
+                                <div class="flex justify-between text-[10px] text-gray-500 mt-1">
+                                    <span>0.25× Slow</span><span>1× Normal</span><span>2.5× Fast</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Sight Canvas & Output -->
+                        <div class="md:col-span-7 flex flex-col gap-4">
+                            <div class="animation-heading" id="sightCanvasTitle">Sight Distance Braking Dynamics</div>
+                            <div id="sightCanvasFrame" class="relative rounded-xl border border-gray-300 canvas-bg animation-frame overflow-hidden flex-1 min-h-[250px] flex items-center justify-center">
+                                <canvas id="sightCanvas" class="w-full h-full block"></canvas>
+                            </div>
+
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                                <div class="bg-gray-900/90 border border-gray-800 rounded-lg p-2.5">
+                                    <span class="text-[10px] text-gray-400 uppercase font-semibold block">Lag Distance ($d_1$)</span>
+                                    <span class="text-base font-bold font-mono text-green-400" id="outLagDist">55.6 m</span>
+                                </div>
+                                <div class="bg-gray-900/90 border border-gray-800 rounded-lg p-2.5">
+                                    <span class="text-[10px] text-gray-400 uppercase font-semibold block">Braking Dist ($d_2$)</span>
+                                    <span class="text-base font-bold font-mono text-amber-400" id="outBrakeDist">71.9 m</span>
+                                </div>
+                                <div class="bg-gray-900/90 border border-gray-800 rounded-lg p-2.5">
+                                    <span class="text-[10px] text-gray-400 uppercase font-semibold block">Design SSD</span>
+                                    <span class="text-base font-bold font-mono text-green-600" id="outTotalSSD">128 m</span>
+                                </div>
+                                <div class="bg-gray-900/90 border border-gray-800 rounded-lg p-2.5">
+                                    <span class="text-[10px] text-gray-400 uppercase font-semibold block">Design OSD</span>
+                                    <span class="text-base font-bold font-mono text-purple-400" id="outTotalOSD">470 m</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+<div class="mt-4 rounded-xl border border-emerald-200 bg-white shadow-sm overflow-hidden">
+<button type="button" class="w-full flex items-center justify-between px-4 py-3 text-left bg-emerald-50 hover:bg-emerald-100 transition"
+ onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.calc-chevron').classList.toggle('rotate-180')">
+ <span class="font-semibold text-emerald-800"><i class="fa-solid fa-calculator mr-2"></i>Detailed SSD / OSD Calculation & Engineering Explanation</span>
+ <i class="calc-chevron fa-solid fa-chevron-down text-emerald-700 transition-transform"></i>
+</button>
+<div class="p-4 space-y-3">
+<div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">Speed conversion</h4>
+<div class="text-sm leading-6"><b>v = V/3.6</b>, where V is in km/h and v is in m/s.</div>
+</div><div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">SSD</h4>
+<div class="text-sm leading-6">The app separates SSD into reaction distance and braking distance: <b>d₁ = 0.278 V t</b>; <b>d₂ = V²/[254(f + G/100)]</b>; therefore <b>SSD = d₁ + d₂</b>.</div>
+</div><div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">OSD</h4>
+<div class="text-sm leading-6">For the implemented OSD model, the slower vehicle speed is <b>Vb = max(10, V − 16)</b>. The app then calculates the initial following distance, overtaking/manoeuvre distance and opposing-vehicle distance and sums them to obtain OSD.</div>
+</div><div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">Animation sequence</h4>
+<div class="text-sm leading-6">A follows B → A moves into the overtaking lane → A overtakes B → A clears B → A returns to B's original lane → A continues in that lane → C continues in its opposing lane → A/C fronts align → loop resets.</div>
+</div><div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">Distance telemetry</h4>
+<div class="text-sm leading-6"><b>A–B distance</b> is the longitudinal separation of A and B. <b>A–C front clearance</b> is measured between the two vehicle fronts. The animation speed slider changes only the playback rate; it does not change SSD or OSD.</div>
+</div><div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">IRC basis</h4>
+<div class="text-sm leading-6">The OSD animation represents the manoeuvre concept described for two-lane roads in IRC:66-1976. Where required overtaking sight distance cannot be provided, the applicable IRC provisions should be followed for intermediate sight distance and overtaking restrictions.</div>
+</div>
+<div class="rounded-lg bg-blue-50 border border-blue-200 p-3 text-xs text-gray-700">
+<b>Engineering note:</b> These equations explain the quantities displayed by this app. The numerical design provisions should be verified against the applicable IRC edition and project conditions before construction use.
+</div>
+</div>
+</div>
+</section>
+
+            <section id="tab-horizontal" class="tab-content hidden space-y-6">
+                <div class="glass-panel rounded-xl p-5 border border-gray-800">
+                    <div class="flex items-center justify-between pb-3 border-b border-gray-800 mb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-arrows-split-up-and-left text-amber-400"></i> Horizontal Alignment & Superelevation
+                            </h2>
+                            <p class="text-xs text-gray-400">IRC 7-step superelevation design, extra widening ($W_e$), and transition curve ($L_s$) analysis (IRC:38-1988).</p>
+                        </div>
+                        <span class="px-2.5 py-1 text-xs rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 font-medium">IRC:38 Code</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        <!-- Controls -->
+                        <div class="md:col-span-5 space-y-4">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-gray-400">Design Speed ($V$)</span>
+                                    <span class="text-amber-400 font-mono font-semibold" id="horizSpeedVal">80 km/h</span>
+                                </div>
+                                <div class="flex items-center gap-2"><div class="flex-1"><input type="range" id="horizSpeed" min="30" max="120" step="5" value="80" oninput="recalculateHorizontal()" class="w-full"></div><input type="number" id="horizSpeedManual" class="manual-value" min="30" max="120" step="5" value="80" aria-label="Manual value for horizSpeed" oninput="setSliderFromManual('horizSpeed', this.value)"></div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-gray-400">Curve Radius ($R$)</span>
+                                    <span class="text-gray-200 font-mono" id="horizRadiusVal">250 m</span>
+                                </div>
+                                <div class="flex items-center gap-2"><div class="flex-1"><input type="range" id="horizRadius" min="40" max="800" step="10" value="250" oninput="recalculateHorizontal()" class="w-full"></div><input type="number" id="horizRadiusManual" class="manual-value" min="40" max="800" step="10" value="250" aria-label="Manual value for horizRadius" oninput="setSliderFromManual('horizRadius', this.value)"></div>
+                            </div>
+
+                            <div>
+                                <label class="text-xs text-gray-400 font-medium block mb-1">Terrain Max Superelevation Limit ($e_{max}$)</label>
+                                <select id="horizEmax" onchange="recalculateHorizontal()" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-green-500 outline-none">
+                                    <option value="0.07" selected>7% (Plain & Rolling Terrain)</option>
+                                    <option value="0.10">10% (Hilly Terrain - Snow free)</option>
+                                    <option value="0.04">4% (Urban Built-up Area with Intersections)</option>
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-xs text-gray-400 block mb-1">Wheelbase ($L$)</label>
+                                    <input type="number" id="horizWheelbase" value="6.1" step="0.1" onchange="recalculateHorizontal()" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-200">
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-400 block mb-1">Num Lanes ($n$)</label>
+                                    <input type="number" id="horizLanes" value="2" min="1" max="4" onchange="recalculateHorizontal()" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-200">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Canvas & Output Metrics -->
+                        <div class="md:col-span-7 flex flex-col gap-4">
+                            <div class="relative rounded-xl border border-gray-800 canvas-bg overflow-hidden flex-1 min-h-[250px] flex items-center justify-center">
+                                <canvas id="horizCanvas" class="w-full h-full block"></canvas>
+                                <div class="absolute top-3 left-3 bg-gray-950/80 backdrop-blur px-2.5 py-1 rounded border border-gray-800 text-[11px] font-mono text-gray-300">
+                                    Banked Track Dynamics & Force Vector Diagram
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                                <div class="bg-gray-900/90 border border-gray-800 rounded-lg p-2.5">
+                                    <span class="text-[10px] text-gray-400 uppercase font-semibold block">IRC Step 1 ($e_{75\%}$)</span >
+                                    <span class="text-base font-bold font-mono text-green-400" id="outEstep1">11.2%</span>
+                                </div>
+                                <div class="bg-gray-900/90 border border-gray-800 rounded-lg p-2.5">
+                                    <span class="text-[10px] text-gray-400 uppercase font-semibold block">Adopted $e$ Rate</span>
+                                    <span class="text-base font-bold font-mono text-green-600" id="outEadopted">7.0%</span>
+                                </div>
+                                <div class="bg-gray-900/90 border border-gray-800 rounded-lg p-2.5">
+                                    <span class="text-[10px] text-gray-400 uppercase font-semibold block">Extra Widening ($W_e$)</span>
+                                    <span class="text-base font-bold font-mono text-amber-400" id="outExtraWidening">0.66 m</span>
+                                </div>
+                                <div class="bg-gray-900/90 border border-gray-800 rounded-lg p-2.5">
+                                    <span class="text-[10px] text-gray-400 uppercase font-semibold block">Transition ($L_s$)</span>
+                                    <span class="text-base font-bold font-mono text-purple-400" id="outTransitionLen">57 m</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+<div class="mt-4 rounded-xl border border-emerald-200 bg-white shadow-sm overflow-hidden">
+<button type="button" class="w-full flex items-center justify-between px-4 py-3 text-left bg-emerald-50 hover:bg-emerald-100 transition"
+ onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.calc-chevron').classList.toggle('rotate-180')">
+ <span class="font-semibold text-emerald-800"><i class="fa-solid fa-calculator mr-2"></i>Detailed Horizontal Alignment, Superelevation, Widening & Transition Calculation</span>
+ <i class="calc-chevron fa-solid fa-chevron-down text-emerald-700 transition-transform"></i>
+</button>
+<div class="p-4 space-y-3">
+<div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">Superelevation</h4>
+<div class="text-sm leading-6">The app first computes theoretical superelevation from the implemented design-speed/radius relationship and then limits the adopted value to the selected maximum.</div>
+</div><div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">Lateral friction</h4>
+<div class="text-sm leading-6">When the adopted superelevation is capped, the remaining demand is represented as lateral friction. The implemented relationship is <b>f = V²/(127R) − e</b>, with V in km/h, R in m and e as decimal.</div>
+</div><div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">Extra widening</h4>
+<div class="text-sm leading-6">Mechanical widening is calculated from wheelbase and curve radius: <b>Wmech = nL²/(2R)</b>. Psychological widening is added using the app's implemented speed/radius expression, then <b>We = Wmech + Wps</b>.</div>
+</div><div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">Transition length</h4>
+<div class="text-sm leading-6">The app evaluates a centrifugal-acceleration-based transition and an empirical IRC transition and adopts the larger value: <b>Ls = max(Ls,C, Ls,IRC)</b>.</div>
+</div><div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">Banked-road animation</h4>
+<div class="text-sm leading-6">The rotating/banked cross-section is a visualization of the adopted superelevation and centrifugal-force concept. It does not feed pixels or animation state back into the design calculation.</div>
+</div><div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">IRC basis</h4>
+<div class="text-sm leading-6">The governing provisions should be read with the applicable IRC geometric-design standard for the road class and terrain. The app's reference list identifies IRC:73 and IRC:86 among its governing references.</div>
+</div>
+<div class="rounded-lg bg-blue-50 border border-blue-200 p-3 text-xs text-gray-700">
+<b>Engineering note:</b> These equations explain the quantities displayed by this app. The numerical design provisions should be verified against the applicable IRC edition and project conditions before construction use.
+</div>
+</div>
+</div>
+</section>
+
+            <section id="tab-vertical" class="tab-content hidden space-y-6">
+                <div class="glass-panel rounded-xl p-5 border border-gray-800">
+                    <div class="flex items-center justify-between pb-3 border-b border-gray-800 mb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-mountain-city text-purple-400"></i> Vertical Curve Alignment (Summit & Valley)
+                            </h2>
+                            <p class="text-xs text-gray-400">Design of parabolic vertical profiles, deviation angle $N$, and sightline clearance (IRC:SP:23-1993).</p>
+                        </div>
+                        <span class="px-2.5 py-1 text-xs rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/30 font-medium">IRC:SP:23 Code</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        <!-- Controls -->
+                        <div class="md:col-span-5 space-y-4">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-gray-400">Initial Grade ($g_1\%$)</span>
+                                    <span class="text-purple-400 font-mono font-semibold" id="vertG1Val">+3.0%</span>
+                                </div>
+                                <div class="flex items-center gap-2"><div class="flex-1"><input type="range" id="vertG1" min="-6" max="6" step="0.5" value="3" oninput="recalculateVertical()" class="w-full"></div><input type="number" id="vertG1Manual" class="manual-value" min="-6" max="6" step="0.5" value="3" aria-label="Manual value for vertG1" oninput="setSliderFromManual('vertG1', this.value)"></div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-gray-400">Final Grade ($g_2\%$)</span>
+                                    <span class="text-purple-400 font-mono font-semibold" id="vertG2Val">-2.0%</span>
+                                </div>
+                                <div class="flex items-center gap-2"><div class="flex-1"><input type="range" id="vertG2" min="-6" max="6" step="0.5" value="-2" oninput="recalculateVertical()" class="w-full"></div><input type="number" id="vertG2Manual" class="manual-value" min="-6" max="6" step="0.5" value="-2" aria-label="Manual value for vertG2" oninput="setSliderFromManual('vertG2', this.value)"></div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-gray-400">Design Speed ($V$)</span>
+                                    <span class="text-gray-200 font-mono" id="vertSpeedVal">80 km/h</span>
+                                </div>
+                                <div class="flex items-center gap-2"><div class="flex-1"><input type="range" id="vertSpeed" min="30" max="120" step="5" value="80" oninput="recalculateVertical()" class="w-full"></div><input type="number" id="vertSpeedManual" class="manual-value" min="30" max="120" step="5" value="80" aria-label="Manual value for vertSpeed" oninput="setSliderFromManual('vertSpeed', this.value)"></div>
+                            </div>
+
+                            <div>
+                                <label class="text-xs text-gray-400 font-medium block mb-1">Sight Criteria Standard</label>
+                                <select id="vertSightType" onchange="recalculateVertical()" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-green-500 outline-none">
+                                    <option value="ssd" selected>Stopping Sight Distance (SSD)</option>
+                                    <option value="isd">Intermediate Sight Distance (ISD = 2*SSD)</option>
+                                    <option value="osd">Overtaking Sight Distance (OSD)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Canvas & Output Metrics -->
+                        <div class="md:col-span-7 flex flex-col gap-4">
+                            <div class="relative rounded-xl border border-gray-800 canvas-bg overflow-hidden h-[420px] md:h-[460px] flex items-center justify-center">
+                                <canvas id="vertCanvas" class="w-full h-full block"></canvas>
+                                <div class="absolute top-3 left-3 bg-gray-950/80 backdrop-blur px-2.5 py-1 rounded border border-gray-800 text-[11px] font-mono text-gray-300">
+                                    Ray-Traced Parabolic Profile & Headlight/Eye Scan
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                                <div class="bg-gray-900/90 border border-gray-800 rounded-lg p-2.5">
+                                    <span class="text-[10px] text-gray-400 uppercase font-semibold block">Deviation ($N$)</span>
+                                    <span class="text-base font-bold font-mono text-green-400" id="outVertN">5.0%</span>
+                                </div>
+                                <div class="bg-gray-900/90 border border-gray-800 rounded-lg p-2.5">
+                                    <span class="text-[10px] text-gray-400 uppercase font-semibold block">Curve Type</span>
+                                    <span class="text-xs font-bold font-mono text-amber-400 block mt-1" id="outVertType">Summit (Crest)</span>
+                                </div>
+                                <div class="bg-gray-900/90 border border-gray-800 rounded-lg p-2.5">
+                                    <span class="text-[10px] text-gray-400 uppercase font-semibold block">Required Sight</span>
+                                    <span class="text-base font-bold font-mono text-green-600" id="outVertReqSight">128 m</span>
+                                </div>
+                                <div class="bg-gray-900/90 border border-gray-800 rounded-lg p-2.5">
+                                    <span class="text-[10px] text-gray-400 uppercase font-semibold block">Min Curve Length ($L_v$)</span>
+                                    <span class="text-base font-bold font-mono text-purple-400" id="outVertLen">186 m</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+<div class="mt-4 rounded-xl border border-emerald-200 bg-white shadow-sm overflow-hidden">
+<button type="button" class="w-full flex items-center justify-between px-4 py-3 text-left bg-emerald-50 hover:bg-emerald-100 transition"
+ onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.calc-chevron').classList.toggle('rotate-180')">
+ <span class="font-semibold text-emerald-800"><i class="fa-solid fa-calculator mr-2"></i>Detailed Vertical Curve Calculation & Engineering Explanation</span>
+ <i class="calc-chevron fa-solid fa-chevron-down text-emerald-700 transition-transform"></i>
+</button>
+<div class="p-4 space-y-3">
+<div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">Grade difference</h4>
+<div class="text-sm leading-6">The algebraic grade difference is represented by <b>N = |g₁ − g₂|/100</b>. The sign and relative order of g₁ and g₂ determine whether the app identifies a summit or valley curve.</div>
+</div><div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">Sight-distance criterion</h4>
+<div class="text-sm leading-6">The app can use SSD, ISD or its OSD criterion. For ISD it uses <b>ISD = 2 × SSD</b>. The selected sight criterion directly changes the required sight distance used by the curve calculation.</div>
+</div><div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">SSD used by this module</h4>
+<div class="text-sm leading-6">The implemented expression is <b>SSD = 0.278 V × 2.5 + V²/(254 × 0.35)</b>. The resulting value is then used as the selected sight-distance requirement when SSD is chosen.</div>
+</div><div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">Curve length</h4>
+<div class="text-sm leading-6">For a summit curve the app uses its implemented parabolic sight-distance relationship; for a valley curve it uses its implemented comfort-based relationship. The displayed length is rounded upward to the next metre.</div>
+</div><div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">Animation</h4>
+<div class="text-sm leading-6">The vertical-curve graphic shows the parabolic profile and sightline concept. The moving point is visual only and does not modify the calculated curve length.</div>
+</div><div class="rounded-lg bg-gray-50 border p-3">
+<h4 class="font-semibold text-gray-900 mb-2">IRC basis</h4>
+<div class="text-sm leading-6">Vertical-curve design should be checked against the applicable IRC geometric-design provisions for the road class, including the selected sight-distance criterion and comfort requirements.</div>
+</div>
+<div class="rounded-lg bg-blue-50 border border-blue-200 p-3 text-xs text-gray-700">
+<b>Engineering note:</b> These equations explain the quantities displayed by this app. The numerical design provisions should be verified against the applicable IRC edition and project conditions before construction use.
+</div>
+</div>
+</div>
+</section>
+        </main>
+    </div>
+
+    <!-- IRC DATA MATRIX REFERENCE MODAL -->
+    <div id="referenceModal" class="fixed inset-0 bg-gray-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl">
+            <div class="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-book-bookmark text-amber-400"></i> IRC Highway Design Reference Standards Matrix
+                </h3>
+                <button onclick="closeReferenceModal()" class="text-gray-400 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-6 text-xs">
+                <!-- Table 1: Design Speeds -->
+                <div>
+                    <h4 class="font-bold text-green-400 uppercase tracking-wider mb-2">1. IRC Design Speeds (km/h) - IRC:73</h4>
+                    <div class="overflow-x-auto rounded-lg border border-gray-800">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-gray-800/80 text-gray-300">
+                                <tr>
+                                    <th class="p-2 border-b border-gray-700">Road Classification</th>
+                                    <th class="p-2 border-b border-gray-700">Plain Terrain</th>
+                                    <th class="p-2 border-b border-gray-700">Rolling Terrain</th>
+                                    <th class="p-2 border-b border-gray-700">Mountainous</th>
+                                    <th class="p-2 border-b border-gray-700">Steep</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-800 text-gray-400">
+                                <tr><td class="p-2 font-medium text-gray-200">Expressway</td><td class="p-2">120</td><td class="p-2">100</td><td class="p-2">80</td><td class="p-2">80</td></tr>
+                                <tr><td class="p-2 font-medium text-gray-200">National / State Highway (NH/SH)</td><td class="p-2">100</td><td class="p-2">80</td><td class="p-2">50</td><td class="p-2">40</td></tr>
+                                <tr><td class="p-2 font-medium text-gray-200">Major District Road (MDR)</td><td class="p-2">80</td><td class="p-2">65</td><td class="p-2">40</td><td class="p-2">30</td></tr>
+                                <tr><td class="p-2 font-medium text-gray-200">Other District Road (ODR)</td><td class="p-2">65</td><td class="p-2">50</td><td class="p-2">30</td><td class="p-2">25</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Table 2: Camber Values -->
+                <div>
+                    <h4 class="font-bold text-green-600 uppercase tracking-wider mb-2">2. IRC Standard Camber Slope Rates (%)</h4>
+                    <div class="overflow-x-auto rounded-lg border border-gray-800">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-gray-800/80 text-gray-300">
+                                <tr>
+                                    <th class="p-2 border-b border-gray-700">Surface Type</th>
+                                    <th class="p-2 border-b border-gray-700">Heavy Rainfall Range (>1000mm)</th>
+                                    <th class="p-2 border-b border-gray-700">Light Rainfall Range (<1000mm)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-800 text-gray-400">
+                                <tr><td class="p-2 font-medium text-gray-200">High Bituminous / Cement Concrete</td><td class="p-2">2.0% (1 in 50)</td><td class="p-2">1.7% (1 in 60)</td></tr>
+                                <tr><td class="p-2 font-medium text-gray-200">Thin Bituminous Surface</td><td class="p-2">2.5% (1 in 40)</td><td class="p-2">2.0% (1 in 50)</td></tr>
+                                <tr><td class="p-2 font-medium text-gray-200">Water Bound Macadam (WBM) / Gravel</td><td class="p-2">3.0% (1 in 33)</td><td class="p-2">2.5% (1 in 40)</td></tr>
+                                <tr><td class="p-2 font-medium text-gray-200">Earthen Road</td><td class="p-2">4.0% (1 in 25)</td><td class="p-2">3.0% (1 in 33)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REPORT PREVIEW MODAL -->
+    <div id="reportModal" class="fixed inset-0 bg-gray-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-file-contract text-green-400"></i> IRC Design Calculation Summary Report
+                </h3>
+                <button onclick="closeReportModal()" class="text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="bg-gray-950 p-4 rounded-xl border border-gray-800 font-mono text-xs space-y-2 text-gray-300" id="reportContent">
+                <!-- Dynamically Generated -->
+            </div>
+
+            <div class="flex justify-end gap-3 pt-2">
+                <button onclick="window.print()" class="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-xs font-semibold">
+                    <i class="fa-solid fa-print"></i> Print / Save PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let state = {
+            activeTab: 'camber',
+            // Camber
+            camberLanes: 7.0,
+            camberSurface: 'concrete',
+            camberRainfall: 'heavy',
+            shoulderWidth: 2.5,
+            rainSimActive: true,
+            rainDrops: [],
+            camberRate: 2.0,
+            camberRenderWidth: 7.0,
+            camberRenderShoulder: 2.5,
+            // Sight
+            speed: 80,
+            reactTime: 2.5,
+            friction: 0.35,
+            grade: 0,
+            simMode: 'none', // 'brake' or 'overtake'
+            simCarX: 0,
+            simCar2X: 0,
+            simCar3X: 0,
+            simPhase: 0,
+            simLastSightSignature: '',
+            // Horizontal
+            horizRadius: 250,
+            horizEmax: 0.07,
+            horizWheelbase: 6.1,
+            horizLanes: 2,
+            // Vertical
+            vertG1: 3.0,
+            vertG2: -2.0,
+            vertSightType: 'ssd',
+            vertCarProgress: 0
+        };
+
+        let animFrameId = null;
+        let visualAnimLastTime = null;
+        let visualAnimRunning = false;
+
+        function switchTab(tabId) {
+            state.activeTab = tabId;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-green-600/20', 'text-green-400', 'border', 'border-green-500/30');
+                btn.classList.add('text-gray-400');
+            });
+
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            activeBtn.classList.add('bg-green-600/20', 'text-green-400', 'border', 'border-green-500/30');
+            activeBtn.classList.remove('text-gray-400');
+
+            // Trigger canvas redraw for active tab
+            setTimeout(() => {
+                if(tabId === 'camber') recalculateCamber();
+                if(tabId === 'sight') recalculateSight();
+                if(tabId === 'horizontal') recalculateHorizontal();
+                if(tabId === 'vertical') recalculateVertical();
+            }, 50);
+        }
+
+        function applyGlobalPreset() {
+            const val = document.getElementById('globalPreset').value;
+            if (val === 'plain_nh') {
+                state.speed = 100;
+                document.getElementById('horizEmax').value = "0.07";
+            } else if (val === 'rolling_nh') {
+                state.speed = 80;
+                document.getElementById('horizEmax').value = "0.07";
+            } else if (val === 'mountain_sh') {
+                state.speed = 50;
+                document.getElementById('horizEmax').value = "0.10";
+            } else if (val === 'urban_arterial') {
+                state.speed = 60;
+                document.getElementById('horizEmax').value = "0.04";
+            }
+            
+            // Sync inputs
+            document.getElementById('sightSpeed').value = state.speed;
+            document.getElementById('horizSpeed').value = state.speed;
+            document.getElementById('vertSpeed').value = state.speed;
+
+            recalculateCamber();
+            recalculateSight();
+            recalculateHorizontal();
+            recalculateVertical();
+        }
+
+        function setSliderFromManual(id, raw) {
+            const slider = document.getElementById(id);
+            const input = document.getElementById(id + 'Manual');
+            if (!slider || !input) return;
+            let v = Number(raw);
+            if (!Number.isFinite(v)) return;
+            const min = Number(slider.min), max = Number(slider.max), step = Number(slider.step) || 1;
+            v = Math.max(min, Math.min(max, v));
+            // Snap to the same increment as the slider so both controls always agree.
+            const snapped = min + Math.round((v - min) / step) * step;
+            v = Math.max(min, Math.min(max, snapped));
+            slider.value = String(v);
+            input.value = String(Number(v.toFixed(6)));
+            const handler = slider.getAttribute('oninput');
+            if (handler) Function(handler)();
+        }
+
+        function syncManualValue(id, value) {
+            const el = document.getElementById(id + 'Manual');
+            if (el) el.value = Number(value).toFixed(String(value).includes('.') ? String(value).split('.')[1].length : 0);
+        }
+
+        function recalculateCamber() {
+            const width = parseFloat(document.getElementById('camberLanes').value);
+            const surface = document.getElementById('camberSurface').value;
+            const rainfall = document.getElementById('camberRainfall').value;
+            const shoulder = parseFloat(document.getElementById('shoulderWidth').value);
+            syncManualValue('shoulderWidth', shoulder);
+
+            document.getElementById('shoulderVal').innerText = `${shoulder.toFixed(2)} m`;
+
+            // IRC Camber Logic
+            let camberRate = 2.0;
+            if (surface === 'concrete') camberRate = (rainfall === 'heavy') ? 2.0 : 1.7;
+            else if (surface === 'thin_bit') camberRate = (rainfall === 'heavy') ? 2.5 : 2.0;
+            else if (surface === 'wbm') camberRate = (rainfall === 'heavy') ? 3.0 : 2.5;
+            else if (surface === 'earthen') camberRate = (rainfall === 'heavy') ? 4.0 : 3.0;
+
+            const crownRise = (width / 2) * (camberRate / 100);
+            const formationWidth = width + (2 * shoulder);
+            const slopeN = (100 / camberRate).toFixed(0);
+
+            document.getElementById('outCamberWidth').innerText = `${width.toFixed(2)} m`;
+            document.getElementById('outCamberRate').innerText = `${camberRate.toFixed(1)}%`;
+            document.getElementById('outCamberSlope').innerText = `1 in ${slopeN}`;
+            document.getElementById('outCrownHeight').innerText = `${crownRise.toFixed(3)} m`;
+            document.getElementById('outFormationWidth').innerText = `${formationWidth.toFixed(2)} m`;
+            state.camberRate = camberRate;
+            state.camberRenderWidth = width;
+            state.camberRenderShoulder = shoulder;
+
+            // Init rain particles if empty
+            if (state.rainDrops.length === 0) {
+                for (let i = 0; i < 50; i++) {
+                    state.rainDrops.push({
+                        x: Math.random(),
+                        y: Math.random() * 0.5,
+                        side: Math.random() > 0.5 ? 1 : -1,
+                        speed: 0.0045 + Math.random() * 0.0025
+                    });
+                }
+            }
+
+            drawCamberCanvas(width, camberRate, shoulder);
+        }
+
+        function toggleRainSim() {
+            state.rainSimActive = document.getElementById('rainSimToggle').checked;
+        }
+
+        function drawCamberCanvas(width, camberRate, shoulder) {
+            const canvas = document.getElementById('camberCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const targetW = Math.max(1, Math.round(rect.width));
+            const targetH = Math.max(1, Math.round(rect.height));
+            // 4K-class backing store: keep CSS layout size fixed, render at 3840 px wide.
+            // The drawing continues to use CSS pixels; only the backing bitmap is high-resolution.
+            const renderW = 3840;
+            const renderH = Math.max(1, Math.min(2160, Math.round(renderW * targetH / Math.max(1, targetW))));
+            const sx = renderW / targetW, sy = renderH / targetH;
+            if (canvas.width !== renderW || canvas.height !== renderH) { canvas.width = renderW; canvas.height = renderH; }
+            ctx.setTransform(sx,0,0,sy,0,0);
+            const w = targetW, h = targetH;
+            ctx.clearRect(0, 0, w, h);
+            const crownX = w / 2, centerY = h - 60;
+            const scalePxPerM = (w * 0.76) / Math.max(1, width);
+            const roadPx = width * scalePxPerM;
+            const camberSlopePx = (roadPx / 2) * (camberRate / 30);
+
+            // The camber diagram intentionally shows the carriageway only.
+            // Shoulders remain an input/output design parameter but are not drawn,
+            // so the visual focus stays on pavement crossfall and runoff.
+            ctx.fillStyle = '#e5e7eb';
+            ctx.beginPath();
+            ctx.moveTo(crownX - roadPx/2 - 30, centerY + 30);
+            ctx.lineTo(crownX - roadPx/2, centerY);
+            ctx.lineTo(crownX + roadPx/2, centerY);
+            ctx.lineTo(crownX + roadPx/2 + 30, centerY + 30);
+            ctx.closePath(); ctx.fill();
+            ctx.fillStyle = '#14532d'; ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(crownX - roadPx/2, centerY); ctx.lineTo(crownX, centerY - camberSlopePx);
+            ctx.lineTo(crownX + roadPx/2, centerY); ctx.lineTo(crownX + roadPx/2, centerY + 12);
+            ctx.lineTo(crownX - roadPx/2, centerY + 12); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = '#f59e0b'; ctx.setLineDash([4,4]);
+            ctx.beginPath(); ctx.moveTo(crownX, centerY - camberSlopePx - 25); ctx.lineTo(crownX, centerY + 20); ctx.stroke(); ctx.setLineDash([]);
+
+            if (state.rainSimActive) {
+                const dt = Math.min(50, Math.max(0, window.__byAnkitAnimDt || 16.67));
+                const rainfallFactor = state.camberRainfall === 'light' ? 0.65 : (state.camberRainfall === 'moderate' ? 0.85 : 1);
+                // Deliberately slow: animation represents runoff across the cross-section,
+                // not a frame counter. Changing a slider cannot change the time base.
+                const runoffSpeed = (0.0008 + 0.00002 * Math.max(0, camberRate)) * rainfallFactor;
+                state.rainDrops.forEach(p => {
+                    p.y += runoffSpeed * (dt / 16.67);
+                    if (p.y >= 1) { p.y = 0; p.x = Math.random(); p.side = Math.random() > 0.5 ? 1 : -1; }
+                    const q = Math.min(1, p.y);
+                    const dropX = crownX + p.side * q * roadPx / 2;
+                    const dropY = centerY - camberSlopePx * (1 - q);
+                    ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.arc(dropX, dropY, 2.2, 0, Math.PI*2); ctx.fill();
+                    if (q > 0.08) {
+                        ctx.strokeStyle = 'rgba(56,189,248,0.45)'; ctx.lineWidth = 1.5;
+                        ctx.beginPath();
+                        ctx.moveTo(crownX + p.side * Math.max(0,q-0.10) * roadPx/2, centerY - camberSlopePx * (1-Math.max(0,q-0.10)));
+                        ctx.lineTo(dropX, dropY); ctx.stroke();
+                    }
+                });
+            }
+            ctx.fillStyle = '#374151'; ctx.font = '11px Inter, sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText(`Carriageway W = ${width}m`, crownX, centerY + 28);
+            ctx.fillText(`Camber ${camberRate.toFixed(1)}%  →  water drains from crown to edge`, crownX, centerY - camberSlopePx - 10);
+            
+        }
+
+        function recalculateSight() {
+            state.simCarX = 0;
+            state.speed = parseFloat(document.getElementById('sightSpeed').value);
+            syncManualValue('sightSpeed', state.speed);
+            state.reactTime = parseFloat(document.getElementById('sightReact').value);
+            syncManualValue('sightReact', state.reactTime);
+            state.friction = parseFloat(document.getElementById('sightFriction').value);
+            syncManualValue('sightFriction', state.friction);
+            state.grade = parseFloat(document.getElementById('sightGrade').value);
+            syncManualValue('sightGrade', state.grade);
+
+            const sightSignature = `${state.speed}|${state.reactTime}|${state.friction}|${state.grade}`;
+            if (state.simLastSightSignature && state.simLastSightSignature !== sightSignature && (state.simMode === 'brake' || state.simMode === 'overtake')) state.simCarX = 0;
+            state.simLastSightSignature = sightSignature;
+
+            document.getElementById('sightSpeedVal').innerText = `${state.speed} km/h`;
+            document.getElementById('sightReactVal').innerText = `${state.reactTime} s`;
+            document.getElementById('sightFrictionVal').innerText = state.friction.toFixed(2);
+            document.getElementById('sightGradeVal').innerText = `${state.grade > 0 ? '+' : ''}${state.grade}%`;
+
+            // IRC Formulas
+            // SSD = 0.278 * V * t + V^2 / (254 * (f +/- G/100))
+            const lagDist = 0.278 * state.speed * state.reactTime;
+            const brakeDist = Math.pow(state.speed, 2) / (254 * (state.friction + (state.grade / 100)));
+            const totalSSD = lagDist + brakeDist;
+
+            // OSD = d1 + d2 + d3
+            // d1 = 0.278 * Vb * t (where Vb = V - 16 km/h)
+            // d2 = 0.278 * Vb * T + 2*s (where s = 0.7*Vb + 6, T = sqrt(8*s / a))
+            const Vb = Math.max(10, state.speed - 16);
+            const s = 0.7 * (Vb / 3.6) + 6;
+            const a = 0.92; // m/s^2 acceleration
+            const T = Math.sqrt((8 * s) / a);
+            const d1 = 0.278 * Vb * 2.0;
+            const d2 = (Vb / 3.6) * T + 2 * s;
+            const d3 = 0.278 * state.speed * T;
+            const totalOSD = d1 + d2 + d3;
+
+            document.getElementById('outLagDist').innerText = `${lagDist.toFixed(1)} m`;
+            document.getElementById('outBrakeDist').innerText = `${brakeDist.toFixed(1)} m`;
+            document.getElementById('outTotalSSD').innerText = `${Math.ceil(totalSSD)} m`;
+            document.getElementById('outTotalOSD').innerText = `${Math.ceil(totalOSD)} m`;
+
+            drawSightCanvas(lagDist, brakeDist, totalSSD, totalOSD);
+        }
+
+        function triggerBrakeSim() {
+            state.simMode = 'brake';
+            state.simCarX = 0;
+            state.simPhase = 0;
+            document.getElementById('sightCanvasTitle').innerText = "Emergency Braking Simulation";
+            recalculateSight();
+        }
+
+        function triggerOvertakeSim() {
+            state.simMode = 'overtake';
+            state.simCarX = 0;
+            state.simPhase = 0;
+            document.getElementById('sightCanvasTitle').innerText = "3-Vehicle Overtaking Maneuver (OSD)";
+            recalculateSight();
+        }
+
+        function drawSightCanvas(lag, brake, ssd, osd) {
+            const canvas = document.getElementById('sightCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const targetW = Math.max(1, Math.round(rect.width)), targetH = Math.max(1, Math.round(rect.height));
+            // 4K-class backing store: keep CSS layout size fixed, render at 3840 px wide.
+            // The drawing continues to use CSS pixels; only the backing bitmap is high-resolution.
+            const renderW = 3840;
+            const renderH = Math.max(1, Math.min(2160, Math.round(renderW * targetH / Math.max(1, targetW))));
+            const sx = renderW / targetW, sy = renderH / targetH;
+            if (canvas.width !== renderW || canvas.height !== renderH) { canvas.width = renderW; canvas.height = renderH; }
+            ctx.setTransform(sx,0,0,sy,0,0);
+            const w=targetW, h=targetH, dt=Math.min(50,Math.max(0,window.__byAnkitAnimDt||16.67));
+            const roadLeft=20, roadRight=w-20, roadY=h-72, roadWidth=roadRight-roadLeft;
+            ctx.clearRect(0,0,w,h);
+            ctx.fillStyle='#e5e7eb'; ctx.fillRect(roadLeft,roadY-42,roadWidth,60);
+            ctx.strokeStyle='#9ca3af'; ctx.lineWidth=1; ctx.beginPath();
+            ctx.moveTo(roadLeft,roadY-42);ctx.lineTo(roadRight,roadY-42);ctx.moveTo(roadLeft,roadY+18);ctx.lineTo(roadRight,roadY+18);ctx.stroke();
+            ctx.strokeStyle='#f59e0b';ctx.setLineDash([10,8]);ctx.beginPath();ctx.moveTo(roadLeft,roadY-12);ctx.lineTo(roadRight,roadY-12);ctx.stroke();ctx.setLineDash([]);
+            const drawVehicle=(x,y,fill,label,dir=1)=>{ctx.save();ctx.translate(x,y);ctx.fillStyle=fill;ctx.fillRect(-15,-8,30,16);ctx.fillStyle='rgba(255,255,255,.9)';ctx.fillRect(dir>0?4:-10,-5,6,4);ctx.fillStyle='#fff';ctx.font='bold 10px Inter,sans-serif';ctx.textAlign='center';ctx.fillText(label,0,4);ctx.restore();};
+
+            if(state.simMode==='overtake'){
+                // OSD ROAD-BEHAVIOUR ANIMATION
+                // A follows B -> A enters overtaking lane -> A overtakes B
+                // -> A clears B -> A returns to B's ORIGINAL lane
+                // -> A continues in B's lane -> C approaches in its own lane
+                // -> A-front and C-front align longitudinally -> loop resets.
+                //
+                // IMPORTANT: This is a road-behaviour animation, not a collision
+                // animation. A and C occupy different lanes at all times.
+
+                const roadM=Math.max(osd,80);
+                const pxPerM=(roadWidth-50)/roadM;
+                const origin=roadLeft+25;
+                const t=Math.max(0,Math.min(1,state.simCarX));
+                const smooth=x=>x*x*(3-2*x);
+                const lerp=(x,y,q)=>x+(y-x)*q;
+
+                // drawVehicle uses a 30 px body centred on x. For A travelling
+                // right, its front is x+15. For C travelling left, its front
+                // is x-15. Therefore front alignment requires:
+                // xC = xA + 30 px = xA + frontAlignM.
+                const vehicleHalfPx=15;
+                const frontAlignM=(vehicleHalfPx*2)/Math.max(pxPerM,0.001);
+
+                // B's lane is the original lane. C stays in the opposing lane.
+                const laneOffset=30;
+                const bLaneY=roadY+5;
+                const cLaneY=roadY-25;
+
+                let aM,bM,cM,aY,phase;
+
+                // C has ONE continuous longitudinal trajectory for the whole
+                // cycle. This prevents the previous phase-to-phase jumps and
+                // guarantees that C genuinely approaches A rather than reversing.
+                // At t=1, C's front is exactly aligned with A's front.
+                const cStart=0.94*roadM;
+                const aFinal=0.74*roadM;
+                const cTarget=aFinal+frontAlignM;
+                cM=lerp(cStart,cTarget,smooth(t));
+
+                if(t<0.28){
+                    // 1. FOLLOW
+                    // A and B move forward in B's original lane with a stable
+                    // following gap.
+                    const q=smooth(t/0.28);
+                    bM=0.20*roadM+0.16*roadM*q;
+                    aM=bM-0.10*roadM;
+                    aY=bLaneY;
+                    phase='A follows B';
+                } else if(t<0.52){
+                    // 2. MOVE OUT + OVERTAKE
+                    // A starts exactly where phase 1 ends, moves to the
+                    // opposing lane, and gains longitudinally on B.
+                    const q=smooth((t-0.28)/0.24);
+                    bM=0.36*roadM+0.08*roadM*q;
+                    aM=0.26*roadM+0.28*roadM*q;
+                    aY=lerp(bLaneY,cLaneY,q);
+                    phase='A moves into overtaking lane and overtakes B';
+                } else if(t<0.70){
+                    // 3. CLEAR B
+                    // A is completely ahead of B while remaining in the
+                    // overtaking lane.
+                    const q=smooth((t-0.52)/0.18);
+                    bM=0.44*roadM+0.08*roadM*q;
+                    aM=0.54*roadM+0.10*roadM*q;
+                    aY=cLaneY;
+                    phase='A clears B';
+                } else if(t<0.82){
+                    // 4. RETURN
+                    // Only after clearing B, A moves back into B's ORIGINAL lane.
+                    const q=smooth((t-0.70)/0.12);
+                    bM=0.52*roadM+0.04*roadM*q;
+                    aM=0.64*roadM+0.06*roadM*q;
+                    aY=lerp(cLaneY,bLaneY,q);
+                    phase="A returns to B's original lane";
+                } else {
+                    // 5. ORIGINAL LANE + FINAL ALIGNMENT
+                    // A remains in B's original lane. C remains in its own
+                    // opposing lane and approaches continuously.
+                    const q=smooth((t-0.82)/0.18);
+                    bM=0.56*roadM+0.015*roadM*q;
+                    aM=0.70*roadM+0.04*roadM*q;
+                    aY=bLaneY;
+                    phase='A continues in B\'s lane — A/C fronts align, reset';
+                }
+
+                // Keep the three longitudinal positions inside the drawable road.
+                bM=Math.max(8,Math.min(roadM-8,bM));
+                aM=Math.max(8,Math.min(roadM-8,aM));
+                cM=Math.max(8,Math.min(roadM-4,cM));
+
+                const xA=origin+aM*pxPerM;
+                const xB=origin+bM*pxPerM;
+                const xC=origin+cM*pxPerM;
+
+                // A: forward in its current lane. B: slow vehicle in original
+                // lane. C: oncoming vehicle in opposing lane.
+                drawVehicle(xB,bLaneY,'#eab308','B',1);
+                drawVehicle(xA,aY,'#166534','A',1);
+                drawVehicle(xC,cLaneY,'#ef4444','C',-1);
+
+                const gapAB=Math.abs(aM-bM);
+                const frontClearance=Math.max(0,cM-aM-frontAlignM);
+
+                // Telemetry is deliberately separated into short lines so it
+                // remains inside the fixed animation panel.
+                ctx.textAlign='center';
+                ctx.fillStyle='#14532d';
+                ctx.font='bold 11px Inter,sans-serif';
+                ctx.fillText(phase,w/2,16);
+
+                ctx.fillStyle='#374151';
+                ctx.font='10px Inter,sans-serif';
+                ctx.fillText(`Current position — A: ${aM.toFixed(1)} m   B: ${bM.toFixed(1)} m   C: ${cM.toFixed(1)} m`,w/2,30);
+                ctx.fillText(`Distance A–B: ${gapAB.toFixed(1)} m   •   A–C front clearance: ${frontClearance.toFixed(1)} m`,w/2,44);
+
+                ctx.fillStyle='#6b7280';
+                ctx.font='9.5px Inter,sans-serif';
+                ctx.fillText('A overtaking vehicle  •  B slow vehicle  •  C oncoming vehicle',w/2,57);
+
+                const dimY=roadY+39,dimEnd=origin+osd*pxPerM;
+                ctx.strokeStyle='#166534';
+                ctx.lineWidth=2;
+                ctx.beginPath();
+                ctx.moveTo(origin,dimY);
+                ctx.lineTo(dimEnd,dimY);
+                ctx.stroke();
+
+                ctx.fillStyle='#166534';
+                ctx.font='bold 10px Inter,sans-serif';
+                ctx.fillText(`Required OSD = ${Math.ceil(osd)} m`,(origin+dimEnd)/2,dimY-5);
+
+                ctx.fillStyle='#6b7280';
+                ctx.font='10px Inter,sans-serif';
+                ctx.fillText('Loop resets when the front of A aligns with the front of C',w/2,h-8);
+            } else {
+                // Road-based SSD animation: reaction travel followed by braking to the obstacle.
+                const maxDist=Math.max(180,ssd*1.2),scale=(roadWidth-50)/maxDist,startX=roadLeft+25,ssdPx=ssd*scale,lagPx=lag*scale,brakePx=brake*scale,obstacleX=startX+ssdPx;
+                ctx.fillStyle='rgba(22,101,52,.16)';ctx.fillRect(startX,roadY+23,lagPx,6);ctx.fillStyle='rgba(239,68,68,.24)';ctx.fillRect(startX+lagPx,roadY+23,brakePx,6);
+                ctx.strokeStyle='#166534';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(startX+lagPx,roadY-40);ctx.lineTo(startX+lagPx,roadY+18);ctx.stroke();ctx.setLineDash([]);
+                ctx.fillStyle='#ef4444';ctx.fillRect(obstacleX-4,roadY-39,8,30);ctx.fillStyle='#374151';ctx.font='10px Inter,sans-serif';ctx.textAlign='center';ctx.fillText('Obstacle',obstacleX,roadY-45);
+                if(state.simMode==='brake'){const totalTime=Math.max(3,lag/Math.max(1,state.speed/3.6)+brake/Math.max(1,state.speed/7.2));state.simCarX=(state.simCarX+dt/(totalTime*1000))%1;}
+                const p=Math.max(0,Math.min(1,state.simCarX)),r=lag/Math.max(1,ssd);let d;if(p<=r)d=lag*(p/Math.max(.001,r));else{const q=(p-r)/Math.max(.001,1-r);d=lag+brake*(1-Math.pow(1-q,2));}d=Math.min(ssd,d);
+                drawVehicle(startX+d*scale,roadY-3,d>=lag?'#ef4444':'#166534','V',1);
+                ctx.fillStyle='#14532d';ctx.font='bold 11px Inter,sans-serif';ctx.fillText(`SSD = ${Math.ceil(ssd)} m  •  ${d>=lag?'braking':'reaction'} phase  •  vehicle has travelled ${d.toFixed(1)} m`,w/2,18);
+                ctx.fillStyle='#374151';ctx.font='10px Inter,sans-serif';ctx.fillText(`d₁ reaction = ${lag.toFixed(1)} m`,startX+lagPx/2,roadY+40);ctx.fillText(`d₂ braking = ${brake.toFixed(1)} m`,startX+lagPx+brakePx/2,roadY+53);
+                ctx.fillStyle='#6b7280';ctx.fillText('Slider changes rescale the actual displayed road distance',w/2,h-8);
+            }
+        }
+
+        function recalculateHorizontal() {
+            state.speed = parseFloat(document.getElementById('horizSpeed').value);
+            state.horizRadius = parseFloat(document.getElementById('horizRadius').value);
+            syncManualValue('horizRadius', state.horizRadius);
+            state.horizEmax = parseFloat(document.getElementById('horizEmax').value);
+            state.horizWheelbase = parseFloat(document.getElementById('horizWheelbase').value);
+            state.horizLanes = parseInt(document.getElementById('horizLanes').value);
+
+            document.getElementById('horizSpeedVal').innerText = `${state.speed} km/h`;
+            document.getElementById('horizRadiusVal').innerText = `${state.horizRadius} m`;
+
+            // IRC 7-Step Superelevation Procedure
+            // Step 1: Calculate e for 75% design speed: e1 = (0.75 V)^2 / (127 R) = V^2 / (225 R)
+            const e1 = Math.pow(state.speed, 2) / (225 * state.horizRadius);
+            let eAdopted = e1;
+            let fCheck = 0;
+
+            if (e1 > state.horizEmax) {
+                eAdopted = state.horizEmax;
+                // Step 2: Check lateral friction f = V^2 / (127 R) - e_max
+                fCheck = (Math.pow(state.speed, 2) / (127 * state.horizRadius)) - eAdopted;
+            }
+
+            // Extra Widening We = W_mech + W_ps = (n L^2 / 2R) + V / (9.5 sqrt(R))
+            const Wmech = (state.horizLanes * Math.pow(state.horizWheelbase, 2)) / (2 * state.horizRadius);
+            const Wps = state.speed / (9.5 * Math.sqrt(state.horizRadius));
+            const We = Wmech + Wps;
+
+            // Transition Curve Length Ls (Max of rate of centrifugal acceleration C, superelevation rate, or empirical IRC formula)
+            // C = 80 / (75 + R)
+            const C = Math.min(0.8, Math.max(0.5, 80 / (75 + state.horizRadius)));
+            const Ls_C = (0.0215 * Math.pow(state.speed, 3)) / (C * state.horizRadius);
+            const Ls_IRC = (2.7 * Math.pow(state.speed, 2)) / state.horizRadius;
+            const Ls = Math.max(Ls_C, Ls_IRC);
+
+            document.getElementById('outEstep1').innerText = `${(e1 * 100).toFixed(1)}%`;
+            document.getElementById('outEadopted').innerText = `${(eAdopted * 100).toFixed(1)}%`;
+            document.getElementById('outExtraWidening').innerText = `${We.toFixed(2)} m`;
+            document.getElementById('outTransitionLen').innerText = `${Math.ceil(Ls)} m`;
+
+            drawHorizontalCanvas(eAdopted);
+        }
+
+        function drawHorizontalCanvas(eAdopted) {
+            const canvas = document.getElementById('horizCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+
+            const w = canvas.width;
+            const h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            const centerX = w / 2;
+            const centerY = h - 70;
+            const bankAngle = Math.atan(eAdopted * 2.5); // Visual amplification
+
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(-bankAngle);
+
+            // Banked Road Track
+            ctx.fillStyle = "#e5e7eb";
+            ctx.fillRect(-120, 0, 240, 16);
+            ctx.strokeStyle = "#22c55e";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(-120, 0, 240, 16);
+
+            // Vehicle Rear View
+            ctx.fillStyle = "#16a34a";
+            ctx.fillRect(-30, -36, 60, 36);
+            // Wheels
+            ctx.fillStyle = "#020617";
+            ctx.fillRect(-28, -6, 12, 10);
+            ctx.fillRect(16, -6, 12, 10);
+
+            // Forces
+            // Centrifugal Force Fc
+            ctx.strokeStyle = "#ef4444";
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(0, -18); ctx.lineTo(70, -18);
+            ctx.stroke();
+            // Arrowhead
+            ctx.fillStyle = "#ef4444";
+            ctx.beginPath();
+            ctx.moveTo(70, -23); ctx.lineTo(80, -18); ctx.lineTo(70, -13);
+            ctx.fill();
+            ctx.fillText("Fc (Centrifugal)", 10, -25);
+
+            ctx.restore();
+
+            // Information Overlay
+            ctx.fillStyle = "#f59e0b";
+            ctx.font = "12px Inter, sans-serif";
+            ctx.fillText(`Superelevation Rate e = ${(eAdopted * 100).toFixed(1)}%`, 30, 40);
+
+            if (state.activeTab === 'horizontal') {
+                requestAnimationFrame(() => drawHorizontalCanvas(eAdopted));
+            }
+        }
+
+        function recalculateVertical() {
+            state.vertG1 = parseFloat(document.getElementById('vertG1').value);
+            syncManualValue('vertG1', state.vertG1);
+            state.vertG2 = parseFloat(document.getElementById('vertG2').value);
+            syncManualValue('vertG2', state.vertG2);
+            state.speed = parseFloat(document.getElementById('vertSpeed').value);
+            state.vertSightType = document.getElementById('vertSightType').value;
+
+            document.getElementById('vertG1Val').innerText = `${state.vertG1 > 0 ? '+' : ''}${state.vertG1.toFixed(1)}%`;
+            document.getElementById('vertG2Val').innerText = `${state.vertG2 > 0 ? '+' : ''}${state.vertG2.toFixed(1)}%`;
+            document.getElementById('vertSpeedVal').innerText = `${state.speed} km/h`;
+
+            // Deviation Angle N
+            const N = Math.abs(state.vertG1 - state.vertG2) / 100;
+            const isSummit = (state.vertG1 > state.vertG2);
+
+            // Sight Distance required
+            const ssd = 0.278 * state.speed * 2.5 + Math.pow(state.speed, 2) / (254 * 0.35);
+            let reqSight = ssd;
+            if (state.vertSightType === 'isd') reqSight = 2 * ssd;
+            if (state.vertSightType === 'osd') reqSight = 470; // nominal OSD
+
+            // Calculate Curve Length Lv per IRC:SP:23
+            let Lv = 0;
+            if (isSummit) {
+                // Summit Curve: Lv = N * S^2 / 4.4 (for S < L)
+                Lv = (N * Math.pow(reqSight, 2)) / 4.4;
+            } else {
+                // Valley Curve: Lv = 0.38 sqrt(N * V^3) for comfort
+                Lv = 0.38 * Math.sqrt(N * Math.pow(state.speed, 3));
+            }
+
+            document.getElementById('outVertN').innerText = `${(N * 100).toFixed(1)}% (${N.toFixed(3)})`;
+            document.getElementById('outVertType').innerText = isSummit ? "Summit Curve (Crest)" : "Valley Curve (Sag)";
+            document.getElementById('outVertReqSight').innerText = `${Math.ceil(reqSight)} m`;
+            document.getElementById('outVertLen').innerText = `${Math.ceil(Lv)} m`;
+
+            drawVerticalCanvas(isSummit);
+        }
+
+        function drawVerticalCanvas(isSummit) {
+            const canvas = document.getElementById('vertCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+
+            const w = canvas.width;
+            const h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            const startY = isSummit ? h - 50 : 60;
+            const apexY = isSummit ? 60 : h - 50;
+            const endY = isSummit ? h - 40 : 70;
+
+            // Parabolic Curve
+            ctx.strokeStyle = "#a855f7";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(30, startY);
+            ctx.quadraticCurveTo(w / 2, apexY, w - 30, endY);
+            ctx.stroke();
+
+            // Dynamic Vehicle Scanning Ray
+            state.vertCarProgress += 0.005;
+            if (state.vertCarProgress > 1) state.vertCarProgress = 0;
+
+            const t = state.vertCarProgress;
+            const carX = (1-t)*(1-t)*30 + 2*(1-t)*t*(w/2) + t*t*(w-30);
+            const carY = (1-t)*(1-t)*startY + 2*(1-t)*t*apexY + t*t*endY;
+
+            // Car Point
+            ctx.fillStyle = "#f59e0b";
+            ctx.beginPath();
+            ctx.arc(carX, carY - 6, 7, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Headlight / Sightline Ray Trace
+            ctx.strokeStyle = "rgba(34, 197, 94, 0.8)";
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(carX, carY - 8);
+            ctx.lineTo(carX + 110, carY - (isSummit ? 2 : -15));
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = "#22c55e";
+            ctx.font = "10px Inter, sans-serif";
+            ctx.fillText("Sightline Ray", carX + 10, carY - 18);
+
+            if (state.activeTab === 'vertical') {
+                requestAnimationFrame(() => drawVerticalCanvas(isSummit));
+            }
+        }
+
+        // Single animation loop for Camber rain and Sight simulations.
+        // Recalculation functions only update state/results and draw one frame;
+        // this loop is the only place that advances animation.
+        function startVisualAnimationLoop() {
+            if (visualAnimRunning) return;
+            visualAnimRunning = true;
+            visualAnimLastTime = performance.now();
+
+            const tick = (now) => {
+                if (!visualAnimRunning) return;
+
+                const dt = Math.min(50, Math.max(0, now - visualAnimLastTime));
+                visualAnimLastTime = now;
+                window.__byAnkitAnimDt = dt;
+
+                try {
+                    if (state.activeTab === 'camber') {
+                        drawCamberCanvas(state.camberRenderWidth, state.camberRate, state.camberRenderShoulder);
+                    } else if (state.activeTab === 'sight') {
+                        const lag = parseFloat(document.getElementById('outLagDist')?.innerText) || 0;
+                        const brake = parseFloat(document.getElementById('outBrakeDist')?.innerText) || 0;
+                        const ssd = parseFloat(document.getElementById('outTotalSSD')?.innerText) || 0;
+                        const osd = parseFloat(document.getElementById('outTotalOSD')?.innerText) || 0;
+
+                        // Advance the road simulation exactly once per animation frame.
+                        // Slider changes reset simCarX; they never spawn another RAF loop.
+                        const speedKmh = Math.max(1, Number(state.speed) || 60);
+                        const simDistance = Math.max(ssd, osd, 100);
+                        const simDurationMs = Math.max(9000, Math.min(18000, (simDistance / (speedKmh / 3.6)) * 1200));
+                        state.simCarX = (Number(state.simCarX) + dt * Math.max(0.25,Math.min(2.5,Number(document.getElementById('osdAnimSpeed')?.value)||1)) / simDurationMs) % 1;
+
+                        drawSightCanvas(lag, brake, ssd, osd);
+                    }
+                } catch (err) {
+                    // Keep the animation loop alive if a transient canvas/layout
+                    // condition occurs while a slider is being dragged.
+                    console.warn('Visual animation frame skipped:', err);
+                }
+
+                animFrameId = requestAnimationFrame(tick);
+            };
+
+            animFrameId = requestAnimationFrame(tick);
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            visualAnimLastTime = performance.now();
+            window.__byAnkitAnimDt = 16.67;
+        });
+
+        function openReferenceModal() {
+            document.getElementById('referenceModal').classList.remove('hidden');
+        }
+        function closeReferenceModal() {
+            document.getElementById('referenceModal').classList.add('hidden');
+        }
+
+        function generatePDFReport() {
+            const reportHtml = `
+                <div class="text-green-400 font-bold border-b border-gray-800 pb-1 mb-2">HIGHWAY GEOMETRIC DESIGN VERIFICATION REPORT</div>
+                <div>Standard Applied: IRC Codes (IRC:73, IRC:86, IRC:66, IRC:38, IRC:SP:23)</div>
+                <div>Date of Computation: ${new Date().toLocaleDateString()}</div>
+                <hr class="border-gray-800 my-2">
+                <div>[1] CARRIAGEWAY & CAMBER:</div>
+                <div> - Lane Width: ${document.getElementById('outCamberWidth').innerText}</div>
+                <div> - Camber Rate: ${document.getElementById('outCamberRate').innerText} (${document.getElementById('outCamberSlope').innerText})</div>
+                <div> - Crown Elevation: ${document.getElementById('outCrownHeight').innerText}</div>
+                <br>
+                <div>[2] SIGHT DISTANCE ANALYSIS:</div>
+                <div> - Speed: ${state.speed} km/h | Reaction: ${state.reactTime}s</div>
+                <div> - Stopping Sight Distance (SSD): ${document.getElementById('outTotalSSD').innerText}</div>
+                <div> - Overtaking Sight Distance (OSD): ${document.getElementById('outTotalOSD').innerText}</div>
+                <br>
+                <div>[3] SUPERELEVATION & CURVATURE:</div>
+                <div> - Curve Radius: ${state.horizRadius} m</div>
+                <div> - Adopted Superelevation (e): ${document.getElementById('outEadopted').innerText}</div>
+                <div> - Required Extra Widening (We): ${document.getElementById('outExtraWidening').innerText}</div>
+                <div> - Transition Curve Length (Ls): ${document.getElementById('outTransitionLen').innerText}</div>
+            `;
+            document.getElementById('reportContent').innerHTML = reportHtml;
+            document.getElementById('reportModal').classList.remove('hidden');
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.add('hidden');
+        }
+
+        window.onload = function() {
+            recalculateCamber();
+            recalculateSight();
+            recalculateHorizontal();
+            recalculateVertical();
+            startVisualAnimationLoop();
+        };
+    
+        document.getElementById('osdAnimSpeed')?.addEventListener('input',()=>{
+            const v=Math.max(0.25,Math.min(2.5,Number(document.getElementById('osdAnimSpeed').value)||1));
+            const label=document.getElementById('osdAnimSpeedValue');
+            if(label) label.textContent=v.toFixed(2).replace(/0$/,'')+'×';
+        });
+</script>
+</body>
+</html>

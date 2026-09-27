@@ -119,6 +119,7 @@ const config: Config = {
       //  {to: '/mix-design',           label: 'Mix Design',  position: 'left'},
        // {to: '/flexible-mix-design',  label: 'IRC 37 Flexible Pavement Design',  position: 'left'},
         {to: '/contact',              label: 'Contact',     position: 'left'},
+        {to: '/gate-test',              label: 'GATE Test',     position: 'left'},
     {
       type: 'dropdown',
       label: '  Design Tools',
@@ -140,9 +141,18 @@ const config: Config = {
           label: 'Aggregate Dry Mix Design ',
           to: '/agg-dry-mix',
         },
+        {
+          label: 'IRC 93 Traffic Signal Design ',
+          to: '/irc-93-traffic-signal-design',
+        }, 
+        {
+          label: 'Highway Geometric Design ',
+          to: '/highway-geometric-design',
+        },  
+        
       ],
     },
-    {
+    { 
       type: 'dropdown',
       label: 'IS 456 Tools',
       position: 'left',
@@ -160,7 +170,9 @@ const config: Config = {
           label: 'IS 456 Staircase Design suite ',
           to: '/IS456-staircase-design',
         },
+        
       ],
+        
     },
       {
       type: 'dropdown',
@@ -249,6 +261,11 @@ const config: Config = {
                 {
           label: 'Contact',
           to: '/contact',
+        },
+
+              {
+          label: 'GATE',  
+          to: '/gate-test',
         },
       ],
     },
