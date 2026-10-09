@@ -31,18 +31,18 @@ button,input{font:inherit}.hidden{display:none!important}
 .question{font-size:19px;line-height:1.7;margin-bottom:20px}.option{padding:13px 15px;border:1px solid var(--line);border-radius:11px;margin:9px 0;line-height:1.65}.letter{font-weight:850;margin-right:9px}
 .answer{margin-top:20px;padding:13px 15px;border-left:4px solid var(--green);background:#effaf2;border-radius:0 10px 10px 0;line-height:1.6}
 .explanation{margin-top:12px;padding:15px;border-left:4px solid var(--blue);background:#eff6ff;border-radius:0 10px 10px 0;line-height:1.65}
-.issue-list{margin-top:8px}.issue{padding:7px 0;border-top:1px solid #fecaca}.issue:first-child{border-top:0}.issue-tag{display:inline-block;font-size:10px;font-weight:900;padding:2px 6px;border-radius:5px;margin-right:6px}.issue-tag.err{background:#fee2e2;color:#991b1b}.issue-tag.wrn{background:#ffedd5;color:#9a3412}.issue details{margin-top:7px}.issue summary{cursor:pointer;font-weight:800;color:#7f1d1d}.issue pre{white-space:pre-wrap;word-break:break-word;background:#fff;border:1px solid #fecaca;border-radius:7px;padding:10px;font:11px ui-monospace,SFMono-Regular,Consolas,monospace;max-height:260px;overflow:auto}.fixhint{margin-top:6px;padding:7px;background:#fff7ed;border-radius:6px;color:#7c2d12}.diag{margin-top:14px;padding:11px 13px;border-radius:9px;font-size:12px;line-height:1.5}.good{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}.badbox{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}.warn{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412}
+.diag{margin-top:14px;padding:11px 13px;border-radius:9px;font-size:12px;line-height:1.5}.good{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}.badbox{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}.warn{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412}
 .summary{margin-top:18px;padding:18px}.summarygrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.statbox{border:1px solid var(--line);border-radius:10px;padding:13px}.statbox b{font-size:22px;display:block}.statbox small{color:var(--muted)}
 math{font-size:1.05em}.footer{text-align:center;color:#94a39a;font-size:11px;margin-top:20px}
 @media(max-width:700px){.urlrow{flex-direction:column}.summarygrid{grid-template-columns:1fr 1fr}.hero h1{font-size:27px}.question{font-size:17px}}
 </style>
 </head>
 <body>
-<header class="topbar"><div class="topbar-in"><div class="logo">By <b>Ankit</b> · GATE Render Checker</div><div class="mode">Question Bank QA · MathML XML diagnostics</div></div></header>
+<header class="topbar"><div class="topbar-in"><div class="logo">By <b>Ankit</b> · GATE Render Checker</div><div class="mode">Question Bank QA</div></div></header>
 <main class="wrap">
 <section class="hero">
 <div class="eyebrow">Civil Engineering</div>
-<h1>GATE Question Bank Render Checker — MathML QA</h1>
+<h1>GATE Question Bank Render Checker</h1>
 <p>Uses the same Google Sheets CSV fetching method as the working ByAnkit GATE Practice page, then renders the selected database rows vertically so you can visually check mathematics, symbols, tables, images, answers and explanations.</p>
 </section>
 
@@ -167,7 +167,7 @@ function loadGViz(id,gid){
 function success(){
  $("status").textContent="✓ "+BANK.length+" questions loaded";$("status").className="status ok";
  $("controls").classList.remove("hidden");$("start").max=BANK.length;$("end").max=BANK.length;$("end").value=Math.min(10,BANK.length);
- $("message").innerHTML='<div class="notice">Question bank loaded. The validator checks rendering and also validates each MathML fragment as XML. For comparison operators, use <code>&amp;lt;</code> inside <code>&lt;mo&gt;</code>, not a raw <code>&lt;</code>.</div>';
+ $("message").innerHTML='<div class="notice">Question bank loaded. Select a row range and render it for visual QA.</div>';
  renderRange(1,Math.min(10,BANK.length));
 }
 const MATH_TAGS=new Set(["math","mrow","mi","mn","mo","mfrac","msup","msub","msubsup","msqrt","mroot","munder","mover","munderover","mtable","mtr","mtd","mlabeledtr","mstyle","mtext","mspace","mfenced","menclose","mpadded","mphantom","merror","mmultiscripts","mprescripts","none","ms","maction"]);
@@ -190,115 +190,27 @@ function renderRich(value){
  out+=esc(s.slice(last)).replace(/\r?\n/g,"<br>");return out;
 }
 function balanced(v,a,b){return (v.match(new RegExp(a,"gi"))||[]).length===(v.match(new RegExp(b,"gi"))||[]).length}
-function xmlMathCheck(fragment){
-  // Parse the exact MathML fragment as XML. This catches raw '<' characters such as
-  // <mo><</mo>, which can look visually correct in HTML but are invalid XML/MathML.
-  const parser=new DOMParser();
-  const doc=parser.parseFromString(fragment,"application/xml");
-  const pe=doc.querySelector("parsererror");
-  if(!pe)return null;
-
-  const raw=pe.textContent||"";
-  let hint="Malformed MathML XML.";
-  if(/<mo\b[^>]*>\s*</i.test(fragment) || /<mtext\b[^>]*>\s*</i.test(fragment))
-    hint="A raw '<' appears inside a MathML element. Use &lt; inside <mo> or <mtext>.";
-  else if(/<mo\b[^>]*>\s*>/i.test(fragment))
-    hint="Check the comparison/operator token inside <mo>.";
-  else if(/&(?:nbsp|times|divide|minus|alpha|beta|gamma|delta|theta|lambda|mu|pi|rho|sigma|phi|omega);/i.test(fragment))
-    hint="A named HTML entity may not be valid XML MathML. Prefer the Unicode symbol or numeric character reference.";
-  return {hint, parser:raw};
-}
-
-function findMathFragments(v){
-  return String(v||"").match(/<math\b[^>]*>[\s\S]*?<\/math\s*>/gi)||[];
-}
-
 function diagnostics(r){
-  const issues=[];
-  if(Object.keys(r).length<15)issues.push({
-    level:"ERROR",field:"row",message:"Database row structure is incomplete."
-  });
-
-  CONTENT.forEach(c=>{
-    const v=String(r[c]||"");
-
-    if(!balanced(v,"<math\\b","<\\/math\\s*>")){
-      issues.push({level:"ERROR",field:c,message:"Unbalanced <math>...</math> tags."});
-    }
-
-    if(/&lt;\s*math\b|&gt;\s*\/\s*math/i.test(v)){
-      issues.push({level:"ERROR",field:c,message:"MathML is HTML-escaped; the CSV must contain real <math>...</math> tags."});
-    }
-
-    if(/\\(?:frac|sqrt|alpha|beta|gamma|delta|epsilon|phi|theta|lambda|mu|rho|sigma|pi|sum|int|leq|geq)\b|\$\$|\$[^$]+\$/.test(v)){
-      issues.push({level:"WARNING",field:c,message:"LaTeX/Markdown mathematics appears to remain."});
-    }
-
-    const fragments=findMathFragments(v);
-    fragments.forEach((m,index)=>{
-      const bad=xmlMathCheck(m);
-      if(bad){
-        issues.push({
-          level:"ERROR",
-          field:c,
-          message:bad.hint,
-          fragment:m,
-          parser:bad.parser,
-          index:index+1
-        });
-      }
-    });
-  });
-
-  if(!String(r.answer||"").trim())
-    issues.push({level:"WARNING",field:"answer",message:"Answer is empty."});
-  if(!String(r.question||"").trim())
-    issues.push({level:"ERROR",field:"question",message:"Question is empty."});
-
-  return issues;
+ const issues=[];
+ if(Object.keys(r).length<15)issues.push(["ERROR","Database row structure is incomplete."]);
+ CONTENT.forEach(c=>{
+  const v=String(r[c]||"");
+  if(!balanced(v,"<math\\b","<\\/math\\s*>"))issues.push(["ERROR",c+": unbalanced <math> tags"]);
+  if(/&lt;\s*math|&gt;\s*\/\s*math/i.test(v))issues.push(["ERROR",c+": MathML is HTML-escaped"]);
+  if(/\\(?:frac|sqrt|alpha|beta|gamma|delta|epsilon|phi|theta|lambda|mu|rho|sigma|pi|sum|int|leq|geq)\b|\$\$|\$[^$]+\$/.test(v))issues.push(["WARNING",c+": LaTeX/Markdown math appears to remain"]);
+  const ms=v.match(/<math\b[^>]*>[\s\S]*?<\/math\s*>/gi)||[];
+  ms.forEach(m=>{const d=new DOMParser().parseFromString(m,"application/xml");if(d.querySelector("parsererror"))issues.push(["ERROR",c+": malformed MathML XML"])});
+ });
+ if(!String(r.answer||"").trim())issues.push(["WARNING","answer is empty"]);
+ if(!String(r.question||"").trim())issues.push(["ERROR","question is empty"]);
+ return issues;
 }
-
-function issueHTML(issues){
-  if(!issues.length)
-    return '<div class="diag good">✓ No obvious MathML/markup error detected in this row.</div>';
-
-  return '<div class="diag badbox"><b>QA issues:</b><div class="issue-list">'+
-    issues.map((x,i)=>{
-      const detail=x.fragment
-        ? '<details><summary>Show offending MathML fragment</summary><pre>'+esc(x.fragment)+'</pre>'+
-          '<div class="fixhint"><b>Suggested correction:</b> '+esc(
-            /<mo\b[^>]*>\s*</i.test(x.fragment)
-              ? 'Replace a raw < inside MathML with &lt; (for example: <mo>&lt;</mo>).'
-              : 'Correct the malformed XML/MathML shown above.'
-          )+'</div></details>'
-        : '';
-      return '<div class="issue"><span class="issue-tag '+(x.level==="ERROR"?"err":"wrn")+'">'+esc(x.level)+'</span>'+
-        '<b>'+esc(x.field)+':</b> '+esc(x.message)+detail+'</div>';
-    }).join("")+
-    '</div></div>';
-}
-
 function card(r,n){
-  const issues=diagnostics(r);
-  if(issueOnly&&!issues.length)return "";
-
-  const opts=["optionA","optionB","optionC","optionD"].map((k,i)=>
-    r[k]?'<div class="option"><span class="letter">'+("ABCD"[i])+".</span>"+renderRich(r[k])+"</div>":""
-  ).join("");
-
-  return '<article class="card qcard">'+
-    '<div class="qtop"><div><div class="qno">Question '+n+' · ID: '+esc(r.id)+'</div>'+
-    '<div class="qmeta">'+esc(r.subject)+' · '+esc(r.topic)+' · '+esc(r.difficulty)+' · source CSV row '+r._sourceRow+'</div></div>'+
-    '<div class="badge">'+esc(r.type)+' · '+esc(r.marks)+' Mark'+(String(r.marks)==="1"?"":"s")+
-    (r.negative?' · −'+esc(r.negative):"")+'</div></div>'+
-    '<div class="question">'+renderRich(r.question)+'</div>'+
-    opts+
-    '<div class="answer"><b>Correct Answer:</b> '+renderRich(r.answer)+'</div>'+
-    '<div class="explanation"><b>Explanation</b><br>'+renderRich(r.explanation||"(No explanation provided)")+'</div>'+
-    issueHTML(issues)+
-    '</article>';
+ const issues=diagnostics(r);if(issueOnly&&!issues.length)return "";
+ const opts=["optionA","optionB","optionC","optionD"].map((k,i)=>r[k]?'<div class="option"><span class="letter">'+("ABCD"[i])+".</span>"+renderRich(r[k])+"</div>":"").join("");
+ const diag=issues.length?'<div class="diag badbox"><b>QA issues:</b> '+issues.map(x=>esc(x[0]+": "+x[1])).join(" · ")+'</div>':'<div class="diag good">✓ No obvious MathML/markup error detected in this row.</div>';
+ return '<article class="card qcard"><div class="qtop"><div><div class="qno">Question '+n+' · ID: '+esc(r.id)+'</div><div class="qmeta">'+esc(r.subject)+' · '+esc(r.topic)+' · '+esc(r.difficulty)+' · source CSV row '+r._sourceRow+'</div></div><div class="badge">'+esc(r.type)+' · '+esc(r.marks)+' Mark'+(String(r.marks)==="1"?"":"s")+(r.negative?' · −'+esc(r.negative):"")+'</div></div><div class="question">'+renderRich(r.question)+'</div>'+opts+'<div class="answer"><b>Correct Answer:</b> '+renderRich(r.answer)+'</div><div class="explanation"><b>Explanation</b><br>'+renderRich(r.explanation||"(No explanation provided)")+'</div>'+diag+'</article>';
 }
-
 function renderRange(a,b){
  a=Math.max(1,parseInt(a)||1);b=Math.min(BANK.length,parseInt(b)||BANK.length);if(a>b){$("questions").innerHTML='<div class="card notice error">Start row must be less than or equal to End row.</div>';return}
  const arr=BANK.slice(a-1,b);$("questions").innerHTML=arr.map((r,i)=>card(r,a+i)).join("");

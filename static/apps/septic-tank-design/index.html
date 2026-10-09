@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ByAnkit • Septic Tank Design — Indian Standards</title>
+<style>
+:root{
+  --ifm-color-primary:#25c2a0;
+  --ifm-color-primary-dark:#21af90;
+  --ifm-color-primary-darker:#1fa588;
+  --ifm-color-primary-darkest:#1a8870;
+  --ifm-color-primary-light:#29d5b0;
+  --ifm-color-primary-lighter:#3eddbd;
+  --ifm-color-primary-lightest:#a6f0e1;
+  --ifm-background-color:#fff;
+  --ifm-background-surface:#f8faf9;
+  --ifm-font-color-base:#1c1e21;
+  --ifm-font-color-secondary:#606770;
+  --ifm-border:#e5e7eb;
+  --ifm-code-bg:#f5f6f7;
+  --success:#2e8555;--danger:#d32f2f;--warn:#d97706;
+  --shadow:0 8px 30px rgba(24,25,26,.08);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ifm-font-color-base);background:var(--ifm-background-color);line-height:1.55}
+a{color:var(--ifm-color-primary-darkest)}
+button,input,select{font:inherit}
+.nav{position:sticky;top:0;z-index:10;background:#18191a;color:#fff;border-bottom:1px solid #303236}
+.navin{max-width:1250px;margin:auto;display:flex;align-items:center;gap:12px;padding:7px 14px}
+.brand{display:flex;align-items:center;gap:7px;font-weight:800;letter-spacing:.2px}
+.logo{width:26px;height:26px;border-radius:8px;background:var(--ifm-color-primary);display:grid;place-items:center;color:#18191a;font-weight:900}
+.navlinks{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.navlinks button{border:0;background:transparent;color:#ddd;padding:7px 10px;border-radius:7px;cursor:pointer}
+.navlinks button:hover,.navlinks button.active{background:var(--ifm-color-primary);color:#10201d}
+.hero{background:linear-gradient(135deg,#f7fffc 0%,#fff 70%,#eafaf6 100%);color:#18191a;padding:28px 18px 25px;border-bottom:1px solid #dfe8e5}
+.hero-in{max-width:1250px;margin:auto}
+.eyebrow{color:var(--ifm-color-primary-darkest);text-transform:uppercase;font-size:.76rem;font-weight:800;letter-spacing:.12em}
+h1{font-size:clamp(1.75rem,3.5vw,2.7rem);line-height:1.08;margin:8px 0 14px}
+.hero p{display:none}
+.badges{display:flex;gap:8px;flex-wrap:wrap}.badge{padding:4px 8px;border-radius:999px;background:#e9faf5;border:1px solid #9de6d5;color:#176b59;font-size:.74rem}
+main{max-width:1250px;margin:0 auto;padding:8px 14px 30px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tabbar{position:sticky;top:55px;z-index:8;background:#fff;border-bottom:1px solid var(--ifm-border);padding:8px 0}.tabbar-in{max-width:1250px;margin:auto;padding:0 18px;display:flex;gap:7px;overflow-x:auto}.tabbar button{border:1px solid var(--ifm-border);background:#fff;border-radius:999px;padding:6px 10px;cursor:pointer;font-weight:700;white-space:nowrap}.tabbar button.active{background:var(--ifm-color-primary);border-color:var(--ifm-color-primary);color:#10201d}.tabpanel{display:none}.tabpanel.active{display:block}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.navlinks{display:none}}
+.card{background:#fff;border:1px solid var(--ifm-border);border-radius:12px;box-shadow:var(--shadow);padding:12px}
+.card h2,.card h3{margin-top:0}
+.section{scroll-margin-top:80px;margin-top:12px}
+label{display:block;font-size:.83rem;font-weight:700;margin:0 0 5px}
+input,select{width:100%;padding:10px 11px;border:1px solid #d6d9dc;border-radius:8px;background:#fff;outline:none}
+input:focus,select:focus{border-color:var(--ifm-color-primary);box-shadow:0 0 0 3px rgba(37,194,160,.12)}
+.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media(max-width:600px){.formgrid{grid-template-columns:1fr}}
+.help{font-size:.74rem;color:var(--ifm-font-color-secondary);margin-top:4px}
+.btnrow{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.btn{border:0;border-radius:8px;padding:8px 11px;font-weight:800;cursor:pointer}
+.primary{background:var(--ifm-color-primary);color:#10201d}.secondary{background:#eef1f0;color:#1c1e21}.dark{background:#18191a;color:#fff}
+.metricgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+@media(max-width:900px){.metricgrid{grid-template-columns:repeat(2,1fr)}}
+.metric{padding:9px;border:1px solid var(--ifm-border);border-radius:10px;background:var(--ifm-background-surface)}
+.metric b{display:block;font-size:1.35rem;color:var(--ifm-color-primary-darkest)}
+.metric span{font-size:.75rem;color:var(--ifm-font-color-secondary)}
+.checks{display:grid;gap:8px}
+.check{display:grid;grid-template-columns:28px 1fr auto;gap:7px;align-items:start;border:1px solid var(--ifm-border);border-radius:10px;padding:8px}
+.icon{width:25px;height:25px;border-radius:50%;display:grid;place-items:center;font-weight:900}
+.ok{background:#dff4e8;color:var(--success)}.bad{background:#fde3e3;color:var(--danger)}.note{background:#fff2d8;color:var(--warn)}
+.check strong{display:block}.check small{color:var(--ifm-font-color-secondary)}
+.status{font-size:.72rem;font-weight:900;white-space:nowrap}
+table{width:100%;border-collapse:collapse;font-size:.86rem}
+th,td{border-bottom:1px solid var(--ifm-border);padding:9px;text-align:left}
+th{background:#f3f5f4;font-size:.76rem;text-transform:uppercase;letter-spacing:.04em}
+tr:hover td{background:#fbfdfc}
+.callout{border-left:4px solid var(--ifm-color-primary);background:#f0fcf9;padding:12px 14px;border-radius:0 9px 9px 0;margin:10px 0}
+.warnbox{border-left-color:var(--warn);background:#fff8eb}
+.diagram{background:#fbfcfc;border:1px solid var(--ifm-border);border-radius:12px;padding:10px;overflow:auto}
+svg{max-width:100%;height:auto;display:block;margin:auto}
+.k{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--ifm-code-bg);padding:2px 5px;border-radius:4px}
+.small{font-size:.8rem;color:var(--ifm-font-color-secondary)}
+details{border:1px solid var(--ifm-border);border-radius:9px;padding:10px 12px;margin:8px 0}
+summary{cursor:pointer;font-weight:800}
+.footer{margin-top:8px;padding:18px;background:#f3f6f5;color:#606770;border-top:1px solid #e1e6e4}
+.footerin{max-width:1250px;margin:auto;font-size:.8rem}
+.print-only{display:none}
+@media print{
+ .nav,.tabbar,.btnrow{display:none}.hero{padding:20px;color:#000;background:#fff;border-bottom:2px solid #25c2a0}.hero p{color:#333}
+ .tabpanel{display:block !important}.card{box-shadow:none;break-inside:avoid}.print-only{display:block}main{padding:10px}
+}
+.method-full{display:block}.method-full>.card{width:100%;max-width:none}.method-full details{margin:10px 0}.method-full p{max-width:1100px}.method-full ul{margin-bottom:8px}.method-step{border:1px solid var(--ifm-border);border-radius:9px;padding:12px 14px;margin:10px 0;background:#fff}.method-step h3{font-size:1rem;margin:0 0 7px;color:var(--ifm-color-primary-darkest)}.method-step p:last-child{margin-bottom:0}</style>
+</head>
+<body>
+<nav class="nav"><div class="navin">
+  <div class="brand"><div class="logo">A</div><span>ByAnkit</span></div>
+  <div class="navlinks"><button class="active" data-tab="design" onclick="openTab('design')">Design</button><button data-tab="checks" onclick="openTab('checks')">Checks</button><button data-tab="drawing" onclick="openTab('drawing')">Drawing</button><button data-tab="disposal" onclick="openTab('disposal')">Disposal</button><button data-tab="references" onclick="openTab('references')">References</button>
+    <button data-tab="method" onclick="openTab('method')">Method</button></div>
+</div></nav>
+
+
+
+<div class="tabbar"><div class="tabbar-in"><button class="active" data-tab="design" onclick="openTab('design')">1 · Design</button><button data-tab="checks" onclick="openTab('checks')">2 · Checks</button><button data-tab="drawing" onclick="openTab('drawing')">3 · Drawing</button><button data-tab="disposal" onclick="openTab('disposal')">4 · Disposal</button><button data-tab="references" onclick="openTab('references')">5 · Standards</button>
+<button data-tab="method" onclick="openTab('method')">6 · Design Steps</button></div></div><main>
+<section id="design" class="tabpanel" style="display:block">
+<div class="grid">
+<div class="card">
+<h2>1. Design inputs</h2>
+<div class="formgrid">
+<div><label>Number of users</label><input id="users" type="number" min="1" max="300" value="5"><div class="help">Residential population equivalent.</div></div>
+<div><label>Wastewater flow (L/person/day)</label><input id="lpcd" type="number" min="20" max="300" value="135"><div class="help">Use the actual contributing flow where known. 135 is a practical domestic benchmark input.</div></div>
+<div><label>Detention time (hours)</label><select id="det"><option value="24" selected>24 h — minimum</option><option value="36">36 h — common design value</option><option value="48">48 h — upper end</option></select></div>
+<div><label>Desludging interval (years)</label><select id="clean"><option value="1">1 year</option><option value="2" selected>2 years</option></select></div>
+<div><label>Liquid depth, proposed (m)</label><input id="depth" type="number" min="1" max="3" step=".05" value="1.2"></div>
+<div><label>Length : width ratio</label><input id="ratio" type="number" min="2" max="4" step=".1" value="2.5"></div>
+<div><label>Freeboard (m)</label><input id="freeboard" type="number" min=".2" max=".6" step=".05" value=".30"></div>
+<div><label>Peak discharge (L/min)</label><input id="peak" type="number" min="1" max="1000" step="1" value="9"><div class="help">Fixture-unit based value if known; otherwise the app uses a conservative household input for the selected population.</div></div>
+</div>
+<div class="btnrow"><button class="btn primary" onclick="calculate()">Calculate design</button><button class="btn secondary" onclick="resetDefaults()">Reset</button><button class="btn dark" onclick="window.print()">Print / Save PDF</button></div>
+<div class="callout"><b>Design basis:</b> For ≤20 users, the app compares your custom calculation with the IS 2470 Appendix-A household sizes. For larger populations, it uses the IS process-design equations and flags when a project is beyond ordinary household scale.</div>
+</div>
+
+<div class="card">
+<h2>2. Selected design</h2>
+<div class="metricgrid">
+<div class="metric"><span>Recommended L</span><b id="outL">1.50 m</b></div>
+<div class="metric"><span>Recommended B</span><b id="outB">0.75 m</b></div>
+<div class="metric"><span>Liquid depth</span><b id="outD">1.05 m</b></div>
+<div class="metric"><span>Total internal depth</span><b id="outH">1.35 m</b></div>
+</div>
+<div style="margin-top:15px">
+<table><tbody>
+<tr><td>Liquid capacity</td><td id="cap">1.18 m³</td></tr>
+<tr><td>Daily inflow</td><td id="flow">675 L/day</td></tr>
+<tr><td>Hydraulic volume for detention</td><td id="hyd">0.68 m³</td></tr>
+<tr><td>IS 2470 digested sludge accumulation</td><td id="sludge">0.77 m³</td></tr>
+<tr><td>Surface area required from peak flow</td><td id="areaReq">0.83 m²</td></tr>
+<tr><td>Provided surface area</td><td id="areaProv">1.13 m²</td></tr>
+</tbody></table>
+</div>
+<p class="small" id="selectionNote"></p>
+</div>
+</div>
+</section>
+
+<section id="checks" class="tabpanel" style="display:none">
+<div class="grid">
+<div class="card">
+<h2>3. Automatic design-condition checks</h2>
+<div id="checksList" class="checks"></div>
+</div>
+<div class="card">
+<h2>4. Construction & sanitary checklist</h2>
+<div class="checks">
+<div class="check"><div class="icon ok">✓</div><div><strong>Watertight tank</strong><small>Floor/walls should be watertight; do not use a bottomless septic tank.</small></div><span class="status">REQUIRED</span></div>
+<div class="check"><div class="icon ok">✓</div><div><strong>Floor</strong><small>IS 2470 indicates minimum M15 cement concrete and a slope may be provided toward sludge withdrawal.</small></div><span class="status">IS 2470</span></div>
+<div class="check"><div class="icon ok">✓</div><div><strong>Inlet</strong><small>For tanks ≤1200 mm wide, provide a submerged/T-shaped inlet arrangement; avoid disturbance of sludge/scum.</small></div><span class="status">IS 2470</span></div>
+<div class="check"><div class="icon ok">✓</div><div><strong>Outlet</strong><small>For tanks &lt;1200 mm wide, 100 mm nominal bore dip-pipe; outlet invert 50 mm below inlet invert.</small></div><span class="status">IS 2470</span></div>
+<div class="check"><div class="icon ok">✓</div><div><strong>Ventilation</strong><small>Minimum 50 mm ventilating pipe with mosquito-proof mesh; height should avoid odour nuisance.</small></div><span class="status">IS 2470</span></div>
+<div class="check"><div class="icon ok">✓</div><div><strong>Access covers</strong><small>Provide access over compartments for inspection/desludging; covers should fit and resist water ingress.</small></div><span class="status">IS 2470</span></div>
+<div class="check"><div class="icon ok">✓</div><div><strong>Effluent disposal</strong><small>Septic tank is primary treatment. Effluent requires an approved secondary treatment/disposal method under IS 2470 Part 2.</small></div><span class="status">CRITICAL</span></div>
+</div>
+</div>
+</div>
+</section>
+
+<section id="drawing" class="tabpanel" style="display:none">
+<div class="card">
+<h2>5. Dynamic schematic — plan & section</h2>
+<p class="small">Schematic is for design communication, not a construction drawing. Dimensions update from the selected internal tank dimensions.</p>
+<div class="diagram">
+<svg id="svg" viewBox="0 0 1100 520" role="img" aria-label="Septic tank plan and section">
+  <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#25c2a0"/></marker></defs>
+  <text x="20" y="30" font-weight="800">PLAN</text>
+  <rect id="planTank" x="40" y="60" width="500" height="180" fill="#eafaf6" stroke="#18191a" stroke-width="3"/>
+  <line id="partition" x1="370" y1="60" x2="370" y2="240" stroke="#25c2a0" stroke-width="5"/>
+  <text x="200" y="155" text-anchor="middle" font-weight="700">1st compartment</text>
+  <text x="455" y="155" text-anchor="middle" font-weight="700">2nd compartment</text>
+  <text x="40" y="270">L = <tspan id="svgL">1.50</tspan> m</text>
+  <text x="280" y="285">B = <tspan id="svgB">0.75</tspan> m</text>
+  <line x1="40" y1="250" x2="540" y2="250" stroke="#25c2a0" marker-end="url(#arr)"/>
+  <line x1="40" y1="250" x2="40" y2="60" stroke="#25c2a0" marker-end="url(#arr)"/>
+  <text x="60" y="55" fill="#2e8555">INLET →</text><text x="465" y="55" fill="#2e8555">→ OUTLET</text>
+  <circle cx="230" cy="120" r="22" fill="#fff" stroke="#18191a"/><text x="230" y="125" text-anchor="middle" font-size="11">MH</text>
+  <circle cx="440" cy="120" r="22" fill="#fff" stroke="#18191a"/><text x="440" y="125" text-anchor="middle" font-size="11">MH</text>
+  <text x="650" y="30" font-weight="800">SECTION</text>
+  <rect id="sectionTank" x="650" y="70" width="390" height="250" fill="#eafaf6" stroke="#18191a" stroke-width="3"/>
+  <rect id="water" x="650" y="145" width="390" height="175" fill="#d9f5ee" stroke="none"/>
+  <line x1="650" y1="145" x2="1040" y2="145" stroke="#25c2a0" stroke-width="3"/>
+  <line x1="650" y1="100" x2="1040" y2="100" stroke="#999" stroke-dasharray="6 6"/>
+  <text x="805" y="92" text-anchor="middle" font-size="12">FREEBOARD</text>
+  <text x="805" y="137" text-anchor="middle" font-size="12">TOP WATER LEVEL</text>
+  <text x="805" y="235" text-anchor="middle" font-weight="700">LIQUID</text>
+  <rect x="650" y="285" width="390" height="35" fill="#c9b08a" opacity=".7"/>
+  <text x="845" y="307" text-anchor="middle" font-size="12">SLUDGE STORAGE ZONE</text>
+  <line x1="610" y1="145" x2="610" y2="320" stroke="#25c2a0" marker-end="url(#arr)"/>
+  <text x="600" y="230" transform="rotate(-90 600 230)" text-anchor="middle">Liquid depth</text>
+  <line x1="650" y1="350" x2="1040" y2="350" stroke="#25c2a0"/>
+  <text x="845" y="372" text-anchor="middle">Internal depth = liquid depth + freeboard</text>
+  <path d="M670 70 L670 30 L690 30" fill="none" stroke="#25c2a0" stroke-width="4"/>
+  <text x="695" y="32" font-size="12">≥50 mm vent + mosquito-proof mesh</text>
+</svg>
+</div>
+</div>
+</section>
+
+<section id="disposal" class="tabpanel" style="display:none">
+<div class="grid">
+<div class="card">
+<h2>6. Effluent disposal screening</h2>
+<div class="formgrid">
+<div><label>Soil percolation time (min / standard drop)</label><input id="perc" type="number" min="1" max="300" value="20"><div class="help">Enter measured site-test value. Do not guess for construction.</div></div>
+<div><label>Distance to drinking-water source (m)</label><input id="well" type="number" min="0" max="100" value="20"></div>
+<div><label>Distance from habitable building (m)</label><input id="building" type="number" min="0" max="50" value="6"></div>
+<div><label>Groundwater clearance below absorption system (m)</label><input id="gw" type="number" min="0" max="20" step=".1" value="2"></div>
+</div>
+<div class="btnrow"><button class="btn primary" onclick="disposalCheck()">Check disposal</button></div>
+<div id="disposalResult" class="callout"></div>
+</div>
+<div class="card">
+<h2>7. What the app will recommend</h2>
+<table><thead><tr><th>Site condition</th><th>Screening outcome</th></tr></thead><tbody>
+<tr><td>Percolation ≤30 min</td><td>Soil absorption system may be suitable, subject to groundwater and separation checks.</td></tr>
+<tr><td>30–60 min</td><td>Dispersion trench / mound arrangement needs site-specific assessment.</td></tr>
+<tr><td>&gt;60 min or impervious soil</td><td>Consider biological / anaerobic treatment and an approved discharge/reuse route rather than relying on a simple soak pit.</td></tr>
+<tr><td>Drinking-water separation</td><td>IS 2470 Part 2 gives 18 m minimum for a subsurface dispersion system; local rules may be more stringent.</td></tr>
+</tbody></table>
+</div>
+</div>
+</section>
+
+
+<section id="method" class="tabpanel" style="display:none">
+<div class="method-full">
+<div class="card">
+<h2>Detailed Septic Tank Design Procedure</h2>
+<p class="small">Use this workflow for an Indian household installation. The app separates the hydraulic, storage, dimensional, construction and disposal decisions so that each can be checked independently.</p>
+
+<div class="method-step"><h3>Step 1 — Establish the design population</h3><p>Determine the number of persons expected to use the system. For a house, use the design occupancy rather than only the present occupants where future occupancy is reasonably foreseeable.</p>
+<p><b>Input:</b> Population, <span class="k">P</span> persons.</p></div>
+
+<div class="method-step"><h3>Step 2 — Establish wastewater flow</h3><p>Determine the actual wastewater contribution. If a reliable measured value is unavailable, use the applicable local design water-supply/wastewater criterion and clearly state the assumption.</p>
+<p><b>Calculation:</b> <span class="k">Q = P × q</span>, where <span class="k">q</span> is wastewater generation in L/person/day.</p>
+<p><b>Important:</b> The standard household dimensions should not be blindly combined with an assumed flow if kitchen, bath and other wastewater are connected. Confirm the scope of the drainage system.</p></div>
+
+<div class="method-step"><h3>Step 3 — Select detention time</h3><p>Adopt the applicable detention period for septic-tank treatment. This app permits <b>24–48 h</b> as the design range represented in IS 2470.</p>
+<p><b>Hydraulic volume:</b> <span class="k">V<sub>d</sub> = Q × t / 24</span>, with Q in m³/day and t in hours.</p></div>
+
+<div class="method-step"><h3>Step 4 — Determine sludge-storage requirement</h3><p>Allow for accumulation between desludging operations. The app uses the IS 2470 design accumulation value of approximately <b>0.00021 m³/person/day</b>.</p>
+<p><b>Sludge volume:</b> <span class="k">V<sub>s</sub> = 0.00021 × P × N × 365</span>, where N is the desludging interval in years.</p>
+<p>Do not assume that hydraulic capacity alone is sufficient. The tank must have adequate storage and must be emptied at an appropriate interval.</p></div>
+
+<div class="method-step"><h3>Step 5 — Select tank dimensions</h3><p>For household systems, first consult the applicable IS 2470 recommended dimension table. Then verify the general dimensional requirements.</p>
+<ul>
+<li>Minimum width: <b>0.75 m</b>.</li>
+<li>Minimum liquid depth: <b>1.0 m</b>.</li>
+<li>Minimum liquid capacity: <b>1.0 m³</b>.</li>
+<li>Rectangular length/width ratio: <b>2 to 4</b>.</li>
+<li>Minimum freeboard: <b>0.30 m</b>.</li>
+</ul>
+<p>For larger populations, use a detailed multi-compartment design rather than simply scaling a small household tank indefinitely.</p></div>
+
+<div class="method-step"><h3>Step 6 — Check settling surface area</h3><p>Check the tank plan area against the peak-flow relationship represented by IS 2470:</p>
+<p class="k">A = 0.92 × Q<sub>p</sub> / 10</p>
+<p>where <span class="k">A</span> is surface area in m² and <span class="k">Q<sub>p</sub></span> is peak flow in L/min.</p>
+<p>The provided surface area should satisfy the applicable requirement. Peak flow should preferably come from a proper plumbing/fixture-flow assessment rather than an arbitrary value.</p></div>
+
+<div class="method-step"><h3>Step 7 — Decide number of compartments</h3><p>Use the applicable IS 2470 configuration. A two-compartment arrangement is used for larger tanks and provides better separation of primary settling/sludge functions from the outlet compartment.</p>
+<p>Provide access to each compartment for inspection and desludging. The internal partition, inlet and outlet arrangements must prevent short-circuiting and disturbance of settled solids.</p></div>
+
+<div class="method-step"><h3>Step 8 — Design inlet and outlet</h3><ul>
+<li>Provide a suitable submerged/T arrangement at the inlet to reduce disturbance.</li>
+<li>For tanks below 1200 mm width, the app represents the <b>100 mm nominal bore</b> outlet dip-pipe arrangement.</li>
+<li>Keep the outlet invert approximately <b>50 mm below the inlet invert</b> where the applicable IS 2470 detail applies.</li>
+<li>Provide sufficient submergence and prevent floating scum from escaping.</li>
+</ul></div>
+
+<div class="method-step"><h3>Step 9 — Provide ventilation and access</h3><p>Provide ventilation through a suitable vent pipe. The app uses the IS 2470 minimum representation of <b>50 mm diameter</b> and mosquito-proof protection. Position the vent to avoid nuisance and ensure safe gas dispersion.</p>
+<p>Provide properly sized access openings/covers over the compartments for inspection, maintenance and desludging.</p></div>
+
+<div class="method-step"><h3>Step 10 — Design the tank structure</h3><p>The hydraulic sizing does <b>not</b> complete the structural design. Separately check:</p>
+<ul>
+<li>Wall thickness and reinforcement</li>
+<li>Earth pressure and surcharge</li>
+<li>Internal water pressure</li>
+<li>Groundwater uplift / flotation</li>
+<li>Base slab and bearing condition</li>
+<li>Cover slab and access-cover loading</li>
+<li>Watertightness and crack control</li>
+<li>Durability and concrete exposure</li>
+<li>Construction joints and pipe penetrations</li>
+</ul>
+<p>These checks require site-specific structural parameters and should be designed by the responsible engineer.</p></div>
+
+<div class="method-step"><h3>Step 11 — Select effluent treatment/disposal</h3><p>A septic tank is <b>primary treatment</b>; its effluent still needs an appropriate treatment/disposal arrangement. Assess soil permeability/percolation, groundwater, drinking-water sources, buildings, property boundaries and local authority requirements.</p>
+<p>Depending on site conditions, options may include a subsurface dispersion/absorption system, dispersion trench, further biological treatment or another approved disposal/reuse system.</p></div>
+
+<div class="method-step"><h3>Step 12 — Final compliance review</h3><p>Before construction, verify the complete design against the <b>latest applicable BIS standards, CPHEEO guidance, NBC provisions and local building/sewerage bye-laws</b>. Check that the tank can be accessed for desludging and that no untreated sewage can reach a drain, groundwater source or surface water.</p></div>
+</div>
+
+</div>
+</section>
+
+<section id="references" class="tabpanel" style="display:none">
+<div class="card">
+<h2>8. Standards, assumptions & engineering notes</h2>
+<details open><summary>Primary standards used</summary>
+<ul>
+<li><b>IS 2470 (Part 1):1985</b> — Code of Practice for Installation of Septic Tanks: Design Criteria and Construction. BIS lists the standard as reviewed in 2022.</li>
+<li><b>IS 2470 (Part 2):1985</b> — Secondary Treatment and Disposal of Septic Tank Effluent.</li>
+<li><b>CPHEEO Manual on Sewerage and Sewage Treatment Systems</b> — national engineering guidance for sewerage/sanitation planning and design.</li>
+<li><b>NBC 2016 / local building bye-laws</b> — check the authority having jurisdiction. Local rules can impose additional separation, chamber, access and disposal requirements.</li>
+</ul></details>
+<details><summary>Key IS 2470 Part 1 values implemented</summary>
+<ul>
+<li>Minimum rectangular tank width: <b>0.75 m</b>.</li>
+<li>Minimum liquid depth: <b>1.0 m</b>; minimum liquid capacity: <b>1.0 m³</b>.</li>
+<li>Rectangular length-to-width ratio: <b>2 to 4</b>.</li>
+<li>Minimum freeboard: <b>300 mm</b>.</li>
+<li>Detention period represented by the process design: <b>24–48 h</b>.</li>
+<li>Minimum practical nominal drainage pipe diameter: <b>100 mm</b>.</li>
+<li>Ventilation pipe: <b>minimum 50 mm</b> with mosquito-proof mesh.</li>
+<li>For tanks &lt;1200 mm wide, the outlet dip-pipe is represented as <b>100 mm nominal bore</b>, with outlet invert 50 mm below inlet invert.</li>
+<li>Where tank capacity exceeds 2000 L, a two-compartment arrangement is appropriate; the app uses a 2:1 first-to-second compartment split as a practical configuration and flags the need for detailed layout.</li>
+</ul></details>
+<details><summary>IS 2470 Part 1 calculation engine</summary>
+<ul>
+<li>Peak-flow surface area: <span class="k">A = 0.92 × Qp / 10</span>, where Qp is peak flow in L/min.</li>
+<li>Digested sludge accumulation: <span class="k">0.00021 m³/person/day</span> (≈76.65 L/person/year).</li>
+<li>Hydraulic detention volume: <span class="k">Vd = Qavg × detention/24</span>.</li>
+<li>The app separates hydraulic volume, sludge-storage volume and sedimentation-area checks rather than hiding them in one black-box number.</li>
+</ul></details>
+<details><summary>Important limitations</summary>
+<ul>
+<li>The app is an <b>educational / preliminary design and checking tool</b>. It is not a substitute for the latest licensed copy of the applicable standards, local bye-laws, site investigation or professional design review.</li>
+<li>The standard household table assumes WC-only discharge; if bath, kitchen and other wastewater are also connected, use measured/approved wastewater flow and verify the treatment/disposal system accordingly.</li>
+<li>Structural design of RCC/brick walls, cover slab, buoyancy/uplift, soil pressure, seismic effects, groundwater and foundation bearing are <b>not certified by this app</b>. These require site-specific structural design.</li>
+<li>Never connect septic-tank effluent directly to an open drain or water body without the required treatment/disinfection and regulatory approval.</li>
+</ul></details>
+<p class="small"><b>Source trail:</b> BIS standard record; IS 2470 Part 1 text; IS 2470 Part 2 text; CPHEEO/MoHUA guidance. See the accompanying project documentation for the exact edition and clause before construction.</p>
+</div>
+</section>
+<div class="print-only"><b>ByAnkit Septic Tank Design — Preliminary Design Report</b><p>Generated from the values entered in the interactive tool.</p></div>
+</main>
+
+<footer class="footer"><div class="footerin">
+  <b>ByAnkit</b> • Civil Engineering • Learn. Understand. Calculate. Check. Research. Build.<br>
+</div></footer>
+
+<script>
+const std=[
+ {u:5,L:1.5,B:.75,d1:1.0,d2:1.05},
+ {u:10,L:2.0,B:.90,d1:1.0,d2:1.40},
+ {u:15,L:2.0,B:.90,d1:1.3,d2:2.00},
+ {u:20,L:2.3,B:1.10,d1:1.3,d2:1.80}
+];
+const colony=[
+ {u:50,L:5.0,B:2.0,d1:1.0,d2:1.24},
+ {u:100,L:7.5,B:2.65,d1:1.0,d2:1.24},
+ {u:150,L:10.0,B:3.0,d1:1.0,d2:1.24},
+ {u:200,L:12.0,B:3.3,d1:1.0,d2:1.24},
+ {u:300,L:15.0,B:4.0,d1:1.0,d2:1.24}
+];
+
+function n(id){return parseFloat(document.getElementById(id).value)||0}
+function fmt(x,d=2){return Number(x).toFixed(d)}
+function openTab(id){document.querySelectorAll(".tabpanel").forEach(x=>x.style.display=(x.id===id?"block":"none"));document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x.dataset.tab===id));window.scrollTo({top:0,behavior:"smooth"})}
+function go(id){openTab(id)}
+
+function nearestStd(u, years){
+  if(u<=20){
+    let s=std.find(x=>x.u>=u)||std[std.length-1];
+    return {...s,source:"IS 2470 Appendix A — household table"};
+  }
+  let c=colony.find(x=>x.u>=u)||colony[colony.length-1];
+  return {...c,source:"IS 2470 Appendix A — residential colony table"};
+}
+
+function calculate(){
+  const u=n("users"), qpc=n("lpcd"), det=n("det"), clean=n("clean"), d=n("depth"), r=n("ratio"), fb=n("freeboard");
+  let peak=n("peak");
+  // Household fixture-flow proxy: retain user input if explicitly changed; otherwise sensible small-household values.
+  if(document.activeElement && document.activeElement.id!=="peak"){
+    if(u<=5) peak=9; else if(u<=10) peak=18; else if(u<=15) peak=18; else if(u<=20) peak=27;
+    document.getElementById("peak").value=peak;
+  }
+  const flow=u*qpc;                         // L/day
+  const hyd=flow*det/24/1000;             // m3
+  const sludge=u*.00021*365*clean;        // m3
+  const areaReq=.92*peak/10;              // m2
+  const s=nearestStd(u,clean);
+  let L=s.L,B=s.B,D=clean==2?s.d2:s.d1;
+  // For >20 users, use table as a reference starting point. For household custom inputs, preserve standard dimensions unless user asks custom.
+  const cap=L*B*D;
+  const H=D+fb;
+  const areaProv=L*B;
+  document.getElementById("outL").textContent=fmt(L)+" m";
+  document.getElementById("outB").textContent=fmt(B)+" m";
+  document.getElementById("outD").textContent=fmt(D)+" m";
+  document.getElementById("outH").textContent=fmt(H)+" m";
+  document.getElementById("cap").textContent=fmt(cap)+" m³ ("+fmt(cap*1000,0)+" L)";
+  document.getElementById("flow").textContent=fmt(flow,0)+" L/day";
+  document.getElementById("hyd").textContent=fmt(hyd)+" m³";
+  document.getElementById("sludge").textContent=fmt(sludge)+" m³";
+  document.getElementById("areaReq").textContent=fmt(areaReq)+" m²";
+  document.getElementById("areaProv").textContent=fmt(areaProv)+" m²";
+  document.getElementById("selectionNote").innerHTML=
+    `<b>Reference selection:</b> ${s.source}. For ≤20 users the standard dimensions assume WC-only discharge. Your entered wastewater flow is used for a separate hydraulic check; if all domestic wastewater is connected, verify the full treatment/disposal system.`;
+  updateChecks({u,flow,hyd,sludge,areaReq,areaProv,L,B,D,H,fb,r,clean,cap,det,peak});
+  draw(L,B,D,H);
+}
+
+function updateChecks(x){
+  const out=[];
+  function add(ok,title,detail,tag="CHECK"){
+    out.push(`<div class="check"><div class="icon ${ok?'ok':'bad'}">${ok?'✓':'!'}</div><div><strong>${title}</strong><small>${detail}</small></div><span class="status" style="color:${ok?'var(--success)':'var(--danger)'}">${ok?'PASS':'ACTION'}</span></div>`);
+  }
+  add(x.B>=.75,"Minimum width",`Provided ${fmt(x.B)} m; IS 2470 minimum is 0.75 m.`);
+  add(x.D>=1.0,"Minimum liquid depth",`Provided ${fmt(x.D)} m; minimum is 1.0 m.`);
+  add(x.cap>=1.0,"Minimum liquid capacity",`Provided ${fmt(x.cap)} m³; minimum is 1.0 m³.`);
+  add(x.L/x.B>=2 && x.L/x.B<=4,"Length-to-width ratio",`L/B = ${fmt(x.L/x.B)}; permitted range is 2–4.`);
+  add(x.fb>=.30,"Freeboard",`Provided ${fmt(x.fb)} m; provide at least 0.30 m above top water level.`);
+  add(x.det>=24 && x.det<=48,"Detention time",`Design input = ${x.det} h; IS 2470 process design range is 24–48 h.`);
+  add(x.areaProv>=x.areaReq,"Settling surface area",`Required ${fmt(x.areaReq)} m² from peak-flow relation; provided ${fmt(x.areaProv)} m².`);
+  add(x.u<=20 || x.cap>2,"Scale / chamber check",x.u<=20?`Household-scale table applies at ${x.u} users.`:`${x.u} users is beyond the individual-household table; provide a multi-compartment/parallel system and detailed engineering review.`);
+  add(x.cap>=x.hyd, "Hydraulic capacity",`Provided liquid volume ${fmt(x.cap)} m³ versus detention volume ${fmt(x.hyd)} m³ for the entered flow.`);
+  // A useful storage flag, intentionally advisory because standard table sizing and modern wastewater flow bases can differ.
+  const storage = x.hyd + x.sludge;
+  add(x.cap>=storage,"Hydraulic + IS sludge storage",`Provided ${fmt(x.cap)} m³; hydraulic + digested-sludge volume is ${fmt(storage)} m³. If this fails, increase size or shorten desludging interval.`, "ADVISORY");
+  document.getElementById("checksList").innerHTML=out.join("");
+}
+
+function draw(L,B,D,H){
+  document.getElementById("svgL").textContent=fmt(L);
+  document.getElementById("svgB").textContent=fmt(B);
+  // keep drawing readable; partition 2:1
+  const tankX=40,tankY=60,tankW=500,tankH=180;
+  const pX=tankX+tankW*(2/3);
+  document.getElementById("partition").setAttribute("x1",pX);
+  document.getElementById("partition").setAttribute("x2",pX);
+  const waterY=70+250*(1-D/H);
+  const waterH=320-waterY;
+  document.getElementById("water").setAttribute("y",waterY);
+  document.getElementById("water").setAttribute("height",Math.max(80,waterH));
+}
+
+function disposalCheck(){
+  const t=n("perc"), well=n("well"), b=n("building"), gw=n("gw");
+  const msgs=[];
+  let ok=true;
+  if(well<18){ok=false;msgs.push("Drinking-water separation is below the 18 m IS 2470 Part 2 criterion for a subsurface dispersion system.");}
+  if(b<6){ok=false;msgs.push("Building separation is below the 6 m IS 2470 Part 2 criterion for subsurface dispersion systems.");}
+  if(gw<1.5){ok=false;msgs.push("Groundwater clearance is below the 1.5 m screening value used for absorption systems; a different treatment/disposal arrangement may be necessary.");}
+  let method="";
+  if(t<=30) method="Percolation ≤30 min: soil absorption may be considered, subject to site and groundwater checks.";
+  else if(t<=60) method="Percolation 30–60 min: use a dispersion-trench/mound arrangement only after site-specific assessment.";
+  else method="Percolation >60 min: ordinary soil absorption is not recommended; consider biological/anaerobic treatment or another approved disposal route.";
+  if(!ok) document.getElementById("disposalResult").className="callout warnbox";
+  else document.getElementById("disposalResult").className="callout";
+  document.getElementById("disposalResult").innerHTML=`<b>${ok?'Screening: conditions appear acceptable for further design':'Screening: revise / investigate before adopting absorption disposal'}</b><br>${method}<br>${msgs.length?'<br>• '+msgs.join('<br>• '):'No separation warning from the entered values.'}<br><br><span class="small">Final disposal method must follow IS 2470 Part 2 and the authority having jurisdiction. A septic tank alone is not a complete wastewater-treatment/disposal system.</span>`;
+}
+
+function resetDefaults(){
+  document.getElementById("users").value=5;document.getElementById("lpcd").value=135;document.getElementById("det").value=24;
+  document.getElementById("clean").value=2;document.getElementById("depth").value=1.2;document.getElementById("ratio").value=2.5;
+  document.getElementById("freeboard").value=.30;document.getElementById("peak").value=9;
+  calculate();
+}
+["users","lpcd","det","clean","depth","ratio","freeboard","peak"].forEach(id=>{
+  document.getElementById(id).addEventListener("change",calculate);
+});
+calculate();disposalCheck();
+</script>
+</body>
+</html>

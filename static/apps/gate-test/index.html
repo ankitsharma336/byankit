@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="calculator.css">
 <title>GATE Practice | ByAnkit — MathML Render Fixed</title>
 <style>
 :root{--green:#166534;--forest:#14532d;--mint:#dcfce7;--bg:#f5f7f6;--card:#fff;--line:#dbe2df;--text:#17211b;--muted:#64746b;--amber:#f59e0b;--red:#dc2626;--blue:#2563eb}
@@ -62,6 +63,208 @@ select{width:100%;padding:11px 12px;border:1px solid #cfd8d4;border-radius:10px;
 .sol-options{margin:10px 0 0;padding-left:20px;font-size:13px;line-height:1.7}
 .review-tools{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 0 10px;flex-wrap:wrap}
 @media(max-width:700px){.sol-grid{grid-template-columns:1fr}}
+
+/* ============================================================
+   GATE CBT TEST UI — isolated overrides for #exam only
+   Existing setup/result/test-bank logic is intentionally untouched.
+   ============================================================ */
+#exam.gate-exam-shell{
+  position:fixed; inset:0; z-index:1000; overflow:hidden;
+  background:#fff; color:#111;
+  font-family:Arial,Helvetica,sans-serif;
+}
+.gate-exam-shell .gate-bluebar{
+  height:56px; background:#337ab7; color:#fff; display:flex;
+  align-items:center; justify-content:space-between; padding:0 14px;
+  border-bottom:1px solid #286090;
+}
+.gate-brand{font-size:20px;letter-spacing:.1px}
+.gate-brand-mark{font-size:28px;line-height:0;vertical-align:-2px}
+.gate-client-logo{font-size:23px;font-weight:700;color:#ff1616}
+.gate-test-titlebar{
+  height:45px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 10px; border-bottom:1px solid #d0d0d0; background:#fff;
+}
+.gate-test-title{font-size:17px}
+.gate-marks{
+  display:flex; gap:0; border:1px solid #777; border-radius:5px;
+  overflow:hidden; font-size:12px;
+}
+.gate-marks span{padding:6px 11px; white-space:nowrap}
+.gate-marks span+span{border-left:1px solid #ccc}
+.gate-subjectbar{
+  height:42px; display:flex; align-items:stretch; border-bottom:1px solid #bbb;
+  background:#f5f5f5; padding-left:10px; gap:0;
+}
+.gate-subject{
+  min-width:135px; padding:0 14px; border:1px solid #ccc; border-top:0;
+  border-bottom:0; background:linear-gradient(#fff,#eee); cursor:default;
+  font-size:13px; color:#111;
+}
+.gate-subject.active{background:#12b8d0;color:#fff;border-color:#10a8be}
+.gate-fullscreen{
+  margin:5px 8px 5px auto; border:1px solid #b6c8d8; background:#eaf2f9;
+  color:#234; padding:0 10px; cursor:pointer; font-size:12px;
+}
+.gate-main{
+  height:calc(100% - 143px); display:grid; grid-template-columns:minmax(0,1fr) 272px;
+  gap:0; background:#fff;
+}
+.gate-question-panel{min-width:0; display:flex; flex-direction:column; border-right:1px solid #ddd}
+.gate-question-number{
+  height:41px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 12px; background:#f4f4f4; border-bottom:1px solid #ddd;
+  font-size:13px; font-weight:700;
+}
+.gate-question-number #qmeta{font-weight:400;color:#555}
+.gate-question-scroll{flex:1;overflow:auto;padding:18px 20px 12px}
+.gate-question{
+  font-size:17px; line-height:1.55; margin:0 0 20px; color:#111;
+}
+.gate-question img{max-width:100%;height:auto}
+.gate-question math{font-size:1.05em}
+.gate-question-panel .option{
+  display:flex; gap:10px; align-items:flex-start; padding:8px 4px;
+  border:0; border-radius:0; margin:0; background:#fff; cursor:pointer;
+  font-size:16px; line-height:1.45;
+}
+.gate-question-panel .option:hover{background:#fafafa;border:0}
+.gate-question-panel .option.selected{
+  background:#fff; border:0; box-shadow:none; color:#000;
+}
+.gate-question-panel .option input{margin:4px 4px 0 0;accent-color:#337ab7}
+.gate-question-panel .letter{font-weight:400;min-width:18px}
+.gate-question-panel .nat{
+  max-width:420px;background:#fff;border:0;padding:0;
+}
+.gate-question-panel .nat input{
+  width:220px;padding:8px;border:1px solid #aaa;border-radius:2px;font-size:16px;
+}
+.gate-bottom-controls{
+  min-height:50px; display:flex; align-items:center; gap:6px;
+  padding:7px 10px; background:#f1f1f1; border-top:1px solid #c8c8c8;
+}
+.gate-nav-btn,.gate-calc-btn{
+  min-height:34px; border:1px solid #aaa; border-radius:3px; padding:0 13px;
+  background:linear-gradient(#fff,#e5e5e5); color:#111; cursor:pointer; font-size:13px;
+}
+.gate-nav-btn:disabled{opacity:.45;cursor:not-allowed}
+.gate-review-btn{margin-left:auto}
+.gate-save-btn{background:#337ab7;color:#fff;border-color:#286090}
+.gate-calc-btn{background:#fff8dc;border-color:#c7a83b;font-weight:700}
+.gate-sidebar{background:#e7eff8;min-width:0;display:flex;flex-direction:column}
+.gate-candidate{
+  height:82px; display:flex;align-items:center;gap:14px;padding:10px;
+  background:#f4f8fc;border-bottom:1px solid #d2dce7;
+}
+.gate-avatar{
+  width:62px;height:58px;border:1px solid #b9c6d2;background:#dbe7f2;
+  display:flex;align-items:center;justify-content:center;font-size:26px;color:#234;
+}
+.gate-time-block{font-size:14px}
+.gate-time-label{font-weight:700;margin-bottom:4px}
+.gate-time-value{font-weight:700;font-size:14px}
+.gate-palette-head{
+  height:44px;display:flex;align-items:center;justify-content:center;
+  background:#dce7f3;border-bottom:1px solid #c4d0dc;font-size:16px;
+}
+.gate-palette{
+  display:grid!important;grid-template-columns:repeat(4,1fr)!important;
+  gap:9px!important;padding:14px 18px!important;background:#e7eff8;
+}
+.gate-palette .pbtn{
+  height:27px!important;min-width:0;border:1px solid #aaa!important;border-radius:4px!important;
+  background:linear-gradient(#fff,#e6e6e6)!important;color:#111!important;font-size:12px!important;
+  box-shadow:none!important;outline:none!important;padding:0!important;
+}
+.gate-palette .pbtn.current{
+  outline:2px solid #111!important;outline-offset:0;background:#fff!important;
+}
+.gate-palette .pbtn.answered{
+  background:#6fbf1f!important;color:#fff!important;border-color:#5a9f17!important;
+}
+.gate-palette .pbtn.review{
+  background:#8d57d8!important;color:#fff!important;border-color:#7040b8!important;
+  border-radius:50%!important;
+}
+.gate-palette .pbtn.answered.review{
+  background:linear-gradient(135deg,#6fbf1f 50%,#8d57d8 50%)!important;
+  color:#fff!important;border-radius:50%!important;
+}
+.gate-palette-help{
+  padding:2px 18px 12px;font-size:11px;line-height:1.8;color:#455;
+}
+.legend-dot{
+  display:inline-block;width:11px;height:11px;border:1px solid #888;
+  vertical-align:-1px;margin-right:4px;background:#fff;
+}
+.legend-answered{background:#6fbf1f;border-color:#5a9f17}
+.legend-review{background:#8d57d8;border-color:#7040b8;border-radius:50%}
+.legend-current{outline:1px solid #111}
+.gate-submit-btn{
+  margin:0 18px 16px;height:36px;border:1px solid #286090;border-radius:3px;
+  background:#337ab7;color:#fff;font-weight:700;cursor:pointer;
+}
+.gate-exam-shell .hidden{display:none!important}
+@media(max-width:900px){
+  .gate-main{grid-template-columns:1fr 235px}
+  .gate-subject{min-width:105px;padding:0 8px}
+}
+@media(max-width:700px){
+  #exam.gate-exam-shell{overflow:auto;position:absolute;min-height:100vh}
+  .gate-main{height:auto;min-height:calc(100vh - 143px);grid-template-columns:1fr}
+  .gate-sidebar{border-top:1px solid #ccc}
+  .gate-palette{grid-template-columns:repeat(8,1fr)!important}
+  .gate-question-scroll{min-height:430px}
+  .gate-review-btn{margin-left:0}
+}
+
+.gate-legacy-stats{display:none!important}
+</style>
+
+<style id="final-working-layout">
+.duration-note{font-size:11px;color:#64746b}
+.duration-readonly{
+  display:flex;align-items:center;min-height:38px;padding:8px 10px;
+  box-sizing:border-box;border:1px solid #cfd8d3;border-radius:7px;
+  background:#f3f6f4;font-weight:800;color:#166534;
+}
+.exam-source-badge{
+  display:inline-flex;align-items:center;width:max-content;
+  margin:0 0 10px;padding:4px 9px;border-radius:999px;
+  background:#e8f5e9;color:#166534;border:1px solid #bbf7d0;
+  font-size:11px;font-weight:800;
+}
+/* Exam mode: all chrome fits in one desktop viewport. */
+html,body{min-height:100%;margin:0}
+#exam.gate-exam-shell{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;max-height:100vh!important;overflow:hidden!important}
+#exam.gate-exam-shell .gate-main{
+  height:calc(100vh - 143px)!important;max-height:calc(100vh - 143px)!important;
+  min-height:0!important;display:grid!important;grid-template-columns:minmax(0,1fr) 292px!important;
+  gap:0!important;overflow:hidden!important;box-sizing:border-box!important;
+}
+#exam.gate-exam-shell .gate-question-panel{min-width:0!important;min-height:0!important;height:100%!important;overflow:hidden!important;display:flex!important;flex-direction:column!important}
+#exam.gate-exam-shell .gate-question-scroll{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important}
+#exam.gate-exam-shell .gate-bottom-controls{flex:0 0 50px!important;height:50px!important;min-height:50px!important;box-sizing:border-box!important}
+#exam.gate-exam-shell .gate-sidebar{width:292px!important;min-width:292px!important;height:100%!important;max-height:100%!important;min-height:0!important;overflow:hidden!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important}
+#exam.gate-exam-shell .gate-candidate{flex:0 0 64px!important;height:64px!important}
+#exam.gate-exam-shell .gate-palette{grid-template-columns:repeat(8,minmax(0,1fr))!important;gap:3px!important}
+#exam.gate-exam-shell .gate-palette .pbtn{height:25px!important;min-height:25px!important;max-height:25px!important;padding:0!important;font-size:10px!important;line-height:25px!important;transform:none!important;writing-mode:horizontal-tb!important}
+#exam.gate-exam-shell .gate-palette .pbtn.current{transform:none!important;writing-mode:horizontal-tb!important}
+/* Actual result section: independent scrolling. */
+#result.result:not(.hidden){
+  position:fixed!important;z-index:100!important;inset:0!important;
+  width:100vw!important;height:100vh!important;max-height:100vh!important;
+  margin:0!important;box-sizing:border-box!important;overflow-y:auto!important;
+  overflow-x:hidden!important;padding:24px!important;-webkit-overflow-scrolling:touch!important;
+}
+#result.result.hidden{display:none!important}
+@media(max-width:900px){
+  #exam.gate-exam-shell{position:relative!important;inset:auto!important;width:100%!important;height:auto!important;max-height:none!important;overflow:visible!important}
+  #exam.gate-exam-shell .gate-main{height:auto!important;max-height:none!important;grid-template-columns:1fr!important;overflow:visible!important}
+  #exam.gate-exam-shell .gate-question-scroll{overflow:visible!important}
+  #exam.gate-exam-shell .gate-sidebar{width:100%!important;min-width:0!important;height:auto!important;max-height:none!important;overflow:visible!important}
+}
 </style>
 </head>
 <body>
@@ -72,19 +275,21 @@ select{width:100%;padding:11px 12px;border:1px solid #cfd8d4;border-radius:10px;
   <div class="hero">
     <div class="eyebrow">Civil Engineering</div>
     <h1>GATE Practice Test</h1>
-    <p>Build a focused practice test from the ByAnkit question bank. Select your subject, topic and test pattern, then start the exam.</p>
+    <p>Build a focused practice test from the ByAnkit question bank. Select the subject, source/year and number of questions, then start the exam.</p>
   </div>
 
   <div class="card setup">
     <div class="section-title">Test Configuration</div>
     <div class="grid">
       <div class="field"><label>Subject</label><select id="subject"></select></div>
-      <div class="field"><label>Topic</label><select id="topic"></select></div>
-      <div class="field"><label>Difficulty</label><select id="difficulty"></select></div>
-      <div class="field"><label>Question Type</label><select id="type"></select></div>
       <div class="field"><label>Source / Year</label><select id="source"></select></div>
-      <div class="field"><label>Number of Questions</label><select id="count"><option>10</option><option>20</option><option>30</option><option>50</option><option>65</option></select></div>
-      <div class="field"><label>Test Duration</label><select id="duration"><option>15</option><option>30</option><option>45</option><option>60</option><option>90</option><option selected>180</option></select></div>
+      <div class="field"><label>Number of Questions</label><select id="count">
+        <option>10</option><option>20</option><option>30</option><option>50</option><option>65</option>
+      </select></div>
+      <div class="field"><label>Test Duration <span class="duration-note">(GATE ratio)</span></label>
+        <div id="durationDisplay" class="duration-readonly">28 min</div>
+        <input type="hidden" id="duration" value="28">
+      </div>
     </div>
     <div class="actions">
       <button class="primary" id="startBtn" disabled>Loading Question Bank…</button>
@@ -98,23 +303,68 @@ select{width:100%;padding:11px 12px;border:1px solid #cfd8d4;border-radius:10px;
   </div>
 </section>
 
-<section id="exam" class="hidden">
-  <div class="exam-head">
-    <div><div class="exam-title">GATE Practice Test</div><div class="chips"><span class="chip" id="progress">Q 1 / 10</span><span class="chip" id="answered">0 Answered</span><span class="chip" id="marked">0 Marked</span></div></div>
-    <div class="timer" id="timer">180:00</div>
+<section id="exam" class="hidden gate-exam-shell">
+  <div class="gate-bluebar">
+    <div class="gate-brand"><span class="gate-brand-mark">•</span> <b>GATE</b> Practice</div>
+    <div class="gate-client-logo">BYANKIT</div>
   </div>
-  <div class="exam-layout">
-    <article class="card question-card">
-      <div class="qtop"><div class="qno" id="qno">Question 1</div><div class="qmeta" id="qmeta">1 Mark</div></div>
-      <div class="question" id="question"></div>
-      <div id="answerArea"></div>
-      <div class="nav"><button class="secondary" id="prev">← Previous</button><button class="secondary" id="mark">Mark for Review</button><button class="primary" id="next">Save & Next →</button></div>
-    </article>
-    <aside class="card palette-card">
-      <div class="palette-title">Question Palette</div>
-      <div class="palette" id="palette"></div>
-      <div class="legend">□ Not answered<br>■ Answered<br>■ Marked for review</div>
-      <button class="primary submit" id="submit">Submit Test</button>
+
+  <div class="gate-test-titlebar">
+    <div class="gate-test-title"><b>GATE: CIVIL ENGINEERING</b></div>
+    <div class="gate-legacy-stats" aria-hidden="true"><span id="progress"></span><span id="answered"></span><span id="marked"></span></div>
+    <div class="gate-marks">
+      <span>Maximum Mark: <b id="gateMaxMarks">1</b></span>
+      <span>Negative Mark: <b id="gateNegativeMarks">0</b></span>
+    </div>
+  </div>
+
+  <div class="gate-subjectbar" id="gateSubjectBar">
+    <button class="gate-subject active" data-section="Civil Engineering" type="button">Civil Engineering</button>
+    <button class="gate-subject" data-section="General Aptitude" type="button">General Aptitude</button>
+    <button class="gate-subject" data-section="Engineering Mathematics" type="button">Engineering Mathematics</button>
+    <button class="gate-subject" data-section="Technical" type="button">Technical</button>
+    <button class="gate-fullscreen" id="gateFullscreen" type="button">View Full Screen</button>
+  </div>
+
+  <div class="gate-main">
+    <main class="gate-question-panel">
+      <div class="gate-question-number">
+        <span id="qno">Question 1</span>
+        <span id="qmeta">1 Mark</span>
+      </div>
+
+      <div class="gate-question-scroll">
+        <div class="gate-question" id="question"></div>
+        <div id="answerArea"></div>
+      </div>
+
+      <div class="gate-bottom-controls">
+        <button class="gate-nav-btn" id="prev">Previous</button>
+        <button class="gate-nav-btn gate-review-btn" id="mark">Mark for Review</button>
+        <button class="gate-nav-btn gate-save-btn" id="next">Save &amp; Next</button>
+        <button class="gate-calc-btn" id="openCalculator" type="button">🧮 Calculator</button>
+      </div>
+    </main>
+
+    <aside class="gate-sidebar">
+      <div class="gate-candidate">
+        <div class="gate-avatar" aria-hidden="true">A</div>
+        <div class="gate-time-block">
+          <div class="gate-time-label">Time Left:</div>
+          <div class="gate-time-value" id="timer">180:00</div>
+        </div>
+      </div>
+
+      <div class="gate-palette-head">Questions Palette</div>
+      <div class="palette gate-palette" id="palette"></div>
+
+      <div class="gate-palette-help">
+        <div><span class="legend-dot legend-answered"></span> Answered</div>
+        <div><span class="legend-dot legend-review"></span> Marked for Review</div>
+        <div><span class="legend-dot legend-current"></span> Current Question</div>
+      </div>
+
+      <button class="gate-submit-btn" id="submit" type="button">Submit Test</button>
     </aside>
   </div>
 </section>
@@ -278,7 +528,8 @@ function loadBank(){
           type:(o.type||"MCQ").toUpperCase(),question:o.question,
           options:[o.optiona,o.optionb,o.optionc,o.optiond].filter(Boolean),
           answer:o.answer,marks:Number(o.marks)||1,negative:Number(o.negative)||0,
-          explanation:o.explanation||"",year:o.year||"",source:o.source||o.year||"",
+          explanation:o.explanation||"",year:o.year||"",
+          examsource:o.examsource||"",source:o.examsource||o.source||o.year||"",
           tolerance:o.tolerance||""
         };
       }).filter(q=>q.question && q.answer);
@@ -312,25 +563,18 @@ function fillSelect(id, values, label){
 }
 function populate(){
   fillSelect("subject",S.bank.map(q=>q.subject),"All Subjects");
-  fillSelect("topic",S.bank.map(q=>q.topic),"All Topics");
-  fillSelect("difficulty",S.bank.map(q=>q.difficulty),"All Difficulties");
-  fillSelect("type",S.bank.map(q=>q.type),"All Types");
   fillSelect("source",S.bank.map(q=>q.source),"All Sources");
 }
-
 
 function updateDependentFilters(){
   const subject=$("subject").value;
   const subset=S.bank.filter(q=>subject==="ALL"||q.subject===subject);
-  fillSelect("topic",subset.map(q=>q.topic),"All Topics");
-  fillSelect("difficulty",subset.map(q=>q.difficulty),"All Difficulties");
-  fillSelect("type",subset.map(q=>q.type),"All Types");
   fillSelect("source",subset.map(q=>q.source),"All Sources");
 }
 
 function pool(){
- let s=$("subject").value,t=$("topic").value,d=$("difficulty").value,ty=$("type").value,src=$("source").value;
- return S.bank.filter(q=>(s=="ALL"||q.subject==s)&&(t=="ALL"||q.topic==t)&&(d=="ALL"||q.difficulty==d)&&(ty=="ALL"||q.type==ty)&&(src=="ALL"||q.source==src));
+  const s=$("subject").value,src=$("source").value;
+  return S.bank.filter(q=>(s=="ALL"||q.subject==s)&&(src=="ALL"||q.source==src));
 }
 function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function start(){
@@ -338,7 +582,7 @@ function start(){
  let p=pool(),n=Number($("count").value);
  if(!p.length){$("message").innerHTML='<div class="notice error">No questions match the selected filters.</div>';return}
  if(p.length<n){$("message").innerHTML='<div class="notice error">Only '+p.length+' questions match these filters. Select '+p.length+' or fewer.</div>';return}
- S.test=shuffle(p).slice(0,n);S.answers=Array(n).fill(null);S.review=Array(n).fill(false);S.i=0;S.sec=Number($("duration").value)*60;
+ S.test=shuffle(p).slice(0,n);S.answers=Array(n).fill(null);S.review=Array(n).fill(false);S.i=0;S.sec=Math.max(60,Math.round(n*180/65)*60);
  $("setup").classList.add("hidden");$("result").classList.add("hidden");$("exam").classList.remove("hidden");$("mode").textContent="Exam Mode";
  render();palette();startTimer();
 }
@@ -347,7 +591,7 @@ function tick(){let m=Math.floor(S.sec/60),s=S.sec%60;$("timer").textContent=Str
 function answered(a){return Array.isArray(a)?a.length>0:a!==null&&a!==undefined&&String(a).trim()!==""}
 function render(){
  let q=S.test[S.i],type=q.type,s=S.answers[S.i];$("progress").textContent="Q "+(S.i+1)+" / "+S.test.length;$("answered").textContent=S.answers.filter(answered).length+" Answered";$("marked").textContent=S.review.filter(Boolean).length+" Marked";
- $("qno").textContent="Question "+(S.i+1)+" · "+type;$("qmeta").textContent=q.marks+" Mark"+(q.marks==1?"":"s")+(q.negative?" · −"+q.negative:"");$("question").innerHTML=renderRich(q.question);
+ $("qno").textContent="Question "+(S.i+1)+" · "+type;$("qmeta").textContent=q.marks+" Mark"+(q.marks==1?"":"s")+(q.negative?" · −"+q.negative:"");const source=String(q.examsource||"").trim();$("question").innerHTML=(source?'<div class="exam-source-badge">Exam: '+esc(source)+'</div>':"")+renderRich(q.question);
  if(type=="NAT"){
   $("answerArea").innerHTML='<div class="nat"><b>Numerical Answer</b><p style="color:#64746b;font-size:12px">Enter your numerical answer.</p><input id="nat" inputmode="decimal" value="'+esc(s??"")+'" placeholder="e.g. 12.50"></div>';
   $("nat").oninput=e=>{S.answers[S.i]=e.target.value.trim();palette();renderCounts()}
@@ -360,7 +604,35 @@ function render(){
 }
 function renderCounts(){$("answered").textContent=S.answers.filter(answered).length+" Answered";$("marked").textContent=S.review.filter(Boolean).length+" Marked"}
 function palette(){$("palette").innerHTML=S.test.map((q,i)=>'<button class="pbtn '+(i===S.i?"current ":"")+(answered(S.answers[i])?"answered ":"")+(S.review[i]?"review":"")+'" onclick="go('+i+')">'+(i+1)+'</button>').join("")}
-function go(i){S.i=i;render();palette()}function next(){if(S.i<S.test.length-1){S.i++;render();palette()}}function prev(){if(S.i>0){S.i--;render();palette()}}
+function go(i){S.i=i;render();palette();syncGateSection()}function next(){if(S.i<S.test.length-1){S.i++;render();palette();syncGateSection()}}function prev(){if(S.i>0){S.i--;render();palette();syncGateSection()}}
+function normalizeSection(v){return String(v||"").trim().toLowerCase().replace(/\s+/g," ")}
+function questionInSection(q,section){
+  const s=normalizeSection(section), qsub=normalizeSection(q.subject), qtopic=normalizeSection(q.topic);
+  if(s==="civil engineering") return qsub==="civil engineering" || qsub.includes("civil engineering");
+  if(s==="general aptitude") return qsub.includes("general aptitude") || qsub==="aptitude" || qsub==="general";
+  if(s==="engineering mathematics") return qsub.includes("engineering mathematics") || qsub==="mathematics" || qsub==="maths";
+  // Technical is the GATE technical bucket: explicitly Technical, or any
+  // subject outside GA/Engineering Mathematics/Civil when the bank stores
+  // individual technical disciplines.
+  if(s==="technical") return qsub==="technical" || (!qsub.includes("general aptitude") && !qsub.includes("engineering mathematics") && qsub!=="aptitude" && qsub!=="mathematics" && qsub!=="maths");
+  return false;
+}
+function syncGateSection(){
+  const buttons=document.querySelectorAll(".gate-subject[data-section]");
+  if(!buttons.length || !S.test.length) return;
+  const q=S.test[S.i];
+  let active="Technical";
+  for(const b of buttons){if(questionInSection(q,b.dataset.section)){active=b.dataset.section;break}}
+  buttons.forEach(b=>b.classList.toggle("active",b.dataset.section===active));
+}
+function jumpGateSection(section){
+  if(!S.test.length) return;
+  const idx=S.test.findIndex(q=>questionInSection(q,section));
+  document.querySelectorAll(".gate-subject[data-section]").forEach(b=>b.classList.toggle("active",b.dataset.section===section));
+  if(idx<0) return;
+  S.i=idx; render(); palette();
+}
+document.querySelectorAll(".gate-subject[data-section]").forEach(b=>b.addEventListener("click",()=>jumpGateSection(b.dataset.section)));
 function correct(q,a){
  if(!answered(a))return false;let t=q.type;
  if(t=="MSQ"){let x=String(q.answer).toUpperCase().split(/[\s,;|]+/).filter(Boolean).sort(),y=(Array.isArray(a)?a:[]).map(v=>v.toUpperCase()).sort();return x.length===y.length&&x.every((v,i)=>v===y[i])}
@@ -381,7 +653,7 @@ function finish(){
   const label=attempted?(ok?"Correct":"Wrong"):"Not Attempted";
   const explanation=q.explanation ? renderRich(q.explanation) :
     '<span style="color:#92400e">No explanation has been added for this question yet. You can add it to the <b>explanation</b> column in the Google Sheet.</span>';
-  const optText=q.options.length ? '<ol class="sol-options">'+q.options.map((o,j)=>'<li><b>'+("ABCD"[j])+'.</b> '+esc(o)+'</li>').join("")+'</ol>' : "";
+  const optText=q.options.length ? '<div class="sol-options">'+q.options.map((o,j)=>'<div class="sol-option"><b>'+("ABCD"[j])+'.</b><span>'+renderRich(o)+'</span></div>').join("")+'</div>' : "";
   return '<div class="solution-card" data-index="'+i+'">'+
     '<div class="solution-head" onclick="toggleSolution('+i+')">'+
       '<div class="solution-title">Question '+(i+1)+' · '+esc(q.topic||"")+'</div>'+
@@ -411,6 +683,157 @@ $("expandAll").onclick=()=>document.querySelectorAll(".solution-card").forEach(c
 $("collapseAll").onclick=()=>document.querySelectorAll(".solution-card").forEach(c=>c.classList.remove("open"));
 $("newTest").onclick=()=>{$("result").classList.add("hidden");$("setup").classList.remove("hidden");$("mode").textContent=""};
 loadBank();
+</script>
+
+
+
+
+<div id="gateCalculatorModal" class="gate-calculator-modal hidden" aria-hidden="true">
+  <div class="gate-calculator-backdrop" id="calculatorBackdrop"></div>
+  <div class="gate-calculator-window" role="dialog" aria-modal="true" aria-label="GATE Virtual Scientific Calculator">
+    <div class="gate-calculator-titlebar">
+      <b>GATE Virtual Scientific Calculator</b>
+      <button type="button" id="closeCalculator" aria-label="Close calculator">✕</button>
+    </div>
+
+    <div class="gate-calc-screen">
+      <div class="gate-calc-expression">
+        <span id="gateCalcMemory" class="gate-calc-memory hidden">M</span>
+        <span id="gateCalcExpression"></span>
+      </div>
+      <div id="gateCalcDisplay" class="gate-calc-display">0</div>
+    </div>
+
+    <div class="gate-calc-keypad">
+  <div class="calc-row r1">
+    <button data-calc-action="binary" data-value="mod">mod</button>
+    <button data-calc-action="memory" data-value="MC">MC</button>
+    <button data-calc-action="memory" data-value="MR">MR</button>
+    <button data-calc-action="memory" data-value="MS">MS</button>
+    <button data-calc-action="memory" data-value="M+">M+</button>
+    <button data-calc-action="memory" data-value="M-">M-</button>
+  </div>
+  <div class="calc-row r2">
+    <button data-calc-action="unary" data-value="sinh">sinh</button>
+    <button data-calc-action="unary" data-value="cosh">cosh</button>
+    <button data-calc-action="unary" data-value="tanh">tanh</button>
+    <button data-calc-action="exp">Exp</button>
+    <button data-calc-action="paren" data-value="(">(</button>
+    <button data-calc-action="paren" data-value=")">)</button>
+    <button class="gate-calc-back" data-calc-action="back">←</button>
+    <button data-calc-action="clear">C</button>
+    <button data-calc-action="sign">+/-</button>
+    <button data-calc-action="unary" data-value="sqrt">√</button>
+  </div>
+  <div class="calc-row r3">
+    <button data-calc-action="unary" data-value="asinh">sinh⁻¹</button>
+    <button data-calc-action="unary" data-value="acosh">cosh⁻¹</button>
+    <button data-calc-action="unary" data-value="atanh">tanh⁻¹</button>
+    <button data-calc-action="unary" data-value="log2">log₂x</button>
+    <button data-calc-action="unary" data-value="ln">ln</button>
+    <button data-calc-action="unary" data-value="log10">log</button>
+    <button data-calc-action="digit" data-value="7">7</button>
+    <button data-calc-action="digit" data-value="8">8</button>
+    <button data-calc-action="digit" data-value="9">9</button>
+    <button data-calc-action="binary" data-value="/">/</button>
+    <button data-calc-action="unary" data-value="percent">%</button>
+  </div>
+  <div class="calc-row r4">
+    <button data-calc-action="constant" data-value="pi">π</button>
+    <button data-calc-action="constant" data-value="e">e</button>
+    <button data-calc-action="unary" data-value="fact">n!</button>
+    <button data-calc-action="binary" data-value="logyx">logᵧx</button>
+    <button data-calc-action="unary" data-value="expe">eˣ</button>
+    <button data-calc-action="unary" data-value="exp10">10ˣ</button>
+    <button data-calc-action="digit" data-value="4">4</button>
+    <button data-calc-action="digit" data-value="5">5</button>
+    <button data-calc-action="digit" data-value="6">6</button>
+    <button data-calc-action="binary" data-value="*">*</button>
+    <button data-calc-action="unary" data-value="recip">1/x</button>
+  </div>
+  <div class="calc-row r5">
+    <button data-calc-action="unary" data-value="sin">sin</button>
+    <button data-calc-action="unary" data-value="cos">cos</button>
+    <button data-calc-action="unary" data-value="tan">tan</button>
+    <button data-calc-action="binary" data-value="pow">xʸ</button>
+    <button data-calc-action="unary" data-value="cube">x³</button>
+    <button data-calc-action="unary" data-value="sqr">x²</button>
+    <button data-calc-action="digit" data-value="1">1</button>
+    <button data-calc-action="digit" data-value="2">2</button>
+    <button data-calc-action="digit" data-value="3">3</button>
+    <button data-calc-action="binary" data-value="-">-</button>
+  </div>
+  <div class="calc-row r6">
+    <button data-calc-action="unary" data-value="asin">sin⁻¹</button>
+    <button data-calc-action="unary" data-value="acos">cos⁻¹</button>
+    <button data-calc-action="unary" data-value="atan">tan⁻¹</button>
+    <button data-calc-action="binary" data-value="yroot">ʸ√x</button>
+    <button data-calc-action="unary" data-value="cbrt">³√</button>
+    <button data-calc-action="unary" data-value="abs">|x|</button>
+    <button class="gate-calc-zero" data-calc-action="digit" data-value="0">0</button>
+    <button data-calc-action="decimal">.</button>
+    <button data-calc-action="binary" data-value="+">+</button>
+  </div>
+  <button class="gate-calc-equals" data-calc-action="equals">=</button>
+</div>
+    <div class="gate-calc-note">Exam mode: calculator input is mouse/touch only. The test timer continues while the calculator is open.</div>
+  </div>
+</div>
+
+
+<script src="calculator.js"></script>
+<script>
+(function(){
+  const oldRender = window.render;
+  window.render = function(){
+    oldRender();
+    const q = S.test[S.i];
+    if(q){
+      const mm = q.marks || 1;
+      const neg = q.negative || 0;
+      document.getElementById("gateMaxMarks").textContent = mm;
+      document.getElementById("gateNegativeMarks").textContent = neg;
+    }
+  };
+
+  const calcModal = document.getElementById("gateCalculatorModal");
+  document.getElementById("openCalculator").addEventListener("click", function(){
+    calcModal.classList.remove("hidden");
+    calcModal.setAttribute("aria-hidden","false");
+    if(window.GateCalc) window.GateCalc.resetForExam();
+  });
+  document.getElementById("closeCalculator").addEventListener("click", closeCalc);
+  document.getElementById("calculatorBackdrop").addEventListener("click", closeCalc);
+  function closeCalc(){
+    calcModal.classList.add("hidden");
+    calcModal.setAttribute("aria-hidden","true");
+  }
+  document.getElementById("gateFullscreen").addEventListener("click", async function(){
+    try{
+      if(!document.fullscreenElement) await document.documentElement.requestFullscreen();
+      else await document.exitFullscreen();
+    }catch(e){}
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key==="Escape" && !calcModal.classList.contains("hidden")) closeCalc();
+  });
+})();
+</script>
+
+
+
+
+
+<script id="final-duration-sync">
+(function(){
+  function syncDuration(){
+    const c=document.getElementById("count"),d=document.getElementById("duration"),o=document.getElementById("durationDisplay");
+    if(!c)return; const n=parseInt(c.value,10); if(!Number.isFinite(n)||n<1)return;
+    const m=Math.max(1,Math.round(n*180/65)); if(d)d.value=String(m); if(o)o.textContent=m+" min";
+  }
+  document.addEventListener("DOMContentLoaded",syncDuration);
+  document.addEventListener("change",e=>{if(e.target&&e.target.id==="count")syncDuration()});
+})();
 </script>
 </body>
 </html>

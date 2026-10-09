@@ -129,6 +129,11 @@ const config: Config = {
           label: 'Concrete Mix Design',
           to: '/mix-design',
         },
+        
+        {
+          label: 'Concrete Mix Design',
+          to: '/septic-tank-design',
+        },
         {
           label: 'IRC 37 Flexible Pavement Design ',
           to: '/flexible-mix-design',
